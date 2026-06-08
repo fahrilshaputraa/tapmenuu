@@ -1,0 +1,110 @@
+{% extends 'layouts/base.html' %}
+{% block title %}TapMenu - Solusi Digital UMKM{% endblock %}
+{% block content %}
+    <header class="site-header">
+        <nav class="navbar" aria-label="Navigasi utama">
+            <a class="brand" href="/" aria-label="TapMenu Home">
+                <span class="brand-icon">🍽️</span>
+                <span>TapMenu</span>
+            </a>
+            <button class="nav-toggle"
+                    type="button"
+                    aria-controls="primary-navigation"
+                    aria-expanded="false"
+                    data-nav-toggle>Menu</button>
+            <div class="nav-links" id="primary-navigation" data-nav-menu>
+                <a href="#fitur">Fitur</a>
+                <a href="#cara-kerja">Cara Kerja</a>
+                <a href="#benefit">Benefit</a>
+                <a class="nav-login" href="{% url 'login' %}">Masuk</a>
+                <a class="nav-register" href="{% url 'register' %}">Daftar Toko</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="hero-section">
+            <div class="hero-copy">
+                <p class="eyebrow">Menu digital untuk restoran, kafe, dan UMKM</p>
+                <h1>Ubah meja pelanggan jadi titik order digital.</h1>
+                <p class="hero-description">
+                    TapMenu membantu pelanggan scan QR, melihat menu, membuat pesanan,
+                    dan membayar digital tanpa antre di kasir.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="{% url 'dashboard' %}">Masuk Dashboard</a>
+                    <a class="btn btn-secondary" href="{% url 'register' %}">Daftar Toko</a>
+                </div>
+            </div>
+            <div class="hero-card" aria-label="Preview alur TapMenu">
+                <div class="phone-preview">
+                    <div class="phone-top"></div>
+                    <div class="menu-preview-card">
+                        <span class="table-badge">Meja 07</span>
+                        <h2>Menu Kopi Nusantara</h2>
+                        <p>2 item di keranjang</p>
+                        <strong>Rp48.000</strong>
+                    </div>
+                    <div class="order-preview-card">
+                        <span>Order masuk</span>
+                        <strong>#TM-1024</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section" id="fitur">
+            <p class="section-label">Fitur Utama</p>
+            <h2>Satu flow dari QR meja sampai dashboard.</h2>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span>📱</span>
+                    <h3>QR Menu</h3>
+                    <p>Pelanggan membuka menu dari QR unik di setiap meja.</p>
+                </article>
+                <article class="feature-card">
+                    <span>🧾</span>
+                    <h3>Order Meja</h3>
+                    <p>Pesanan tersimpan dengan nomor meja dan catatan pelanggan.</p>
+                </article>
+                <article class="feature-card">
+                    <span>💳</span>
+                    <h3>Pembayaran Digital</h3>
+                    <p>Struktur siap untuk QRIS, Virtual Account, dan e-wallet.</p>
+                </article>
+                <article class="feature-card">
+                    <span>📊</span>
+                    <h3>Dashboard</h3>
+                    <p>Staff dan owner bisa memantau order, menu, dan laporan.</p>
+                </article>
+            </div>
+        </section>
+        <section class="section split-section" id="cara-kerja">
+            <div>
+                <p class="section-label">Cara Kerja</p>
+                <h2>Simple untuk pelanggan, rapi untuk operasional.</h2>
+            </div>
+            <ol class="steps-list">
+                <li>Owner setup resto, menu, dan meja.</li>
+                <li>Sistem generate QR token untuk setiap meja.</li>
+                <li>Pelanggan scan QR lalu pesan dari HP.</li>
+                <li>Order masuk ke dashboard staff/kasir/dapur.</li>
+            </ol>
+        </section>
+        <section class="section benefit-section" id="benefit">
+            <p class="section-label">Benefit</p>
+            <h2>Dibuat untuk UMKM kuliner Indonesia.</h2>
+            <div class="benefit-list">
+                <p>Mengurangi antrean kasir.</p>
+                <p>Mengurangi salah catat pesanan.</p>
+                <p>Membantu owner melihat order dan transaksi.</p>
+            </div>
+        </section>
+        <section class="cta-section">
+            <h2>Siap digitalisasi menu restoranmu?</h2>
+            <p>Mulai dari landing page ini, lalu login ke dashboard untuk mengelola TapMenu.</p>
+            <a class="btn btn-primary" href="{% url 'dashboard' %}">Masuk Dashboard</a>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <p>© {% now "Y" %} TapMenu. Solusi digital untuk resto, kafe, dan UMKM.</p>
+    </footer>
+{% endblock %}

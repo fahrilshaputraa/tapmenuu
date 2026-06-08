@@ -1,0 +1,78 @@
+<aside data-dashboard-sidebar
+       class="hidden md:flex w-72 bg-white border-r border-gray-200 flex-col z-20 shrink-0">
+    <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+        <a href="{% url 'dashboard' %}"
+           class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-utensils text-sm"></i>
+        </a>
+        <div>
+            <a href="{% url 'dashboard' %}"
+               class="text-lg font-extrabold text-primary tracking-tight block">TapMenu</a>
+            <span class="text-xs text-gray-400">Owner Dashboard</span>
+        </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll"
+         aria-label="Dashboard navigation">
+        {% with current=request.resolver_match.url_name %}
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Utama</div>
+            <a href="{% url 'dashboard' %}"
+               {% if current == 'dashboard' %}aria-current="dashboard"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'dashboard' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-house w-5"></i> Dashboard
+            </a>
+            <a href="{% url 'orders' %}"
+               {% if current == 'orders' %}aria-current="orders"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'orders' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-receipt w-5"></i> Pesanan
+            </a>
+            <a href="{% url 'tables' %}"
+               {% if current == 'tables' %}aria-current="tables"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'tables' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+            </a>
+            <a href="{% url 'management_menu' %}"
+               {% if current == 'management_menu' %}aria-current="management_menu"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'management_menu' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
+            </a>
+            <a href="{% url 'reports' %}"
+               {% if current == 'reports' %}aria-current="reports"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'reports' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-chart-pie w-5"></i> Laporan
+            </a>
+            <a href="{% url 'book_menu' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-gray-500 font-medium hover:bg-gray-50 hover:text-dark"
+               target="_blank"
+               rel="noopener">
+                <i class="fa-solid fa-eye w-5"></i> Lihat Menu Publik
+            </a>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-8 mb-3 px-2">Pengaturan</div>
+            <a href="{% url 'store' %}"
+               {% if current == 'store' %}aria-current="store"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'store' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-store w-5"></i> Profil Toko
+            </a>
+            <a href="{% url 'employee' %}"
+               {% if current == 'employee' %}aria-current="employee"{% endif %}
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'employee' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                <i class="fa-solid fa-users-gear w-5"></i> Karyawan
+            </a>
+            <a href="{% url 'login' %}"
+               class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-5"></i> Logout
+            </a>
+        {% endwith %}
+    </nav>
+    <div class="p-4 border-t border-gray-100">
+        <div class="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 cursor-pointer">
+            <img src="https://i.pravatar.cc/100?img=5"
+                 class="w-10 h-10 rounded-full border border-gray-200"
+                 alt="Owner">
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-dark truncate">Pak Budi</p>
+                <p class="text-xs text-gray-500 truncate">Owner</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+        </div>
+    </div>
+</aside>

@@ -1,0 +1,21 @@
+body {
+            background-color: #F7F5F2;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .floating-card {
+            animation: float 6s ease-in-out infinite;
+        }

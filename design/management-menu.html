@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapMenu - Daftar Menu</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B4332',    /* Deep Emerald */
+                        primaryLight: '#2D6A4F',
+                        secondary: '#D8F3DC',  /* Mint */
+                        accent: '#E07A5F',     /* Terracotta */
+                        bg: '#F7F5F2',         /* Bone White */
+                        dark: '#2D3436',       /* Charcoal */
+                        danger: '#EF4444',
+                        success: '#10B981',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px rgba(0,0,0,0.06)',
+                        'soft': '0 4px 20px -2px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F7F5F2;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Toggle Switch Updated Color #1B4332 */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #1B4332;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #1B4332;
+        }
+
+        .toggle-checkbox {
+            right: calc(100% - 1.25rem);
+        }
+
+        /* Initial pos */
+    </style>
+</head>
+
+<body class="font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col z-20 shrink-0">
+            <!-- Brand -->
+            <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-utensils text-xs"></i>
+                </div>
+                <span class="text-lg font-extrabold text-primary tracking-tight">TapMenu</span>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Utama</div>
+
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-grid-2 w-5"></i> Dashboard
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-receipt w-5"></i> Pesanan
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+                </a>
+                <!-- Active State -->
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 bg-secondary/50 text-primary font-bold rounded-xl transition-colors">
+                    <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
+                </a>
+
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-8 mb-3 px-2">Pengaturan</div>
+
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-store w-5"></i> Profil Toko
+                </a>
+            </div>
+
+            <!-- Profile Bottom -->
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 cursor-pointer">
+                    <img src="https://i.pravatar.cc/100?img=5" class="w-9 h-9 rounded-full border border-gray-200">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-dark truncate">Pak Budi</p>
+                        <p class="text-xs text-gray-500 truncate">Owner</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+
+            <!-- Header -->
+            <header
+                class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-primary text-xl"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h2 class="text-xl font-bold text-dark">Daftar Menu</h2>
+                        <p class="text-xs text-gray-500">Kelola produk, harga, varian, dan stok</p>
+                    </div>
+                </div>
+                <button onclick="openAddModal()"
+                    class="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Tambah Menu</span>
+                </button>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+
+                    <!-- Stats & Search Bar -->
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
+                        <!-- Category Tabs -->
+                        <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1">
+                            <button onclick="filterMenu('all')" id="tab-all"
+                                class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap">Semua</button>
+                            <button onclick="filterMenu('food')" id="tab-food"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Makanan</button>
+                            <button onclick="filterMenu('drink')" id="tab-drink"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Minuman</button>
+                            <button onclick="filterMenu('snack')" id="tab-snack"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Cemilan</button>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="relative w-full md:w-64">
+                            <i
+                                class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="search-input" oninput="searchMenu()" placeholder="Cari nama menu..."
+                                class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <!-- Menu List (Grid) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        id="menu-container">
+                        <!-- Items will be injected by JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16">
+                        <div
+                            class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                            <i class="fa-solid fa-burger text-3xl"></i>
+                        </div>
+                        <h3 class="text-dark font-bold">Tidak ada menu ditemukan</h3>
+                        <p class="text-gray-500 text-sm">Coba kata kunci lain atau tambahkan menu baru.</p>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- === ADD/EDIT MODAL (COMPLEX) === -->
+    <div id="menu-modal"
+        class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white z-10">
+                <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Menu Baru</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition-colors"><i
+                        class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-gray-100 bg-gray-50 px-5 pt-2 gap-4 overflow-x-auto">
+                <button onclick="switchTab('basic')" id="tab-btn-basic"
+                    class="pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-colors whitespace-nowrap">Info
+                    Dasar</button>
+                <button onclick="switchTab('pricing')" id="tab-btn-pricing"
+                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Harga
+                    & Pajak</button>
+                <button onclick="switchTab('variants')" id="tab-btn-variants"
+                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Varian</button>
+                <button onclick="switchTab('others')" id="tab-btn-others"
+                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Stok
+                    & Lainnya</button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll relative">
+
+                <!-- TAB 1: INFO DASAR -->
+                <div id="tab-content-basic" class="space-y-5 fade-in">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <!-- Image Upload -->
+                        <div class="w-full sm:w-1/3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Foto Menu</label>
+                            <div
+                                class="relative aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center group cursor-pointer overflow-hidden hover:border-primary transition-colors">
+                                <img id="preview-image" src=""
+                                    class="absolute inset-0 w-full h-full object-cover hidden">
+                                <div class="text-center text-gray-400 group-hover:text-primary">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl mb-1"></i>
+                                    <p class="text-[10px] font-bold uppercase">Upload</p>
+                                </div>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer"
+                                    onchange="handleImageUpload(this)">
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-2 text-center">Min. 500x500px (JPG/PNG)</p>
+                        </div>
+
+                        <!-- Basic Inputs -->
+                        <div class="w-full sm:w-2/3 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Menu <span
+                                        class="text-red-500">*</span></label>
+                                <input type="text" id="input-name"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                    placeholder="Contoh: Nasi Goreng Spesial">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Kategori <span
+                                        class="text-red-500">*</span></label>
+                                <select id="input-category"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium">
+                                    <option value="food">Makanan</option>
+                                    <option value="drink">Minuman</option>
+                                    <option value="snack">Cemilan</option>
+                                    <option value="dessert">Penutup</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Deskripsi</label>
+                                <textarea id="input-desc" rows="3"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium resize-none"
+                                    placeholder="Jelaskan bahan utama atau rasa..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: HARGA & PAJAK -->
+                <div id="tab-content-pricing" class="hidden space-y-5 fade-in">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga Dasar (Rp) <span
+                                    class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                                <input type="number" id="input-price" oninput="calculateFinalPrice()"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg font-bold text-dark"
+                                    placeholder="0">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Diskon (%)</label>
+                            <div class="relative">
+                                <input type="number" id="input-discount" oninput="calculateFinalPrice()"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                    placeholder="0">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Kosongkan jika tidak ada diskon.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Pajak / PPN
+                                (%)</label>
+                            <div class="relative">
+                                <input type="number" id="input-tax"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                    placeholder="10">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Standar PPN restoran 10%.</p>
+                        </div>
+                    </div>
+
+                    <!-- Preview Box -->
+                    <div class="bg-secondary/30 rounded-xl p-4 border border-secondary mt-4">
+                        <p class="text-xs font-bold text-primary mb-2 uppercase">Preview Harga Pelanggan</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500" id="preview-original-container">Harga Normal: <span
+                                        class="line-through" id="preview-original">Rp 0</span></p>
+                                <p class="text-xs text-accent font-bold" id="preview-discount-label">Hemat 0%</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-extrabold text-primary" id="preview-final">Rp 0</p>
+                                <p class="text-[10px] text-gray-500">*Belum termasuk PPN</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: VARIAN (NEW) -->
+                <div id="tab-content-variants" class="hidden space-y-6 fade-in">
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start">
+                        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-xs font-bold text-blue-800">Info Varian</h4>
+                            <p class="text-[10px] text-blue-600">Gunakan varian untuk opsi tambahan seperti "Level
+                                Pedas" (Pilih Satu) atau "Toping Tambahan" (Pilih Banyak).</p>
+                        </div>
+                    </div>
+
+                    <div id="variants-container" class="space-y-4">
+                        <!-- Variant Groups will be injected here -->
+                    </div>
+
+                    <button onclick="addVariantGroup()"
+                        class="w-full py-3 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Grup Varian
+                    </button>
+                </div>
+
+                <!-- TAB 4: STOK & LAINNYA -->
+                <div id="tab-content-others" class="hidden space-y-6 fade-in">
+
+                    <!-- Stock Management -->
+                    <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h4 class="font-bold text-dark text-sm">Manajemen Stok</h4>
+                                <p class="text-[10px] text-gray-500">Aktifkan untuk melacak jumlah stok.</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="toggle-stock" onchange="toggleStockInput()"
+                                    class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300" />
+                                <label for="toggle-stock"
+                                    class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+
+                        <div id="stock-input-container" class="hidden transition-all">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Jumlah Stok Saat
+                                Ini</label>
+                            <input type="number" id="input-stock"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary text-sm font-medium"
+                                placeholder="Contoh: 50">
+                        </div>
+                    </div>
+
+                    <!-- Labels -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Label Menu
+                            (Opsional)</label>
+                        <div class="flex gap-3">
+                            <label class="cursor-pointer select-none">
+                                <input type="checkbox" id="label-favorite" class="peer sr-only">
+                                <div
+                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-bold peer-checked:bg-[#FFF0EB] peer-checked:text-accent peer-checked:border-accent transition-all">
+                                    <i class="fa-solid fa-heart mr-1"></i> Favorit
+                                </div>
+                            </label>
+                            <label class="cursor-pointer select-none">
+                                <input type="checkbox" id="label-new" class="peer sr-only">
+                                <div
+                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-bold peer-checked:bg-secondary peer-checked:text-primary peer-checked:border-primary transition-all">
+                                    <i class="fa-solid fa-star mr-1"></i> Baru
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                            <input type="checkbox" id="toggle-active"
+                                class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
+                                checked />
+                            <label for="toggle-active"
+                                class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-dark">Tampilkan di Menu</p>
+                            <p class="text-[10px] text-gray-500">Menu ini bisa dipesan oleh pelanggan.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3 z-10">
+                <button onclick="closeModal()"
+                    class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">Batal</button>
+                <button onclick="saveMenu()"
+                    class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">Simpan
+                    Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- DATA ---
+        let menuList = [
+            {
+                id: 1,
+                name: "Nasi Goreng Spesial",
+                category: "food",
+                price: 25000,
+                discount: 0,
+                tax: 10,
+                desc: "Lengkap dengan telur dan sate.",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80",
+                active: true,
+                labels: ['favorite'],
+                variants: [
+                    {
+                        name: "Level Pedas",
+                        type: "radio",
+                        options: [
+                            { name: "Tidak Pedas", price: 0 },
+                            { name: "Sedang", price: 0 },
+                            { name: "Pedas", price: 0 }
+                        ]
+                    }
+                ]
+            },
+            { id: 2, name: "Es Teh Manis", category: "drink", price: 5000, discount: 0, tax: 10, desc: "Teh asli menyegarkan.", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80", active: true, labels: [], variants: [] },
+            { id: 3, name: "Ayam Bakar Madu", category: "food", price: 35000, discount: 15, tax: 10, desc: "Ayam kampung bumbu madu.", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80", active: true, labels: ['new'], variants: [] },
+            { id: 4, name: "Pisang Keju", category: "snack", price: 15000, discount: 0, tax: 10, desc: "Pisang kepok pilihan.", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a3a2b7b?auto=format&fit=crop&w=300&q=80", active: true, labels: [], variants: [] },
+        ];
+
+        let currentFilter = 'all';
+        let editingId = null;
+
+        // --- INIT ---
+        window.onload = () => {
+            renderMenu();
+        };
+
+        // --- FUNCTIONS ---
+        function formatRupiah(num) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+
+            container.innerHTML = '';
+
+            const filtered = menuList.filter(item => {
+                const matchCat = currentFilter === 'all' || item.category === currentFilter;
+                const matchSearch = item.name.toLowerCase().includes(searchVal);
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+            }
+
+            filtered.forEach(item => {
+                const statusColor = item.active ? 'text-primary' : 'text-danger';
+                const statusText = item.active ? 'Tersedia' : 'Habis';
+                const opacity = item.active ? '' : 'opacity-75 grayscale-[0.5]';
+                const checked = item.active ? 'checked' : '';
+                const hasDiscount = item.discount && item.discount > 0;
+                const finalPrice = hasDiscount ? item.price * ((100 - item.discount) / 100) : item.price;
+
+                let labelsHtml = '';
+                if (item.labels.includes('favorite')) labelsHtml += `<span class="bg-[#FFF0EB] text-accent text-[10px] font-bold px-2 py-0.5 rounded-full border border-accent/20 mr-1">Favorit</span>`;
+                if (item.labels.includes('new')) labelsHtml += `<span class="bg-secondary text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20 mr-1">Baru</span>`;
+
+                // Variant Badge
+                const variantBadge = item.variants && item.variants.length > 0
+                    ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200 mr-1">${item.variants.length} Varian</span>`
+                    : '';
+
+                const card = `
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col h-full ${opacity}">
+                    <div class="h-40 bg-gray-100 relative overflow-hidden">
+                        <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute top-2 right-2">
+                            <button onclick="deleteItem(${item.id})" class="w-8 h-8 bg-white/90 backdrop-blur rounded-lg text-red-400 hover:text-red-600 flex items-center justify-center shadow-sm transition-colors"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="absolute bottom-2 left-2 flex gap-1">
+                            <span class="bg-black/60 backdrop-blur text-white px-2 py-1 rounded text-xs font-bold">
+                                ${item.category === 'food' ? 'Makanan' : item.category === 'drink' ? 'Minuman' : 'Cemilan'}
+                            </span>
+                            ${hasDiscount ? `<span class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">-${item.discount}%</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-dark text-lg leading-tight line-clamp-1">${item.name}</h3>
+                        </div>
+                        <div class="mb-2 flex flex-wrap gap-1 items-center">
+                            ${labelsHtml}
+                            ${variantBadge}
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3 line-clamp-2 flex-1">${item.desc}</p>
+                        
+                        <div class="mb-4">
+                             ${hasDiscount ? `<span class="text-gray-400 text-xs line-through mr-1">${formatRupiah(item.price)}</span>` : ''}
+                             <span class="text-accent font-extrabold text-lg">${formatRupiah(finalPrice)}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-50">
+                            <div class="flex items-center gap-2">
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                    <input type="checkbox" onchange="toggleStatus(${item.id})" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300" ${checked}/>
+                                    <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                                </div>
+                                <span class="text-xs font-bold ${statusColor}">${statusText}</span>
+                            </div>
+                            
+                            <button onclick="editItem(${item.id})" class="text-primary hover:bg-secondary/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                Edit <i class="fa-solid fa-pen ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+                container.innerHTML += card;
+            });
+
+            updateTabs();
+        }
+
+        function updateTabs() {
+            const tabs = ['all', 'food', 'drink', 'snack'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === currentFilter) {
+                    btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                    btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-white', 'text-gray-500', 'border-gray-200');
+                }
+            });
+        }
+
+        function filterMenu(category) {
+            currentFilter = category;
+            renderMenu();
+        }
+
+        function searchMenu() {
+            renderMenu();
+        }
+
+        function toggleStatus(id) {
+            const item = menuList.find(i => i.id === id);
+            if (item) {
+                item.active = !item.active;
+                renderMenu();
+            }
+        }
+
+        // --- MODAL & TABS LOGIC ---
+        function switchTab(tabName) {
+            ['basic', 'pricing', 'variants', 'others'].forEach(t => {
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).classList.remove('border-primary', 'text-primary');
+                document.getElementById(`tab-btn-${t}`).classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabName}`).classList.add('border-primary', 'text-primary');
+            document.getElementById(`tab-btn-${tabName}`).classList.remove('border-transparent', 'text-gray-500');
+        }
+
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modal-title').innerText = 'Tambah Menu Baru';
+
+            // Reset inputs
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-category').value = 'food';
+            document.getElementById('input-desc').value = '';
+            document.getElementById('input-price').value = '';
+            document.getElementById('input-discount').value = '';
+            document.getElementById('input-tax').value = '10';
+            document.getElementById('input-stock').value = '';
+            document.getElementById('toggle-stock').checked = false;
+            toggleStockInput();
+            document.getElementById('label-favorite').checked = false;
+            document.getElementById('label-new').checked = false;
+            document.getElementById('toggle-active').checked = true;
+
+            document.getElementById('preview-image').src = '';
+            document.getElementById('preview-image').classList.add('hidden');
+
+            // Clear variants
+            document.getElementById('variants-container').innerHTML = '';
+
+            switchTab('basic'); // Default tab
+            calculateFinalPrice();
+            document.getElementById('menu-modal').classList.remove('hidden');
+        }
+
+        function editItem(id) {
+            const item = menuList.find(i => i.id === id);
+            if (!item) return;
+
+            editingId = id;
+            document.getElementById('modal-title').innerText = 'Edit Menu';
+
+            // Populate fields
+            document.getElementById('input-name').value = item.name;
+            document.getElementById('input-category').value = item.category;
+            document.getElementById('input-desc').value = item.desc;
+            document.getElementById('input-price').value = item.price;
+            document.getElementById('input-discount').value = item.discount || '';
+            document.getElementById('input-tax').value = item.tax || 10;
+
+            // Stock
+            if (item.stockQty) {
+                document.getElementById('toggle-stock').checked = true;
+                document.getElementById('input-stock').value = item.stockQty;
+            } else {
+                document.getElementById('toggle-stock').checked = false;
+                document.getElementById('input-stock').value = '';
+            }
+            toggleStockInput();
+
+            // Labels & Active
+            document.getElementById('label-favorite').checked = item.labels.includes('favorite');
+            document.getElementById('label-new').checked = item.labels.includes('new');
+            document.getElementById('toggle-active').checked = item.active;
+
+            if (item.image) {
+                document.getElementById('preview-image').src = item.image;
+                document.getElementById('preview-image').classList.remove('hidden');
+            }
+
+            // Populate Variants
+            const vContainer = document.getElementById('variants-container');
+            vContainer.innerHTML = '';
+            if (item.variants) {
+                item.variants.forEach(group => addVariantGroup(group));
+            }
+
+            switchTab('basic');
+            calculateFinalPrice();
+            document.getElementById('menu-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('menu-modal').classList.add('hidden');
+        }
+
+        function toggleStockInput() {
+            const isChecked = document.getElementById('toggle-stock').checked;
+            const container = document.getElementById('stock-input-container');
+            if (isChecked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function calculateFinalPrice() {
+            const price = parseFloat(document.getElementById('input-price').value) || 0;
+            const discount = parseFloat(document.getElementById('input-discount').value) || 0;
+
+            document.getElementById('preview-original').innerText = formatRupiah(price);
+
+            let final = price;
+            if (discount > 0) {
+                final = price * ((100 - discount) / 100);
+                document.getElementById('preview-discount-label').innerText = `Hemat ${discount}%`;
+                document.getElementById('preview-original-container').classList.remove('hidden');
+            } else {
+                document.getElementById('preview-discount-label').innerText = '';
+                document.getElementById('preview-original-container').classList.add('hidden');
+            }
+
+            document.getElementById('preview-final').innerText = formatRupiah(final);
+        }
+
+        function handleImageUpload(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview-image').src = e.target.result;
+                    document.getElementById('preview-image').classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- VARIANT LOGIC ---
+        function addVariantGroup(data = null) {
+            const container = document.getElementById('variants-container');
+            const groupId = Date.now() + Math.random().toString(36).substr(2, 5);
+
+            const groupName = data ? data.name : '';
+            const groupType = data ? data.type : 'radio';
+
+            const groupHtml = document.createElement('div');
+            groupHtml.className = 'variant-group bg-gray-50 rounded-xl p-4 border border-gray-200 relative';
+            groupHtml.id = `v-group-${groupId}`;
+            groupHtml.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nama Grup</label>
+                            <input type="text" class="group-name-input w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" placeholder="Cth: Level Pedas" value="${groupName}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tipe Pilihan</label>
+                            <select class="group-type-input w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                                <option value="radio" ${groupType === 'radio' ? 'selected' : ''}>Pilih Satu (Wajib)</option>
+                                <option value="checkbox" ${groupType === 'checkbox' ? 'selected' : ''}>Pilih Banyak (Opsional)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="removeVariantGroup('${groupId}')" class="ml-3 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                
+                <div class="space-y-2" id="v-options-${groupId}">
+                    <!-- Options go here -->
+                </div>
+                
+                <button onclick="addVariantOption('${groupId}')" class="mt-3 text-xs font-bold text-primary hover:underline">+ Tambah Opsi</button>
+            `;
+            container.appendChild(groupHtml);
+
+            // Add Options
+            if (data && data.options) {
+                data.options.forEach(opt => addVariantOption(groupId, opt));
+            } else {
+                addVariantOption(groupId); // Add one default option
+            }
+        }
+
+        function addVariantOption(groupId, data = null) {
+            const optionsContainer = document.getElementById(`v-options-${groupId}`);
+            const optId = Date.now() + Math.random().toString(36).substr(2, 5);
+
+            const optName = data ? data.name : '';
+            const optPrice = data ? data.price : '';
+
+            const optDiv = document.createElement('div');
+            optDiv.className = 'flex gap-2 items-center option-row';
+            optDiv.id = `v-opt-${optId}`;
+            optDiv.innerHTML = `
+                <input type="text" class="opt-name-input flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary" placeholder="Nama Opsi (Cth: Sedang)" value="${optName}">
+                <div class="relative w-24">
+                     <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-bold">+Rp</span>
+                    <input type="number" class="opt-price-input w-full bg-white border border-gray-200 rounded-lg pl-8 pr-2 py-2 text-xs focus:outline-none focus:border-primary" placeholder="0" value="${optPrice}">
+                </div>
+                <button onclick="removeVariantOption('${optId}')" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            optionsContainer.appendChild(optDiv);
+        }
+
+        function removeVariantGroup(groupId) {
+            const el = document.getElementById(`v-group-${groupId}`);
+            if (el) el.remove();
+        }
+
+        function removeVariantOption(optId) {
+            const el = document.getElementById(`v-opt-${optId}`);
+            if (el) el.remove();
+        }
+
+        function collectVariantData() {
+            const variants = [];
+            const groups = document.querySelectorAll('.variant-group');
+
+            groups.forEach(group => {
+                const name = group.querySelector('.group-name-input').value;
+                const type = group.querySelector('.group-type-input').value;
+                const options = [];
+
+                group.querySelectorAll('.option-row').forEach(opt => {
+                    const optName = opt.querySelector('.opt-name-input').value;
+                    const optPrice = parseInt(opt.querySelector('.opt-price-input').value) || 0;
+                    if (optName) {
+                        options.push({ name: optName, price: optPrice });
+                    }
+                });
+
+                if (name && options.length > 0) {
+                    variants.push({ name, type, options });
+                }
+            });
+            return variants;
+        }
+
+        // --- SAVE LOGIC ---
+        function saveMenu() {
+            // Gather Data
+            const name = document.getElementById('input-name').value;
+            const category = document.getElementById('input-category').value;
+            const desc = document.getElementById('input-desc').value;
+            const price = parseInt(document.getElementById('input-price').value);
+            const discount = parseInt(document.getElementById('input-discount').value) || 0;
+            const tax = parseInt(document.getElementById('input-tax').value) || 10;
+
+            // Stock Logic
+            let stockQty = null;
+            if (document.getElementById('toggle-stock').checked) {
+                stockQty = parseInt(document.getElementById('input-stock').value) || 0;
+            }
+
+            // Labels Logic
+            let labels = [];
+            if (document.getElementById('label-favorite').checked) labels.push('favorite');
+            if (document.getElementById('label-new').checked) labels.push('new');
+
+            const active = document.getElementById('toggle-active').checked;
+
+            // Image Logic
+            let image = document.getElementById('preview-image').src;
+            if (!image || image.includes(window.location.href)) {
+                image = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80";
+            }
+
+            // Collect Variants
+            const variants = collectVariantData();
+
+            // Validation
+            if (!name || isNaN(price)) return alert("Nama dan Harga dasar wajib diisi!");
+
+            const newData = {
+                name, category, desc, price, discount, tax, stockQty, labels, active, image, variants
+            };
+
+            if (editingId) {
+                const idx = menuList.findIndex(i => i.id === editingId);
+                if (idx !== -1) {
+                    menuList[idx] = { ...menuList[idx], ...newData };
+                }
+            } else {
+                const newId = menuList.length > 0 ? Math.max(...menuList.map(i => i.id)) + 1 : 1;
+                menuList.push({ id: newId, ...newData });
+            }
+
+            closeModal();
+            renderMenu();
+        }
+
+        function deleteItem(id) {
+            if (confirm("Hapus menu ini secara permanen?")) {
+                menuList = menuList.filter(i => i.id !== id);
+                renderMenu();
+            }
+        }
+    </script>
+</body>
+
+</html>

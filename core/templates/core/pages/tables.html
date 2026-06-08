@@ -1,0 +1,78 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% block title %}TapMenu - Meja & QR{% endblock %}
+{% block dashboard_tailwind_config %}
+    <script src="{% static 'core/js/pages/dashboard-1.js' %}"></script>
+{% endblock %}
+{% block dashboard_extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/pages/dashboard-1.css' %}">
+{% endblock %}
+{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-bg{% endblock %}
+{% block dashboard_main %}
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+            <button class="md:hidden text-primary text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <h1 class="text-2xl font-extrabold text-dark">Meja & QR</h1>
+                <p class="text-sm text-gray-500">Kelola nomor meja dan tautan QR menu untuk pelanggan.</p>
+            </div>
+        </div>
+        <button class="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span class="hidden sm:inline">Tambah Meja</span>
+        </button>
+    </header>
+    <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+        <div class="max-w-7xl mx-auto space-y-6 fade-in">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
+                    <p class="text-sm text-gray-500 mb-1">Total Meja</p>
+                    <h2 class="text-3xl font-extrabold text-primary">12</h2>
+                    <p class="text-xs text-gray-400 mt-1">8 aktif, 4 siap ditambahkan</p>
+                </article>
+                <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
+                    <p class="text-sm text-gray-500 mb-1">QR Aktif</p>
+                    <h2 class="text-3xl font-extrabold text-primary">8</h2>
+                    <p class="text-xs text-gray-400 mt-1">Tautan langsung ke menu publik</p>
+                </article>
+                <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
+                    <p class="text-sm text-gray-500 mb-1">Scan Hari Ini</p>
+                    <h2 class="text-3xl font-extrabold text-primary">87</h2>
+                    <p class="text-xs text-gray-400 mt-1">Dari pelanggan dine-in</p>
+                </article>
+            </section>
+            <section class="bg-white rounded-[2rem] border border-gray-100 shadow-card overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <div>
+                        <h2 class="font-extrabold text-dark">Daftar Meja</h2>
+                        <p class="text-sm text-gray-500">Prototype tampilan meja, nanti bisa dihubungkan ke model DiningTable.</p>
+                    </div>
+                    <a href="{% url 'book_menu' %}"
+                       target="_blank"
+                       rel="noopener"
+                       class="text-sm font-bold text-primary hover:text-primaryLight">Preview Menu Publik</a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-6">
+                    {% for table_number in '12345678' %}
+                        <article class="rounded-2xl border border-gray-100 bg-[#F7F5F2] p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-11 h-11 rounded-2xl bg-secondary text-primary flex items-center justify-center">
+                                    <i class="fa-solid fa-chair"></i>
+                                </div>
+                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Aktif</span>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-dark">Meja {{ table_number }}</h3>
+                            <p class="text-sm text-gray-500 mb-4">Kapasitas 2 orang</p>
+                            <div class="flex items-center gap-2 text-xs font-bold text-primary">
+                                <i class="fa-solid fa-qrcode"></i>
+                                QR siap dibagikan
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}

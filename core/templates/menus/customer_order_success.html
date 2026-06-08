@@ -1,0 +1,40 @@
+{% load menu_extras %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pesanan {{ order.code }} - {{ restaurant.name }}</title>
+    </head>
+    <body>
+        <main>
+            <header>
+                <p>Meja {{ dining_table.table_number }}</p>
+                <h1>Pesanan berhasil dibuat</h1>
+                <p>{{ restaurant.name }}</p>
+            </header>
+            <section>
+                <h2>{{ order.code }}</h2>
+                {% if order.customer_name %}<p>Nama: {{ order.customer_name }}</p>{% endif %}
+                <p>Status: {{ order.get_status_display }}</p>
+                <p>Total: {{ order.total_amount|rupiah }}</p>
+            </section>
+            {% if payment %}
+                <section>
+                    <h2>Pembayaran</h2>
+                    <p>Reference: {{ payment.reference }}</p>
+                    <p>Metode: {{ payment.get_method_display }}</p>
+                    <p>Status: {{ payment.get_status_display }}</p>
+                    <p>Jumlah: {{ payment.amount|rupiah }}</p>
+                    {% if payment_details.qr_string %}<p>QRIS: {{ payment_details.qr_string }}</p>{% endif %}
+                    {% if payment_details.payment_url %}
+                        <p>
+                            Link pembayaran: <a href="{{ payment_details.payment_url }}">{{ payment_details.payment_url }}</a>
+                        </p>
+                    {% endif %}
+                </section>
+            {% endif %}
+            <a href="{% url 'customer_menu' dining_table.qr_token %}">Kembali ke menu</a>
+        </main>
+    </body>
+</html>

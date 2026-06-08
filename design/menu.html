@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapMenu - Daftar Pesanan</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B4332',    /* Deep Emerald */
+                        primaryLight: '#2D6A4F',
+                        secondary: '#D8F3DC',  /* Mint */
+                        accent: '#E07A5F',     /* Terracotta */
+                        bg: '#F7F5F2',         /* Bone White */
+                        dark: '#2D3436',       /* Charcoal */
+                        pending: '#F59E0B',    /* Amber for New Orders */
+                        processing: '#3B82F6', /* Blue for Cooking */
+                        ready: '#10B981',      /* Green for Ready */
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px rgba(0,0,0,0.06)',
+                        'soft': '0 4px 20px -2px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F7F5F2;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Blinking animation for new orders */
+        @keyframes blink-border {
+            0% {
+                border-color: #F59E0B;
+            }
+
+            50% {
+                border-color: transparent;
+            }
+
+            100% {
+                border-color: #F59E0B;
+            }
+        }
+
+        .new-order-card {
+            border: 2px solid #F59E0B;
+            animation: blink-border 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col z-20 shrink-0">
+            <!-- Brand -->
+            <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-utensils text-xs"></i>
+                </div>
+                <span class="text-lg font-extrabold text-primary tracking-tight">TapMenu</span>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Utama</div>
+
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-grid-2 w-5"></i> Dashboard
+                </a>
+                <!-- Active State -->
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 bg-secondary/50 text-primary font-bold rounded-xl transition-colors">
+                    <i class="fa-solid fa-receipt w-5"></i> Pesanan
+                    <span class="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
+                </a>
+
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-8 mb-3 px-2">Pengaturan</div>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-store w-5"></i> Profil Toko
+                </a>
+            </div>
+
+            <!-- Profile Bottom -->
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 cursor-pointer">
+                    <img src="https://i.pravatar.cc/100?img=5" class="w-9 h-9 rounded-full border border-gray-200">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-dark truncate">Pak Budi</p>
+                        <p class="text-xs text-gray-500 truncate">Owner</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+
+            <!-- Header -->
+            <header
+                class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-primary text-xl"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h2 class="text-xl font-bold text-dark">Daftar Pesanan</h2>
+                        <p class="text-xs text-gray-500">Pantau pesanan masuk dan status dapur</p>
+                    </div>
+                </div>
+
+                <!-- Date & Time -->
+                <div class="hidden sm:block text-right">
+                    <p class="text-sm font-bold text-dark" id="current-time">14:30</p>
+                    <p class="text-xs text-gray-500" id="current-date">Rabu, 25 Okt 2023</p>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+
+                    <!-- Status Tabs & Search -->
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
+                        <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1">
+                            <button onclick="filterOrders('all')" id="tab-all"
+                                class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap">Semua</button>
+                            <button onclick="filterOrders('new')" id="tab-new"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-pending hover:bg-yellow-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap flex items-center gap-2">
+                                Baru <span class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">3</span>
+                            </button>
+                            <button onclick="filterOrders('process')" id="tab-process"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-processing hover:bg-blue-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Diproses</button>
+                            <button onclick="filterOrders('ready')" id="tab-ready"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-ready hover:bg-green-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Siap
+                                Saji</button>
+                            <button onclick="filterOrders('completed')" id="tab-completed"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Selesai</button>
+                        </div>
+
+                        <div class="relative w-full md:w-64">
+                            <i
+                                class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="search-order" oninput="renderOrders()"
+                                placeholder="Cari No. Meja / ID..."
+                                class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <!-- Orders Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="orders-container">
+                        <!-- Orders will be injected here -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20">
+                        <div
+                            class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                            <i class="fa-solid fa-clipboard-check text-4xl"></i>
+                        </div>
+                        <h3 class="text-dark font-bold">Tidak ada pesanan</h3>
+                        <p class="text-gray-500 text-sm">Belum ada pesanan pada kategori ini.</p>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- === ORDER DETAIL MODAL === -->
+    <div id="order-modal"
+        class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-primary text-white">
+                <div>
+                    <h3 class="font-bold text-lg">Detail Pesanan</h3>
+                    <p class="text-xs text-green-100" id="modal-order-id">#ORD-1023</p>
+                </div>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white"><i
+                        class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll bg-[#F7F5F2]">
+                <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-500 text-xs uppercase font-bold">Pelanggan / Meja</span>
+                        <span class="text-dark font-bold" id="modal-table">Meja 4 (Indoor)</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-500 text-xs uppercase font-bold">Waktu Pesan</span>
+                        <span class="text-dark font-bold text-sm" id="modal-time">14:05</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 text-xs uppercase font-bold">Status</span>
+                        <span class="text-xs font-bold px-2 py-1 rounded bg-yellow-100 text-yellow-700"
+                            id="modal-status">Baru</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3" id="modal-items">
+                    <!-- Items injected here -->
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                    <span class="font-bold text-lg text-dark">Total</span>
+                    <span class="font-extrabold text-xl text-primary" id="modal-total">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="p-5 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
+                <button onclick="closeModal()"
+                    class="py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
+                <button
+                    class="py-3 bg-primary text-white font-bold rounded-xl shadow hover:bg-primaryLight transition-colors"
+                    id="modal-action-btn">Proses Pesanan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- DATA ---
+        let orders = [
+            {
+                id: "ORD-1024",
+                table: "Meja 4 (Indoor)",
+                time: "Baru Saja",
+                timestamp: Date.now(),
+                status: "new",
+                total: 58000,
+                items: [
+                    { name: "Nasi Goreng Spesial", qty: 1, price: 25000, notes: "Pedas, Tanpa Acar" },
+                    { name: "Sate Ayam Madura", qty: 1, price: 25000, notes: "" },
+                    { name: "Es Teh Manis", qty: 1, price: 8000, notes: "Es Sedikit" }
+                ]
+            },
+            {
+                id: "ORD-1023",
+                table: "Meja 2",
+                time: "5 Menit lalu",
+                timestamp: Date.now() - 300000,
+                status: "new",
+                total: 18000,
+                items: [
+                    { name: "Kopi Susu Gula Aren", qty: 1, price: 18000, notes: "Less Sugar" }
+                ]
+            },
+            {
+                id: "ORD-1022",
+                table: "Meja 8 (Outdoor)",
+                time: "10 Menit lalu",
+                timestamp: Date.now() - 600000,
+                status: "new",
+                total: 45000,
+                items: [
+                    { name: "Pisang Keju", qty: 2, price: 15000, notes: "" },
+                    { name: "Jus Alpukat", qty: 1, price: 15000, notes: "" }
+                ]
+            },
+            {
+                id: "ORD-1021",
+                table: "Meja 1",
+                time: "15 Menit lalu",
+                timestamp: Date.now() - 900000,
+                status: "process",
+                total: 120000,
+                items: [
+                    { name: "Ayam Bakar Madu", qty: 2, price: 30000, notes: "" },
+                    { name: "Nasi Goreng Spesial", qty: 2, price: 25000, notes: "" },
+                    { name: "Es Jeruk", qty: 2, price: 10000, notes: "" }
+                ]
+            },
+            {
+                id: "ORD-1020",
+                table: "Bungkus - Rini",
+                time: "20 Menit lalu",
+                timestamp: Date.now() - 1200000,
+                status: "ready",
+                total: 30000,
+                items: [
+                    { name: "Ayam Geprek", qty: 2, price: 15000, notes: "Sambal Pisah" }
+                ]
+            },
+            {
+                id: "ORD-1019",
+                table: "Meja 5",
+                time: "30 Menit lalu",
+                timestamp: Date.now() - 1800000,
+                status: "completed",
+                total: 55000,
+                items: [
+                    { name: "Mie Goreng Jawa", qty: 2, price: 20000, notes: "" },
+                    { name: "Es Teh", qty: 3, price: 5000, notes: "" }
+                ]
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        // --- INIT ---
+        window.onload = () => {
+            updateTime();
+            renderOrders();
+            setInterval(updateTime, 60000);
+        };
+
+        // --- FUNCTIONS ---
+        function formatRupiah(num) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('current-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-container');
+            const searchVal = document.getElementById('search-order').value.toLowerCase();
+
+            container.innerHTML = '';
+
+            const filtered = orders.filter(o => {
+                const matchStatus = currentFilter === 'all' || o.status === currentFilter;
+                const matchSearch = o.id.toLowerCase().includes(searchVal) || o.table.toLowerCase().includes(searchVal);
+                return matchStatus && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+            }
+
+            filtered.forEach(order => {
+                let statusBadge = '';
+                let actionBtn = '';
+                let cardClass = 'bg-white rounded-2xl p-5 shadow-card border border-gray-100 relative transition-all hover:shadow-md';
+
+                if (order.status === 'new') {
+                    statusBadge = `<span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Baru</span>`;
+                    actionBtn = `<button onclick="updateStatus('${order.id}', 'process')" class="w-full py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primaryLight transition-colors shadow-sm mt-4">Terima Pesanan</button>`;
+                    cardClass += ' new-order-card'; // Blinking border
+                } else if (order.status === 'process') {
+                    statusBadge = `<span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"><i class="fa-solid fa-fire-burner mr-1"></i> Dimasak</span>`;
+                    actionBtn = `<button onclick="updateStatus('${order.id}', 'ready')" class="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-sm mt-4">Selesai Masak</button>`;
+                } else if (order.status === 'ready') {
+                    statusBadge = `<span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"><i class="fa-solid fa-bell-concierge mr-1"></i> Siap Saji</span>`;
+                    actionBtn = `<button onclick="updateStatus('${order.id}', 'completed')" class="w-full py-2.5 bg-green-600 text-white font-bold rounded-xl text-sm hover:bg-green-700 transition-colors shadow-sm mt-4">Antar & Selesai</button>`;
+                } else {
+                    statusBadge = `<span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"><i class="fa-solid fa-check mr-1"></i> Selesai</span>`;
+                    actionBtn = `<button class="w-full py-2.5 bg-gray-100 text-gray-400 font-bold rounded-xl text-sm cursor-not-allowed mt-4">Arsip</button>`;
+                    cardClass += ' opacity-75';
+                }
+
+                // Items Preview (Max 2)
+                let itemsHtml = '';
+                order.items.slice(0, 2).forEach(item => {
+                    itemsHtml += `
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600"><span class="font-bold text-dark">${item.qty}x</span> ${item.name}</span>
+                        </div>
+                    `;
+                });
+                if (order.items.length > 2) {
+                    itemsHtml += `<div class="text-xs text-gray-400 italic mt-1">+${order.items.length - 2} item lainnya...</div>`;
+                }
+
+                const html = `
+                <div class="${cardClass}">
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-3">
+                        <div>
+                            <h4 class="font-extrabold text-lg text-dark leading-tight">${order.table}</h4>
+                            <p class="text-xs text-gray-400 font-mono mt-0.5">${order.id}</p>
+                        </div>
+                        <div class="text-right flex flex-col items-end gap-1">
+                            ${statusBadge}
+                            <span class="text-[10px] text-gray-400 flex items-center gap-1"><i class="fa-regular fa-clock"></i> ${order.time}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 min-h-[60px] cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors" onclick="openDetail('${order.id}')">
+                        ${itemsHtml}
+                    </div>
+
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-3">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Total</span>
+                        <span class="font-extrabold text-lg text-primary">${formatRupiah(order.total)}</span>
+                    </div>
+
+                    ${actionBtn}
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+
+            updateTabs();
+        }
+
+        function updateTabs() {
+            const tabs = ['all', 'new', 'process', 'ready', 'completed'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === currentFilter) {
+                    btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                    btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200', 'hover:bg-gray-50', 'hover:text-gray-700');
+                    // Remove specific hover colors for active tab to keep it consistent
+                    btn.classList.remove('hover:text-pending', 'hover:text-processing', 'hover:text-ready');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-white', 'text-gray-500', 'border-gray-200');
+                }
+            });
+        }
+
+        function filterOrders(status) {
+            currentFilter = status;
+            renderOrders();
+        }
+
+        function updateStatus(id, newStatus) {
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                order.status = newStatus;
+                // Move timestamp to simulate real-time
+                if (newStatus === 'process') order.time = 'Sedang Dimasak';
+                if (newStatus === 'ready') order.time = 'Baru Saja';
+                renderOrders();
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        function openDetail(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('modal-order-id').innerText = order.id;
+            document.getElementById('modal-table').innerText = order.table;
+            document.getElementById('modal-time').innerText = order.time; // Should be real time in app
+            document.getElementById('modal-total').innerText = formatRupiah(order.total);
+
+            // Status Badge in Modal
+            const statusEl = document.getElementById('modal-status');
+            if (order.status === 'new') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-100 text-yellow-700"; statusEl.innerText = "Baru"; }
+            else if (order.status === 'process') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700"; statusEl.innerText = "Diproses"; }
+            else if (order.status === 'ready') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700"; statusEl.innerText = "Siap Saji"; }
+            else { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-600"; statusEl.innerText = "Selesai"; }
+
+            // Items List
+            const itemsContainer = document.getElementById('modal-items');
+            itemsContainer.innerHTML = '';
+            order.items.forEach(item => {
+                itemsContainer.innerHTML += `
+                    <div class="bg-white border border-gray-100 p-3 rounded-lg flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-dark"><span class="text-primary mr-1">${item.qty}x</span> ${item.name}</p>
+                            ${item.notes ? `<p class="text-xs text-gray-500 italic mt-1 bg-gray-50 inline-block px-2 py-0.5 rounded"><i class="fa-regular fa-note-sticky mr-1"></i>${item.notes}</p>` : ''}
+                        </div>
+                        <span class="font-bold text-sm text-gray-700">${formatRupiah(item.price * item.qty)}</span>
+                    </div>
+                `;
+            });
+
+            // Action Button Logic
+            const btn = document.getElementById('modal-action-btn');
+            btn.onclick = () => { updateStatus(id, getNextStatus(order.status)); closeModal(); };
+
+            if (order.status === 'new') { btn.innerText = "Terima Pesanan"; btn.className = "py-3 bg-primary text-white font-bold rounded-xl shadow hover:bg-primaryLight transition-colors"; btn.disabled = false; }
+            else if (order.status === 'process') { btn.innerText = "Selesai Masak"; btn.className = "py-3 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700 transition-colors"; btn.disabled = false; }
+            else if (order.status === 'ready') { btn.innerText = "Antar & Selesai"; btn.className = "py-3 bg-green-600 text-white font-bold rounded-xl shadow hover:bg-green-700 transition-colors"; btn.disabled = false; }
+            else { btn.innerText = "Pesanan Selesai"; btn.className = "py-3 bg-gray-200 text-gray-400 font-bold rounded-xl cursor-not-allowed"; btn.disabled = true; }
+
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        function getNextStatus(current) {
+            if (current === 'new') return 'process';
+            if (current === 'process') return 'ready';
+            if (current === 'ready') return 'completed';
+            return 'completed';
+        }
+    </script>
+</body>
+
+</html>

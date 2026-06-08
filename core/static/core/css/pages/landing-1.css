@@ -1,0 +1,37 @@
+body {
+            background-color: #F7F5F2;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Animation for Floating Element */
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(-2deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(-1deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(-2deg);
+            }
+        }
+
+        .floating-card {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F7F5F2;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1B4332;
+            border-radius: 4px;
+        }

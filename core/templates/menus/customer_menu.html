@@ -1,0 +1,85 @@
+{% load menu_extras %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Menu {{ restaurant.name }} - Meja {{ dining_table.table_number }}</title>
+    </head>
+    <body>
+        <main>
+            <header>
+                <p>Menu Digital</p>
+                <h1>{{ restaurant.name }}</h1>
+                <p>Meja {{ dining_table.table_number }}</p>
+            </header>
+            <aside>
+                <h2>Keranjang</h2>
+                {% if cart_summary.total_quantity %}
+                    <p>{{ cart_summary.total_quantity }} item</p>
+                    <p>Total: {{ cart_summary.total_amount|rupiah }}</p>
+                    <ul>
+                        {% for cart_item in cart_summary.items %}
+                            <li>
+                                {{ cart_item.quantity }}x {{ cart_item.menu_item.name }}
+                                - {{ cart_item.line_total|rupiah }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post"
+                          action="{% url 'customer_checkout' dining_table.qr_token %}">
+                        {% csrf_token %}
+                        <label>
+                            Nama Customer
+                            <input type="text" name="customer_name" placeholder="Nama Anda">
+                        </label>
+                        <label>
+                            Catatan Pesanan
+                            <textarea name="customer_note" placeholder="Catatan untuk restoran"></textarea>
+                        </label>
+                        <label>
+                            Metode Pembayaran
+                            <select name="payment_method">
+                                {% for method_value, method_label in payment_methods %}
+                                    <option value="{{ method_value }}">{{ method_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <button type="submit">Checkout</button>
+                    </form>
+                {% else %}
+                    <p>Keranjang masih kosong.</p>
+                {% endif %}
+            </aside>
+            {% for category in categories %}
+                <section>
+                    <h2>{{ category.name }}</h2>
+                    {% for item in category.items.all %}
+                        <article>
+                            <h3>{{ item.name }}</h3>
+                            {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+                            <p>{{ item.price|rupiah }}</p>
+                            <form method="post"
+                                  action="{% url 'customer_cart_add' dining_table.qr_token item.id %}">
+                                {% csrf_token %}
+                                <label>
+                                    Jumlah
+                                    <input type="number" name="quantity" value="1" min="1">
+                                </label>
+                                <label>
+                                    Catatan
+                                    <input type="text" name="note" placeholder="Contoh: tanpa gula">
+                                </label>
+                                <button type="submit">Tambah</button>
+                            </form>
+                        </article>
+                    {% empty %}
+                        <p>Belum ada menu tersedia di kategori ini.</p>
+                    {% endfor %}
+                </section>
+            {% empty %}
+                <p>Menu belum tersedia.</p>
+            {% endfor %}
+        </main>
+    </body>
+</html>

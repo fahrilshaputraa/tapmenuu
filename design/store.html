@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapMenu - Profil Toko</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B4332',    /* Deep Emerald */
+                        primaryLight: '#2D6A4F',
+                        secondary: '#D8F3DC',  /* Mint */
+                        accent: '#E07A5F',     /* Terracotta */
+                        bg: '#F7F5F2',         /* Bone White */
+                        dark: '#2D3436',       /* Charcoal */
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px rgba(0,0,0,0.06)',
+                        'soft': '0 4px 20px -2px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F7F5F2;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col z-20 shrink-0">
+            <!-- Brand -->
+            <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-utensils text-xs"></i>
+                </div>
+                <span class="text-lg font-extrabold text-primary tracking-tight">TapMenu</span>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Utama</div>
+
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-receipt w-5"></i> Pesanan
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
+                </a>
+
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-8 mb-3 px-2">Pengaturan</div>
+                <!-- Active State -->
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 bg-secondary/50 text-primary font-bold rounded-xl transition-colors">
+                    <i class="fa-solid fa-store w-5"></i> Profil Toko
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-dark rounded-xl transition-colors">
+                    <i class="fa-solid fa-users-gear w-5"></i> Karyawan
+                </a>
+            </div>
+
+            <!-- Profile Bottom -->
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 cursor-pointer">
+                    <img src="https://i.pravatar.cc/100?img=5" class="w-9 h-9 rounded-full border border-gray-200">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-dark truncate">Pak Budi</p>
+                        <p class="text-xs text-gray-500 truncate">Owner</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+
+            <!-- Header -->
+            <header
+                class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-primary text-xl"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h2 class="text-xl font-bold text-dark">Profil Toko</h2>
+                        <p class="text-xs text-gray-500">Informasi ini akan tampil di menu digital pelanggan</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button
+                        class="hidden sm:flex px-4 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50 transition-all items-center gap-2">
+                        <i class="fa-regular fa-eye"></i>
+                        <span>Lihat Menu</span>
+                    </button>
+                    <button onclick="saveStoreProfile()"
+                        class="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        <span>Simpan</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+                <div class="max-w-4xl mx-auto space-y-8 fade-in">
+
+                    <!-- Visual Branding Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Logo Upload -->
+                        <div
+                            class="bg-white p-6 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center text-center h-full">
+                            <h3 class="font-bold text-dark text-sm mb-4 w-full text-left border-b border-gray-50 pb-2">
+                                Logo Toko</h3>
+
+                            <div class="relative w-32 h-32 group cursor-pointer">
+                                <img id="logo-preview" src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png"
+                                    class="w-32 h-32 rounded-full object-cover border-4 border-secondary shadow-sm transition-opacity group-hover:opacity-75">
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="bg-black/50 text-white rounded-full p-2">
+                                        <i class="fa-solid fa-camera"></i>
+                                    </div>
+                                </div>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer"
+                                    onchange="previewImage(this, 'logo-preview')">
+                            </div>
+
+                            <p class="text-[10px] text-gray-400 mt-4 px-4">
+                                Disarankan format persegi (1:1), min. 500x500px. Max 2MB.
+                            </p>
+                        </div>
+
+                        <!-- Banner Upload -->
+                        <div
+                            class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-card border border-gray-100 h-full flex flex-col">
+                            <h3 class="font-bold text-dark text-sm mb-4 border-b border-gray-50 pb-2">Banner Menu
+                                Digital</h3>
+
+                            <div
+                                class="relative w-full h-32 sm:h-40 bg-gray-100 rounded-xl overflow-hidden group cursor-pointer border-2 border-dashed border-gray-200 hover:border-primary transition-colors flex-1">
+                                <img id="banner-preview" src=""
+                                    class="absolute inset-0 w-full h-full object-cover hidden">
+                                <div id="banner-placeholder"
+                                    class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-primary">
+                                    <i class="fa-solid fa-image text-3xl mb-2"></i>
+                                    <span class="text-xs font-bold">Upload Banner / Foto Depan Toko</span>
+                                </div>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer"
+                                    onchange="previewImage(this, 'banner-preview', 'banner-placeholder')">
+                            </div>
+
+                            <p class="text-[10px] text-gray-400 mt-3">
+                                Tampil di bagian paling atas menu digital. Disarankan rasio landscape (16:9).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Store Details Form -->
+                    <div class="bg-white p-6 rounded-2xl shadow-card border border-gray-100">
+                        <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+                            <i class="fa-solid fa-store text-primary"></i>
+                            <h3 class="font-bold text-dark">Identitas & Alamat</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Nama Toko -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nama Usaha / Toko
+                                    <span class="text-red-500">*</span></label>
+                                <input type="text" value="Warung Bu Dewi"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-bold text-dark"
+                                    placeholder="Cth: Kopi Kenangan Masa Lalu">
+                            </div>
+
+                            <!-- Slogan -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Slogan / Tagline
+                                    (Opsional)</label>
+                                <input type="text" value="Rasanya seperti masakan ibu"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm text-dark"
+                                    placeholder="Cth: Jagonya Ayam Geprek">
+                            </div>
+
+                            <!-- Kategori -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Kategori Bisnis
+                                    <span class="text-red-500">*</span></label>
+                                <select
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium text-dark">
+                                    <option>Warung Makan</option>
+                                    <option>Restoran</option>
+                                    <option>Coffee Shop</option>
+                                    <option>Bakery & Pastry</option>
+                                    <option>Fast Food</option>
+                                </select>
+                            </div>
+
+                            <!-- Nomor WA -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">No. WhatsApp Admin
+                                    <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">+62</span>
+                                    <input type="tel" value="81234567890"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-primary text-sm font-medium text-dark"
+                                        placeholder="812xxx">
+                                </div>
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Alamat
+                                    Lengkap</label>
+                                <textarea rows="3"
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm text-dark resize-none">Jl. Merdeka No. 45, RT 02/RW 05, Kecamatan Bandung Wetan, Kota Bandung, Jawa Barat</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Media & Links -->
+                    <div class="bg-white p-6 rounded-2xl shadow-card border border-gray-100">
+                        <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+                            <i class="fa-solid fa-share-nodes text-primary"></i>
+                            <h3 class="font-bold text-dark">Media Sosial & Link</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Instagram -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Instagram
+                                    Username</label>
+                                <div class="relative">
+                                    <i
+                                        class="fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" value="warungbudewi"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-sm text-dark"
+                                        placeholder="username_tanpa_at">
+                                </div>
+                            </div>
+
+                            <!-- Google Maps -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Link Google
+                                    Maps</label>
+                                <div class="relative">
+                                    <i
+                                        class="fa-solid fa-map-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="url"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-sm text-dark"
+                                        placeholder="https://goo.gl/maps/...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function saveStoreProfile() {
+            const btn = document.querySelector('button[onclick="saveStoreProfile()"]');
+            const originalContent = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersimpan';
+                btn.classList.remove('bg-primary', 'hover:bg-primaryLight');
+                btn.classList.add('bg-green-600');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-green-600');
+                    btn.classList.add('bg-primary', 'hover:bg-primaryLight');
+                }, 2000);
+            }, 1000);
+        }
+
+        function previewImage(input, imgId, placeholderId = null) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById(imgId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+
+                    if (placeholderId) {
+                        document.getElementById(placeholderId).classList.add('hidden');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+
+</html>

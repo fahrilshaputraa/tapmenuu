@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}TapMenu - Dashboard{% endblock %}
+        </title>
+        {% block dashboard_tailwind_config %}{% endblock %}
+        <script src="https://cdn.tailwindcss.com"></script>
+        {% block dashboard_vendor_scripts %}{% endblock %}
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        {% block dashboard_extra_css %}{% endblock %}
+    </head>
+    <body class="{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}">
+        <div class="flex h-screen overflow-hidden">
+            {% include 'core/partials/dashboard_sidebar.html' %}
+            <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+                {% block dashboard_main %}{% endblock %}
+            </main>
+        </div>
+        {% block dashboard_overlays %}{% endblock %}
+        {% block dashboard_page_scripts %}{% endblock %}
+    </body>
+</html>

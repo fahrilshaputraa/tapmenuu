@@ -1,0 +1,599 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TapMenu - Solusi Digital UMKM</title>
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+              rel="stylesheet">
+        <!-- Font Awesome -->
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="{% static 'core/js/pages/landing-1.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'core/css/pages/landing-1.css' %}">
+    </head>
+    <body class="font-sans text-dark antialiased overflow-x-hidden">
+        <!-- NAVBAR -->
+        <nav class="fixed w-full z-50 bg-[#F7F5F2]/95 backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300"
+             id="navbar">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center gap-2.5 group cursor-pointer">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <span class="text-xl font-extrabold text-primary tracking-tight">TapMenu</span>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-10 text-sm font-semibold text-gray-500">
+                    <a href="#fitur" class="hover:text-primary transition-colors">Fitur</a>
+                    <a href="#cara-kerja" class="hover:text-primary transition-colors">Untuk Siapa?</a>
+                    <a href="#harga" class="hover:text-primary transition-colors">Harga</a>
+                </div>
+                <!-- CTA Button -->
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="{% url 'login' %}"
+                       class="text-sm font-bold text-primary hover:text-primary/80">Masuk</a>
+                    <a href="{% url 'register' %}"
+                       class="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 transform hover:-translate-y-0.5">
+                        Daftar Toko
+                    </a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMenu()"
+                        class="md:hidden text-2xl text-primary focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+            <!-- Mobile Menu Dropdown -->
+            <div id="mobile-menu"
+                 class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full shadow-xl">
+                <div class="flex flex-col p-6 space-y-4 font-semibold text-gray-600">
+                    <a href="#fitur" class="hover:text-primary">Fitur</a>
+                    <a href="#cara-kerja" class="hover:text-primary">Untuk Siapa?</a>
+                    <a href="#harga" class="hover:text-primary">Harga</a>
+                    <hr class="border-gray-100">
+                    <a href="{% url 'login' %}"
+                       class="text-center py-3 bg-secondary text-primary rounded-lg">Masuk</a>
+                    <a href="{% url 'register' %}"
+                       class="text-center py-3 bg-primary text-white rounded-lg">Daftar Toko</a>
+                </div>
+            </div>
+        </nav>
+        <!-- HERO SECTION -->
+        <section class="pt-36 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+                <!-- Text Content -->
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm mb-8">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Aplikasi Kasir & Menu Digital
+                        Gratis</span>
+                    </div>
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary leading-[1.1] mb-6">
+                        Modernisasi
+                        <br>
+                        Warung <span class="text-accent relative inline-block">
+                        Anda
+                        <svg class="absolute w-full h-3 -bottom-1 left-0 text-accent opacity-30"
+                             viewBox="0 0 100 10"
+                             preserveAspectRatio="none">
+                            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" />
+                        </svg>
+                    </span>
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed mb-10 max-w-lg">
+                    Bikin menu digital QR Code, catat pesanan, dan atur stok dalam satu aplikasi simpel. Didesain khusus
+                    untuk UMKM Indonesia agar naik kelas.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'register' %}"
+                       class="px-8 py-4 bg-accent text-white font-bold rounded-xl shadow-lg hover:bg-[#d06a50] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                        <span>Coba Gratis Sekarang</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <button class="px-8 py-4 bg-white border-2 border-gray-100 text-dark font-bold rounded-xl hover:border-gray-300 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-google-play text-gray-500"></i>
+                        <span>Download App</span>
+                    </button>
+                </div>
+                <div class="mt-10 flex items-center gap-4 text-sm text-gray-500 font-medium">
+                    <div class="flex -space-x-2">
+                        <img src="https://i.pravatar.cc/100?img=1"
+                             class="w-8 h-8 rounded-full border-2 border-white"
+                             alt="User">
+                        <img src="https://i.pravatar.cc/100?img=2"
+                             class="w-8 h-8 rounded-full border-2 border-white"
+                             alt="User">
+                        <img src="https://i.pravatar.cc/100?img=3"
+                             class="w-8 h-8 rounded-full border-2 border-white"
+                             alt="User">
+                    </div>
+                    <p>Bergabung dengan <span class="text-primary font-bold">2.500+</span> UMKM</p>
+                </div>
+            </div>
+            <!-- Visual Mockup -->
+            <div class="relative md:h-full flex items-center justify-center">
+                <!-- Blob Background -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-secondary/50 rounded-full blur-3xl -z-10">
+                </div>
+                <!-- Phone Card Mockup -->
+                <div class="floating-card relative w-[320px] bg-white rounded-[2.5rem] shadow-2xl border-[8px] border-white overflow-hidden z-10">
+                    <!-- Mockup Header -->
+                    <div class="bg-primary p-6 pb-10 relative">
+                        <div class="flex justify-between items-center text-white mb-4">
+                            <i class="fa-solid fa-bars"></i>
+                            <span class="font-bold">Warung Bu Dewi</span>
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="text-white font-bold text-xl">Mau makan apa?</h3>
+                            <div class="mt-3 bg-white/20 backdrop-blur-sm p-2 rounded-lg flex items-center text-white/70 text-sm gap-2">
+                                <i class="fa-solid fa-search ml-2"></i> Cari menu...
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Mockup Content -->
+                    <div class="bg-[#F7F5F2] h-[350px] -mt-4 rounded-t-[2rem] relative z-20 p-5 overflow-hidden">
+                        <!-- Categories -->
+                        <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                            <span class="bg-accent text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Makanan</span>
+                            <span class="bg-white text-gray-500 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Minuman</span>
+                            <span class="bg-white text-gray-500 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Cemilan</span>
+                        </div>
+                        <!-- Item 1 -->
+                        <div class="bg-white p-3 rounded-xl shadow-sm mb-3 flex gap-3 items-center">
+                            <img src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=100&q=80"
+                                 class="w-16 h-16 rounded-lg object-cover"
+                                 alt="Ayam Geprek">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm">Ayam Geprek</h4>
+                                <p class="text-[10px] text-gray-400">Sambal bawang pedas</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-primary font-bold text-sm">Rp 15.000</span>
+                                    <div class="w-6 h-6 bg-secondary text-primary rounded-full flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="bg-white p-3 rounded-xl shadow-sm mb-3 flex gap-3 items-center">
+                            <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=100&q=80"
+                                 class="w-16 h-16 rounded-lg object-cover"
+                                 alt="Kopi">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm">Es Kopi Susu</h4>
+                                <p class="text-[10px] text-gray-400">Gula aren asli</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-primary font-bold text-sm">Rp 18.000</span>
+                                    <div class="w-6 h-6 bg-secondary text-primary rounded-full flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating Badge -->
+                <div class="absolute bottom-10 -left-4 bg-white p-4 rounded-xl shadow-soft animate-bounce z-20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold">Status</p>
+                            <p class="text-sm font-bold text-dark">Pesanan Masuk!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- FEATURES GRID -->
+    <section id="fitur" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-20">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4">Semua Fitur, Tanpa Ribet</h2>
+                <p class="text-gray-600 text-lg">Fokus pada masakan Anda, biarkan TapMenu mengurus manajemen digitalnya.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-10">
+                <!-- Feature 1 -->
+                <div class="group p-8 bg-[#F7F5F2] rounded-[2rem] hover:bg-primary transition-colors duration-300">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl text-accent shadow-sm mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3 group-hover:text-white">Menu QR Code</h3>
+                    <p class="text-gray-600 leading-relaxed group-hover:text-green-100">
+                        Hemat biaya cetak buku menu. Pelanggan scan QR di meja, langsung lihat foto menu yang menggugah
+                        selera.
+                    </p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="group p-8 bg-[#F7F5F2] rounded-[2rem] hover:bg-primary transition-colors duration-300">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl text-accent shadow-sm mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3 group-hover:text-white">Catat Kasir</h3>
+                    <p class="text-gray-600 leading-relaxed group-hover:text-green-100">
+                        Lupakan bon kertas yang sering hilang. Catat pemasukan tunai dan non-tunai (QRIS) dengan rapi.
+                    </p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="group p-8 bg-[#F7F5F2] rounded-[2rem] hover:bg-primary transition-colors duration-300">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl text-accent shadow-sm mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3 group-hover:text-white">Laporan Bisnis</h3>
+                    <p class="text-gray-600 leading-relaxed group-hover:text-green-100">
+                        Pantau menu terlaris dan jam sibuk warung Anda. Data otomatis tersaji tanpa perlu menghitung
+                        manual.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- SHOWCASE / AUDIENCE -->
+    <section id="cara-kerja" class="py-24 bg-secondary/30 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="relative">
+                        <div class="absolute -top-10 -left-10 w-40 h-40 bg-accent/20 rounded-full blur-2xl"></div>
+                        <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=800&q=80"
+                             alt="Pemilik UMKM"
+                             class="relative z-10 rounded-[2rem] shadow-xl border-4 border-white rotate-2 hover:rotate-0 transition-all duration-500">
+                    </div>
+                </div>
+                <div class="order-1 md:order-2">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-6">
+                        Cocok untuk Segala Jenis Usaha
+                        Kuliner
+                    </h2>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm shrink-0">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Warung Makan & Kaki Lima</h4>
+                                <p class="text-gray-600 text-sm">Simpel, cepat, tidak butuh HP mahal.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm shrink-0">
+                                <i class="fa-solid fa-mug-hot"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Coffee Shop & Kafe</h4>
+                                <p class="text-gray-600 text-sm">Tampilan menu estetik sesuai branding kafe.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm shrink-0">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Franchise & Cloud Kitchen</h4>
+                                <p class="text-gray-600 text-sm">Kelola stok lebih efisien dan terukur.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- PRICING -->
+    <section id="harga" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-secondary text-primary rounded-full text-xs font-bold uppercase tracking-[0.2em] mb-6">
+                    Paket Harga
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4">
+                    Mulai Gratis, Upgrade Saat Toko
+                    Anda Tumbuh
+                </h2>
+                <p class="text-lg text-gray-600">
+                    Pilih paket sesuai kebutuhan operasional. Semua paket sudah termasuk
+                    menu digital, dashboard penjualan, dan support onboarding.
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8 items-stretch">
+                <div class="bg-[#F7F5F2] border border-gray-100 rounded-[2rem] p-8 shadow-soft">
+                    <div class="mb-8">
+                        <p class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Starter</p>
+                        <h3 class="text-4xl font-extrabold text-primary mb-2">Gratis</h3>
+                        <p class="text-gray-500">
+                            Cocok untuk warung baru yang ingin mulai pakai QR menu dan kasir
+                            digital.
+                        </p>
+                    </div>
+                    <ul class="space-y-4 text-sm text-gray-600 mb-8">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>1 outlet aktif</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>QR menu tanpa batas
+                            meja</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Pencatatan pesanan &
+                            kasir dasar</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Laporan harian
+                            sederhana</span>
+                        </li>
+                    </ul>
+                    <a href="{% url 'register' %}"
+                       class="w-full px-6 py-3.5 bg-white border border-gray-200 text-primary font-bold rounded-xl hover:border-primary transition-colors text-center block">
+                        Mulai Gratis
+                    </a>
+                </div>
+                <div class="relative bg-primary rounded-[2rem] p-8 shadow-2xl shadow-primary/20 text-white lg:-translate-y-4">
+                    <div class="absolute top-6 right-6 px-3 py-1 bg-accent rounded-full text-[11px] font-extrabold uppercase tracking-[0.15em]">
+                        Paling Laris
+                    </div>
+                    <div class="mb-8">
+                        <p class="text-sm font-bold text-green-200 uppercase tracking-[0.2em] mb-3">Growth</p>
+                        <div class="flex items-end gap-2 mb-2">
+                            <h3 class="text-4xl font-extrabold">Rp 99rb</h3>
+                            <span class="text-green-200 pb-1">/bulan</span>
+                        </div>
+                        <p class="text-green-100">
+                            Untuk usaha yang sudah ramai dan butuh kontrol operasional lebih
+                            rapi.
+                        </p>
+                    </div>
+                    <ul class="space-y-4 text-sm text-green-50 mb-8">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-secondary mt-0.5"></i><span>Semua fitur
+                            Starter</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-secondary mt-0.5"></i><span>3 akun karyawan &
+                            hak akses</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-secondary mt-0.5"></i><span>Laporan penjualan,
+                            produk terlaris, dan jam sibuk</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-secondary mt-0.5"></i><span>Export laporan
+                            mingguan dan bulanan</span>
+                        </li>
+                    </ul>
+                    <a href="{% url 'register' %}"
+                       class="w-full px-6 py-3.5 bg-accent text-white font-bold rounded-xl hover:bg-[#d06a50] transition-colors text-center block">
+                        Coba 14 Hari
+                    </a>
+                </div>
+                <div class="bg-[#F7F5F2] border border-gray-100 rounded-[2rem] p-8 shadow-soft">
+                    <div class="mb-8">
+                        <p class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Enterprise</p>
+                        <h3 class="text-4xl font-extrabold text-primary mb-2">Custom</h3>
+                        <p class="text-gray-500">
+                            Untuk franchise, multi-cabang, atau cloud kitchen dengan kebutuhan
+                            integrasi khusus.
+                        </p>
+                    </div>
+                    <ul class="space-y-4 text-sm text-gray-600 mb-8">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Multi-outlet
+                            dashboard</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Role tim lebih
+                            detail</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Onboarding prioritas
+                            dan training</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><span>Opsional integrasi
+                            POS / ERP</span>
+                        </li>
+                    </ul>
+                    <button class="w-full px-6 py-3.5 bg-white border border-gray-200 text-primary font-bold rounded-xl hover:border-primary transition-colors">
+                        Hubungi Tim Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- TESTIMONIALS -->
+    <section id="testimoni" class="py-24 bg-secondary/30">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+                <div class="max-w-2xl">
+                    <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-primary rounded-full text-xs font-bold uppercase tracking-[0.2em] mb-6">
+                        Testimoni Mitra
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4">
+                        Dipakai Harian oleh UMKM yang
+                        Ingin Operasional Lebih Ringkas
+                    </h2>
+                    <p class="text-lg text-gray-600">
+                        Bukan cuma tampil modern di depan pelanggan, tapi juga membantu
+                        owner ambil keputusan dari data penjualan yang rapi.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl px-6 py-5 shadow-soft border border-white/80">
+                    <p class="text-sm text-gray-500 mb-1">Rating rata-rata pengguna</p>
+                    <div class="flex items-center gap-3">
+                        <div class="flex text-amber-400">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-2xl font-extrabold text-primary">4.9/5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <article class="bg-white rounded-[2rem] p-8 shadow-soft border border-gray-100">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://i.pravatar.cc/100?img=12"
+                             alt="Mitra TapMenu"
+                             class="w-14 h-14 rounded-2xl object-cover">
+                        <div>
+                            <h3 class="font-bold text-primary">Ibu Rina</h3>
+                            <p class="text-sm text-gray-500">Pemilik Warteg Rasa Ibu, Bekasi</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        "Sebelumnya saya catat pesanan manual. Sekarang
+                        semua masuk ke HP, menu tinggal scan, dan laporan harian langsung kelihatan malam itu juga."
+                    </p>
+                    <div class="flex text-amber-400 gap-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                </article>
+                <article class="bg-primary rounded-[2rem] p-8 shadow-2xl shadow-primary/15 text-white">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://i.pravatar.cc/100?img=15"
+                             alt="Mitra TapMenu"
+                             class="w-14 h-14 rounded-2xl object-cover border-2 border-white/20">
+                        <div>
+                            <h3 class="font-bold">Kevin Aditya</h3>
+                            <p class="text-sm text-green-200">Owner Kopi Sudut Kota, Bandung</p>
+                        </div>
+                    </div>
+                    <p class="text-green-50 leading-relaxed mb-6">
+                        "Yang paling terasa itu tampilan menunya jadi lebih
+                        premium. Pelanggan lebih sering pesan add-on, dan tim saya lebih cepat waktu closing kasir."
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex text-amber-300 gap-1">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-[0.2em] text-green-200">Growth Plan</span>
+                    </div>
+                </article>
+                <article class="bg-white rounded-[2rem] p-8 shadow-soft border border-gray-100">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://i.pravatar.cc/100?img=20"
+                             alt="Mitra TapMenu"
+                             class="w-14 h-14 rounded-2xl object-cover">
+                        <div>
+                            <h3 class="font-bold text-primary">Chef Damar</h3>
+                            <p class="text-sm text-gray-500">Cloud Kitchen Sambel Hutan, Jakarta</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        "Kami pakai TapMenu untuk beberapa brand sekaligus.
+                        Rekap produk terlaris dan omzet per outlet bikin restock bahan jauh lebih presisi."
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex text-amber-400 gap-1">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Multi Outlet</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+    <!-- CTA -->
+    <section class="py-20 px-6">
+        <div class="max-w-5xl mx-auto bg-primary rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden">
+            <!-- Decoration Circles -->
+            <div class="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-64 h-64 bg-accent opacity-20 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl">
+            </div>
+            <div class="relative z-10">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6">
+                    Gratis Selamanya.
+                    <br>
+                    Tanpa Komisi.
+                </h2>
+                <p class="text-green-100 text-lg mb-10 max-w-2xl mx-auto">
+                    Kami mendukung UMKM Indonesia untuk Go
+                    Digital. Mulai gunakan TapMenu hari ini dan rasakan kemudahannya.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{% url 'register' %}"
+                       class="px-10 py-4 bg-accent text-white font-bold rounded-xl shadow-lg hover:bg-[#d06a50] transition-colors">
+                        Daftar Sekarang
+                    </a>
+                    <button class="px-10 py-4 bg-transparent border border-green-300 text-white font-bold rounded-xl hover:bg-white hover:text-primary transition-colors">
+                        Pelajari Lebih Lanjut
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-10 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-utensils text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold text-primary">TapMenu</span>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Membantu UMKM kuliner Indonesia mengelola bisnis lebih mudah, modern, dan efisien.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-primary mb-4">Produk</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#fitur" class="hover:text-accent">Menu Digital</a></li>
+                        <li><a href="#fitur" class="hover:text-accent">Aplikasi Kasir</a></li>
+                        <li><a href="#fitur" class="hover:text-accent">Manajemen Stok</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-primary mb-4">Perusahaan</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#cara-kerja" class="hover:text-accent">Tentang Kami</a></li>
+                        <li><a href="#testimoni" class="hover:text-accent">Karir</a></li>
+                        <li><a href="mailto:halo@tapmenu.id" class="hover:text-accent">Kontak</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-primary mb-4">Hubungi Kami</h4>
+                    <div class="flex gap-4">
+                        <a href="https://instagram.com/"
+                           target="_blank"
+                           rel="noopener"
+                           class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="https://wa.me/6200000000000"
+                           target="_blank"
+                           rel="noopener"
+                           class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="mailto:halo@tapmenu.id"
+                           class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-regular fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-gray-400">&copy; 2024 TapMenu Indonesia. Hak Cipta Dilindungi.</p>
+                <div class="flex gap-6 text-xs text-gray-400">
+                    <a href="{% url 'register' %}" class="hover:text-primary">Kebijakan Privasi</a>
+                    <a href="{% url 'register' %}" class="hover:text-primary">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Mobile Menu Script -->
+    <script src="{% static 'core/js/pages/landing-2.js' %}"></script>
+</body>
+</html>

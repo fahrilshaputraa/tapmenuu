@@ -1,0 +1,178 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% block title %}TapMenu - Manajemen Karyawan{% endblock %}
+{% block dashboard_tailwind_config %}
+    <script src="{% static 'core/js/pages/employee-1.js' %}"></script>
+{% endblock %}
+{% block dashboard_extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/pages/employee-1.css' %}">
+{% endblock %}
+{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}
+{% block dashboard_main %}
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+            <button class="md:hidden text-primary text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <h2 class="text-xl font-bold text-dark">Manajemen Karyawan</h2>
+                <p class="text-xs text-gray-500">Atur akses, peran, dan PIN login staf Anda</p>
+            </div>
+        </div>
+        <button onclick="openAddModal()"
+                class="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i>
+            <span class="hidden sm:inline">Tambah Karyawan</span>
+        </button>
+    </header>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+        <div class="max-w-7xl mx-auto space-y-6 fade-in">
+            <!-- Stats & Search -->
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
+                <div class="flex gap-4">
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Total</p>
+                            <p class="font-bold text-dark leading-none" id="total-count">4</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Aktif</p>
+                            <p class="font-bold text-dark leading-none" id="active-count">3</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative w-full md:w-72">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text"
+                           id="search-input"
+                           oninput="renderEmployees()"
+                           placeholder="Cari nama karyawan..."
+                           class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                </div>
+            </div>
+            <!-- Employee Table (Layout Baru) -->
+            <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase font-bold text-gray-500 tracking-wider">
+                                <th class="px-6 py-4">Karyawan</th>
+                                <th class="px-6 py-4">Peran / Role</th>
+                                <th class="px-6 py-4">PIN Akses</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm" id="employee-table-body">
+                            <!-- Items will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty State (Inside Table) -->
+                <div id="empty-state"
+                     class="hidden flex flex-col items-center justify-center py-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-3">
+                        <i class="fa-solid fa-user-slash text-2xl"></i>
+                    </div>
+                    <h3 class="text-dark font-bold">Karyawan tidak ditemukan</h3>
+                    <p class="text-gray-500 text-xs">Silakan tambah karyawan baru atau ubah pencarian.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_overlays %}
+    <!-- === ADD/EDIT MODAL === -->
+    <div id="employee-modal"
+         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Karyawan</h3>
+                <button onclick="closeModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
+                <!-- Avatar Upload -->
+                <div class="flex justify-center mb-4">
+                    <div class="relative">
+                        <img id="preview-avatar"
+                             src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+                             class="w-24 h-24 rounded-full object-cover border-4 border-gray-50 shadow-sm">
+                        <div class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full border border-gray-200 shadow flex items-center justify-center cursor-pointer hover:text-primary text-gray-500 overflow-hidden">
+                            <i class="fa-solid fa-camera text-xs"></i>
+                            <input type="file"
+                                   accept="image/*"
+                                   class="absolute inset-0 opacity-0 cursor-pointer"
+                                   onchange="handleAvatarUpload(this)">
+                        </div>
+                    </div>
+                </div>
+                <!-- Inputs -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                        Nama Lengkap <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text"
+                           id="input-name"
+                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium"
+                           placeholder="Contoh: Siti Aminah">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                        Posisi / Role <span class="text-red-500">*</span>
+                    </label>
+                    <select id="input-role"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium">
+                        <option value="Kasir">Kasir</option>
+                        <option value="Dapur">Staf Dapur</option>
+                        <option value="Pelayan">Pelayan (Waiter)</option>
+                        <option value="Manajer">Manajer Toko</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                        PIN Akses (6 Digit) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password"
+                               id="input-pin"
+                               maxlength="6"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium tracking-widest"
+                               placeholder="******">
+                        <button type="button"
+                                onclick="togglePinVisibility()"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark">
+                            <i class="fa-regular fa-eye" id="pin-icon"></i>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1">Digunakan untuk login ke aplikasi POS.</p>
+                </div>
+            </div>
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+                <button onclick="closeModal()"
+                        class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                    Batal
+                </button>
+                <button onclick="saveEmployee()"
+                        class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
+                    Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_page_scripts %}
+    <script src="{% static 'core/js/pages/employee-2.js' %}"></script>
+{% endblock %}

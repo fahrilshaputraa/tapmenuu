@@ -1,0 +1,346 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% block title %}TapMenu - Daftar Menu{% endblock %}
+{% block dashboard_tailwind_config %}
+    <script src="{% static 'core/js/pages/management-menu-1.js' %}"></script>
+{% endblock %}
+{% block dashboard_extra_css %}
+    <link rel="stylesheet"
+          href="{% static 'core/css/pages/management-menu-1.css' %}">
+{% endblock %}
+{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}
+{% block dashboard_main %}
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+            <button class="md:hidden text-primary text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <h2 class="text-xl font-bold text-dark">Daftar Menu</h2>
+                <p class="text-xs text-gray-500">Kelola produk, harga, varian, dan stok</p>
+            </div>
+        </div>
+        <button onclick="openAddModal()"
+                class="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span class="hidden sm:inline">Tambah Menu</span>
+        </button>
+    </header>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+        <div class="max-w-7xl mx-auto space-y-6 fade-in">
+            <!-- Stats & Search Bar -->
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
+                <!-- Category Tabs -->
+                <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1">
+                    <button onclick="filterMenu('all')"
+                            id="tab-all"
+                            class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap">
+                        Semua
+                    </button>
+                    <button onclick="filterMenu('food')"
+                            id="tab-food"
+                            class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+                        Makanan
+                    </button>
+                    <button onclick="filterMenu('drink')"
+                            id="tab-drink"
+                            class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+                        Minuman
+                    </button>
+                    <button onclick="filterMenu('snack')"
+                            id="tab-snack"
+                            class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+                        Cemilan
+                    </button>
+                </div>
+                <!-- Search -->
+                <div class="relative w-full md:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text"
+                           id="search-input"
+                           oninput="searchMenu()"
+                           placeholder="Cari nama menu..."
+                           class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                </div>
+            </div>
+            <!-- Menu List (Grid) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                 id="menu-container">
+                <!-- Items will be injected by JS -->
+            </div>
+            <!-- Empty State -->
+            <div id="empty-state"
+                 class="hidden flex flex-col items-center justify-center py-16">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                    <i class="fa-solid fa-burger text-3xl"></i>
+                </div>
+                <h3 class="text-dark font-bold">Tidak ada menu ditemukan</h3>
+                <p class="text-gray-500 text-sm">Coba kata kunci lain atau tambahkan menu baru.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_overlays %}
+    <!-- === ADD/EDIT MODAL (COMPLEX) === -->
+    <div id="menu-modal"
+         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white z-10">
+                <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Menu Baru</h3>
+                <button onclick="closeModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-gray-100 bg-gray-50 px-5 pt-2 gap-4 overflow-x-auto">
+                <button onclick="switchTab('basic')"
+                        id="tab-btn-basic"
+                        class="pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-colors whitespace-nowrap">
+                    Info
+                    Dasar
+                </button>
+                <button onclick="switchTab('pricing')"
+                        id="tab-btn-pricing"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Harga
+                    & Pajak
+                </button>
+                <button onclick="switchTab('variants')"
+                        id="tab-btn-variants"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Varian
+                </button>
+                <button onclick="switchTab('others')"
+                        id="tab-btn-others"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Stok
+                    & Lainnya
+                </button>
+            </div>
+            <!-- Modal Body (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll relative">
+                <!-- TAB 1: INFO DASAR -->
+                <div id="tab-content-basic" class="space-y-5 fade-in">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <!-- Image Upload -->
+                        <div class="w-full sm:w-1/3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Foto Menu</label>
+                            <div class="relative aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center group cursor-pointer overflow-hidden hover:border-primary transition-colors">
+                                <img id="preview-image"
+                                     src=""
+                                     class="absolute inset-0 w-full h-full object-cover hidden">
+                                <div class="text-center text-gray-400 group-hover:text-primary">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl mb-1"></i>
+                                    <p class="text-[10px] font-bold uppercase">Upload</p>
+                                </div>
+                                <input type="file"
+                                       accept="image/*"
+                                       class="absolute inset-0 opacity-0 cursor-pointer"
+                                       onchange="handleImageUpload(this)">
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-2 text-center">Min. 500x500px (JPG/PNG)</p>
+                        </div>
+                        <!-- Basic Inputs -->
+                        <div class="w-full sm:w-2/3 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                    Nama Menu <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text"
+                                       id="input-name"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="Contoh: Nasi Goreng Spesial">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                    Kategori <span class="text-red-500">*</span>
+                                </label>
+                                <select id="input-category"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium">
+                                    <option value="food">Makanan</option>
+                                    <option value="drink">Minuman</option>
+                                    <option value="snack">Cemilan</option>
+                                    <option value="dessert">Penutup</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Deskripsi</label>
+                                <textarea id="input-desc"
+                                          rows="3"
+                                          class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium resize-none"
+                                          placeholder="Jelaskan bahan utama atau rasa..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TAB 2: HARGA & PAJAK -->
+                <div id="tab-content-pricing" class="hidden space-y-5 fade-in">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                Harga Dasar (Rp) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                                <input type="number"
+                                       id="input-price"
+                                       oninput="calculateFinalPrice()"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg font-bold text-dark"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Diskon (%)</label>
+                            <div class="relative">
+                                <input type="number"
+                                       id="input-discount"
+                                       oninput="calculateFinalPrice()"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="0">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Kosongkan jika tidak ada diskon.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                Pajak / PPN
+                                (%)
+                            </label>
+                            <div class="relative">
+                                <input type="number"
+                                       id="input-tax"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="10">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Standar PPN restoran 10%.</p>
+                        </div>
+                    </div>
+                    <!-- Preview Box -->
+                    <div class="bg-secondary/30 rounded-xl p-4 border border-secondary mt-4">
+                        <p class="text-xs font-bold text-primary mb-2 uppercase">Preview Harga Pelanggan</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500" id="preview-original-container">
+                                    Harga Normal: <span class="line-through" id="preview-original">Rp 0</span>
+                                </p>
+                                <p class="text-xs text-accent font-bold" id="preview-discount-label">Hemat 0%</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-extrabold text-primary" id="preview-final">Rp 0</p>
+                                <p class="text-[10px] text-gray-500">*Belum termasuk PPN</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TAB 3: VARIAN (NEW) -->
+                <div id="tab-content-variants" class="hidden space-y-6 fade-in">
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start">
+                        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-xs font-bold text-blue-800">Info Varian</h4>
+                            <p class="text-[10px] text-blue-600">
+                                Gunakan varian untuk opsi tambahan seperti "Level
+                                Pedas" (Pilih Satu) atau "Toping Tambahan" (Pilih Banyak).
+                            </p>
+                        </div>
+                    </div>
+                    <div id="variants-container" class="space-y-4">
+                        <!-- Variant Groups will be injected here -->
+                    </div>
+                    <button onclick="addVariantGroup()"
+                            class="w-full py-3 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Grup Varian
+                    </button>
+                </div>
+                <!-- TAB 4: STOK & LAINNYA -->
+                <div id="tab-content-others" class="hidden space-y-6 fade-in">
+                    <!-- Stock Management -->
+                    <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h4 class="font-bold text-dark text-sm">Manajemen Stok</h4>
+                                <p class="text-[10px] text-gray-500">Aktifkan untuk melacak jumlah stok.</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox"
+                                       id="toggle-stock"
+                                       onchange="toggleStockInput()"
+                                       class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300" />
+                                <label for="toggle-stock"
+                                       class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                                </label>
+                            </div>
+                        </div>
+                        <div id="stock-input-container" class="hidden transition-all">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                Jumlah Stok Saat
+                                Ini
+                            </label>
+                            <input type="number"
+                                   id="input-stock"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary text-sm font-medium"
+                                   placeholder="Contoh: 50">
+                        </div>
+                    </div>
+                    <!-- Labels -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">
+                            Label Menu
+                            (Opsional)
+                        </label>
+                        <div class="flex gap-3">
+                            <label class="cursor-pointer select-none">
+                                <input type="checkbox" id="label-favorite" class="peer sr-only">
+                                <div class="px-4 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-bold peer-checked:bg-[#FFF0EB] peer-checked:text-accent peer-checked:border-accent transition-all">
+                                    <i class="fa-solid fa-heart mr-1"></i> Favorit
+                                </div>
+                            </label>
+                            <label class="cursor-pointer select-none">
+                                <input type="checkbox" id="label-new" class="peer sr-only">
+                                <div class="px-4 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-bold peer-checked:bg-secondary peer-checked:text-primary peer-checked:border-primary transition-all">
+                                    <i class="fa-solid fa-star mr-1"></i> Baru
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Active Status -->
+                    <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                            <input type="checkbox"
+                                   id="toggle-active"
+                                   class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
+                                   checked />
+                            <label for="toggle-active"
+                                   class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                            </label>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-dark">Tampilkan di Menu</p>
+                            <p class="text-[10px] text-gray-500">Menu ini bisa dipesan oleh pelanggan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Actions -->
+            <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3 z-10">
+                <button onclick="closeModal()"
+                        class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                    Batal
+                </button>
+                <button onclick="saveMenu()"
+                        class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
+                    Simpan
+                    Menu
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_page_scripts %}
+    <script src="{% static 'core/js/pages/management-menu-2.js' %}"></script>
+{% endblock %}
