@@ -166,10 +166,12 @@ class PaymentGatewayTests(TestCase):
     def test_dummy_gateway_verify_callback_returns_normalized_payload(self):
         gateway = DummyPaymentGateway()
 
-        result = gateway.verify_callback({
-            'reference': 'DUMMY-PAY-001',
-            'status': 'paid',
-        })
+        result = gateway.verify_callback(
+            {
+                'reference': 'DUMMY-PAY-001',
+                'status': 'paid',
+            }
+        )
 
         self.assertEqual(result['reference'], 'DUMMY-PAY-001')
         self.assertEqual(result['status'], Payment.Status.PAID)

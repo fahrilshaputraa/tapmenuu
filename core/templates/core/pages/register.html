@@ -10,7 +10,7 @@
               rel="stylesheet">
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <script src="{% static 'core/js/pages/register-1.js' %}"></script>
+        <script src="{% static 'core/js/pages/register-1.js' %}?v=20260608-fix-tailwind"></script>
         <link rel="stylesheet" href="{% static 'core/css/pages/register-1.css' %}">
     </head>
     <body class="font-sans text-dark antialiased min-h-screen overflow-x-hidden bg-bg">
@@ -116,7 +116,8 @@
                                     Buat akun owner untuk mulai setup toko, karyawan, dan menu digital dalam satu tempat.
                                 </p>
                             </div>
-                            <form class="space-y-5" method="get" action="{% url 'dashboard' %}">
+                            <form class="space-y-5" method="post" action="{% url 'register' %}">
+                                {% csrf_token %}
                                 <div>
                                     <label for="fullname"
                                            class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
@@ -127,6 +128,7 @@
                                             <i class="fa-regular fa-user"></i>
                                         </span>
                                         <input id="fullname"
+                                               name="username"
                                                type="text"
                                                placeholder="Nama owner / pengelola"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
@@ -142,6 +144,7 @@
                                             <i class="fa-solid fa-store"></i>
                                         </span>
                                         <input id="business"
+                                               name="restaurant_name"
                                                type="text"
                                                placeholder="Contoh: Warung Bu Dewi"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
@@ -157,6 +160,7 @@
                                             <i class="fa-regular fa-envelope"></i>
                                         </span>
                                         <input id="email"
+                                               name="email"
                                                type="email"
                                                placeholder="owner@tapmenu.id"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
@@ -173,6 +177,7 @@
                                                 <i class="fa-solid fa-lock"></i>
                                             </span>
                                             <input id="password"
+                                                   name="password1"
                                                    type="password"
                                                    placeholder="Min. 8 karakter"
                                                    class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-12 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
@@ -194,6 +199,7 @@
                                                 <i class="fa-solid fa-shield-heart"></i>
                                             </span>
                                             <input id="confirm-password"
+                                                   name="password2"
                                                    type="password"
                                                    placeholder="Ulangi kata sandi"
                                                    class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-12 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static menu_extras %}
 <!DOCTYPE html>
 <html lang="id">
     <head>
@@ -6,104 +6,105 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>TapMenu - Menu Digital</title>
-        <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
-        <!-- Google Fonts -->
+        <script src="{% static 'core/js/pages/book-menu-1.js' %}?v=20260608-fix-tailwind"></script>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
               rel="stylesheet">
-        <!-- Font Awesome -->
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <script src="{% static 'core/js/pages/book-menu-1.js' %}"></script>
         <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}">
     </head>
-</main>
-<!-- Floating Cart Bar (Hidden by default) -->
-<div id="cart-bar"
-     class="fixed bottom-4 left-4 right-4 z-40 hidden slide-up">
-    <div class="bg-primary text-white rounded-2xl p-4 shadow-floating flex justify-between items-center cursor-pointer"
-         onclick="openCartModal()">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center font-bold text-lg"
-                 id="total-items-badge">0</div>
-            <div class="flex flex-col">
-                <span class="text-xs text-green-100">Total Pembayaran</span>
-                <span class="font-bold text-lg" id="total-price-bar">Rp 0</span>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 font-bold text-sm bg-accent px-4 py-2 rounded-xl hover:bg-[#d06a50] transition-colors">
-            Lihat Pesanan <i class="fa-solid fa-chevron-right"></i>
-        </div>
-    </div>
-</div>
-</div>
-<!-- === CART / CHECKOUT MODAL === -->
-<div id="cart-modal" class="fixed inset-0 z-50 hidden">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-         onclick="closeCartModal()"></div>
-    <!-- Bottom Sheet -->
-    <div class="absolute bottom-0 w-full bg-[#F7F5F2] rounded-t-[2rem] shadow-2xl h-[85vh] flex flex-col slide-up">
-        <!-- Handle bar -->
-        <div class="w-full flex justify-center pt-4 pb-2"
-             onclick="closeCartModal()">
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-        </div>
-        <!-- Modal Header -->
-        <div class="px-6 pb-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-primary">Pesanan Anda</h2>
-            <button onclick="closeCartModal()"
-                    class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <!-- Cart Items (Scrollable) -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scroll"
-             id="cart-items-container">
-            <!-- Cart items injected here -->
-        </div>
-        <!-- Bill Details & Checkout -->
-        <div class="bg-white p-6 rounded-t-[2rem] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            <div class="space-y-3 mb-6 text-sm">
-                <div class="flex justify-between text-gray-500">
-                    <span>Subtotal</span>
-                    <span class="font-bold text-dark" id="bill-subtotal">Rp 0</span>
+    <body class="font-sans bg-bg text-dark antialiased min-h-screen">
+        <main class="max-w-md mx-auto min-h-screen bg-bg pb-28 shadow-2xl shadow-black/5">
+            <header class="bg-primary text-white px-5 pt-6 pb-8 rounded-b-[2rem] relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-white/10"></div>
+                <div class="absolute -left-20 bottom-0 w-56 h-56 rounded-full bg-accent/20 blur-2xl"></div>
+                <div class="relative z-10 flex items-center justify-between mb-8">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Menu Digital</p>
+                        <h1 class="text-2xl font-extrabold mt-1">{{ restaurant.name|default:'TapMenu' }}</h1>
+                        {% if dining_table %}
+                            <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }}</p>
+                        {% else %}
+                            <p class="text-sm text-green-100 mt-1">Pilih menu favorit Anda</p>
+                        {% endif %}
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center">
+                        <i class="fa-solid fa-utensils text-xl"></i>
+                    </div>
                 </div>
-                <div class="flex justify-between text-gray-500">
-                    <span>Pajak & Layanan (10%)</span>
-                    <span class="font-bold text-dark" id="bill-tax">Rp 0</span>
+                <div class="relative z-10 bg-white/10 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                    <p class="text-sm text-green-100">Menu tersedia</p>
+                    <p class="text-3xl font-extrabold">{{ menu_count|default:0 }}</p>
                 </div>
-                <div class="border-t border-dashed border-gray-300 my-2"></div>
-                <div class="flex justify-between text-lg">
-                    <span class="font-bold text-primary">Total</span>
-                    <span class="font-extrabold text-accent" id="bill-total">Rp 0</span>
-                </div>
-            </div>
-            <button onclick="processCheckout()"
-                    class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-[#143326] transition-all flex justify-center items-center gap-2">
-                <i class="fa-solid fa-paper-plane"></i> Pesan Sekarang
-            </button>
-        </div>
-    </div>
-</div>
-<!-- === SUCCESS OVERLAY === -->
-<div id="success-view"
-     class="hidden fixed inset-0 z-[60] bg-primary flex flex-col items-center justify-center p-6 text-center text-white fade-in">
-    <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 animate-bounce">
-        <i class="fa-solid fa-check text-4xl text-white"></i>
-    </div>
-    <h2 class="text-3xl font-bold mb-2">Pesanan Diterima!</h2>
-    <p class="text-green-100 mb-8 max-w-xs mx-auto">Mohon tunggu sebentar, pesanan Anda sedang disiapkan oleh dapur.</p>
-    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl w-full max-w-xs border border-white/10">
-        <p class="text-xs text-green-200 uppercase font-bold mb-1">Estimasi Waktu</p>
-        <p class="text-2xl font-bold">15 - 20 Menit</p>
-    </div>
-    <button onclick="location.reload()"
-            class="mt-10 px-8 py-3 border border-white/30 rounded-xl text-sm font-bold hover:bg-white/10 transition-colors">
-        Kembali ke Menu
-    </button>
-</div>
-<!-- JAVASCRIPT LOGIC -->
-<script src="{% static 'core/js/pages/book-menu-2.js' %}"></script>
-</body>
+            </header>
+            {% if categories %}
+                <nav class="px-5 -mt-5 relative z-20 flex gap-2 overflow-x-auto no-scrollbar pb-3">
+                    {% for category in categories %}
+                        <a href="#cat-{{ category.id }}"
+                           class="shrink-0 bg-white text-primary border border-gray-100 px-4 py-2 rounded-full text-sm font-extrabold shadow-card">
+                            {{ category.name }}
+                        </a>
+                    {% endfor %}
+                </nav>
+            {% endif %}
+            <section class="px-5 pt-4 space-y-8">
+                {% for category in categories %}
+                    <div id="cat-{{ category.id }}" class="scroll-mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-dark">{{ category.name }}</h2>
+                                <p class="text-xs text-gray-500">{{ category.items.all|length }} pilihan menu</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            {% for item in category.items.all %}
+                                <article class="bg-white rounded-[1.75rem] p-4 shadow-card border border-gray-100 flex gap-4">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}"
+                                             alt="{{ item.name }}"
+                                             class="w-24 h-24 rounded-2xl object-cover shrink-0">
+                                    {% else %}
+                                        <div class="w-24 h-24 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-bowl-food text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-extrabold text-dark leading-tight">{{ item.name }}</h3>
+                                        {% if item.description %}<p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>{% endif %}
+                                        <div class="mt-3 flex items-center justify-between gap-3">
+                                            <p class="font-extrabold text-primary">{{ item.price|rupiah }}</p>
+                                            {% if dining_table %}
+                                                <form method="post"
+                                                      action="{% url 'customer_cart_add' dining_table.qr_token item.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <button type="submit"
+                                                            class="w-9 h-9 rounded-xl bg-accent text-white flex items-center justify-center shadow-sm">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </article>
+                            {% empty %}
+                                <div class="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-gray-500 bg-white">
+                                    Belum ada menu tersedia di kategori ini.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="bg-white rounded-[2rem] p-8 text-center shadow-card border border-gray-100 mt-6">
+                        <div class="w-16 h-16 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-book-open text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-dark mb-2">Menu belum tersedia</h2>
+                        <p class="text-sm text-gray-500">Tambahkan kategori dan item menu dari dashboard.</p>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
+    </body>
 </html>

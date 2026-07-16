@@ -35,6 +35,7 @@ def create_order_from_cart(*, table, cart_items, customer_name='', customer_note
             menu_item = cart_item['menu_item']
             quantity = int(cart_item.get('quantity', 1))
             note = cart_item.get('note', '')
+            unit_price = int(cart_item.get('unit_price', menu_item.price))
 
             if quantity < 1:
                 raise OrderCreationError('Quantity menu minimal 1.')
@@ -53,7 +54,7 @@ def create_order_from_cart(*, table, cart_items, customer_name='', customer_note
                 order=order,
                 menu_item=menu_item,
                 item_name=menu_item.name,
-                unit_price=menu_item.price,
+                unit_price=unit_price,
                 quantity=quantity,
                 notes=note,
             )

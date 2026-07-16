@@ -1,49 +1,32 @@
 {% extends 'layouts/dashboard.html' %}
-{% load static %}
+{% load static menu_extras %}
 {% block title %}TapMenu - Laporan Keuangan{% endblock %}
 {% block dashboard_tailwind_config %}
-    <script src="{% static 'core/js/pages/reports-1.js' %}"></script>
+    <script src="{% static 'core/js/pages/reports-1.js' %}?v=20260608-fix-tailwind"></script>
 {% endblock %}
-{% block dashboard_vendor_scripts %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
 {% block dashboard_extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/reports-1.css' %}">
 {% endblock %}
 {% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}
 {% block dashboard_main %}
-    <!-- Header -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
-            <button class="md:hidden text-primary text-xl">
+            <button type="button"
+                    data-dashboard-menu-button
+                    aria-controls="dashboard-sidebar"
+                    aria-expanded="false"
+                    class="md:hidden text-primary text-xl">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
                 <h2 class="text-xl font-bold text-dark">Laporan & Keuangan</h2>
-                <p class="text-xs text-gray-500">Analisa penjualan toko dan kinerja tim</p>
+                <p class="text-xs text-gray-500">Ringkasan order dan pembayaran.</p>
             </div>
         </div>
-        <!-- Date Filter -->
-        <div class="flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-            <button onclick="setFilter('today')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-md bg-gray-100 text-dark shadow-sm filter-btn"
-                    id="btn-today">Hari Ini</button>
-            <button onclick="setFilter('week')"
-                    class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 rounded-md filter-btn"
-                    id="btn-week">Minggu Ini</button>
-            <button onclick="setFilter('month')"
-                    class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 rounded-md filter-btn"
-                    id="btn-month">Bulan Ini</button>
-            <div class="w-px h-4 bg-gray-200 mx-1"></div>
-            <button class="px-2 py-1.5 text-gray-400 hover:text-primary text-xs">
-                <i class="fa-regular fa-calendar"></i>
-            </button>
-        </div>
     </header>
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-6 custom-scroll">
         <div class="max-w-7xl mx-auto space-y-8 fade-in">
-            <!-- 1. SUMMARY CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Omzet -->
                 <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-secondary/30 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
                     </div>
@@ -52,15 +35,14 @@
                             <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
                                 <i class="fa-solid fa-wallet"></i>
                             </div>
-                            <p class="text-xs font-bold text-gray-500 uppercase">Total Pemasukan</p>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Total Pemasukan Paid</p>
                         </div>
-                        <h3 class="text-2xl font-extrabold text-dark mb-1" id="summary-revenue">Rp 0</h3>
+                        <h3 class="text-2xl font-extrabold text-dark mb-1">{{ revenue|rupiah }}</h3>
                         <p class="text-xs text-green-600 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-trend-up"></i> +12% <span class="text-gray-400 font-normal">vs periode lalu</span>
+                            <i class="fa-solid fa-check"></i> Dari pembayaran lunas
                         </p>
                     </div>
                 </div>
-                <!-- Transaksi -->
                 <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
                     </div>
@@ -71,14 +53,12 @@
                             </div>
                             <p class="text-xs font-bold text-gray-500 uppercase">Total Transaksi</p>
                         </div>
-                        <h3 class="text-2xl font-extrabold text-dark mb-1"
-                            id="summary-transactions">0</h3>
+                        <h3 class="text-2xl font-extrabold text-dark mb-1">{{ order_count }}</h3>
                         <p class="text-xs text-blue-600 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-check-double"></i> +5 <span class="text-gray-400 font-normal">pesanan baru</span>
+                            <i class="fa-solid fa-check-double"></i> {{ paid_count }} sudah lunas
                         </p>
                     </div>
                 </div>
-                <!-- Rata-rata -->
                 <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
                     </div>
@@ -89,48 +69,58 @@
                             </div>
                             <p class="text-xs font-bold text-gray-500 uppercase">Rata-rata Order</p>
                         </div>
-                        <h3 class="text-2xl font-extrabold text-dark mb-1" id="summary-average">Rp 0</h3>
-                        <p class="text-xs text-gray-400 font-normal">Per pelanggan per transaksi</p>
+                        <h3 class="text-2xl font-extrabold text-dark mb-1">{{ average_order_value|rupiah }}</h3>
+                        <p class="text-xs text-gray-400 font-normal">Berdasarkan semua order tercatat</p>
                     </div>
                 </div>
             </div>
-            <!-- 2. CHART & EMPLOYEE STATS -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Chart Section (2/3 width) -->
                 <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-card border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-dark text-lg">Grafik Penjualan</h3>
-                        <button class="text-xs text-primary font-bold border border-primary/20 bg-primary/5 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">
-                            Download
-                            PDF
-                        </button>
+                        <div>
+                            <h3 class="font-bold text-dark text-lg">Distribusi Status Order</h3>
+                            <p class="text-xs text-gray-400">Dihitung dari status order.</p>
+                        </div>
                     </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="salesChart"></canvas>
+                    <div class="space-y-4">
+                        {% for row in by_status %}
+                            <div>
+                                <div class="flex items-center justify-between text-sm mb-1">
+                                    <span class="font-bold text-dark">{{ row.label }}</span><span class="text-gray-500">{{ row.count }} order</span>
+                                </div>
+                                <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full"
+                                         style="width: {% if order_count %}{% widthratio row.count order_count 100 %}{% else %}0{% endif %}%">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <!-- Employee Performance (1/3 width) -->
                 <div class="bg-white p-6 rounded-2xl shadow-card border border-gray-100 flex flex-col">
-                    <h3 class="font-bold text-dark text-lg mb-1">Top Performa Kasir</h3>
-                    <p class="text-xs text-gray-400 mb-6">Berdasarkan total nominal transaksi.</p>
-                    <div class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-4"
-                         id="employee-stats-container">
-                        <!-- Items injected by JS -->
+                    <h3 class="font-bold text-dark text-lg mb-1">Ringkasan Data</h3>
+                    <p class="text-xs text-gray-400 mb-6">Ikhtisar transaksi berjalan.</p>
+                    <div class="space-y-4 text-sm">
+                        <div class="rounded-2xl bg-[#F7F5F2] p-4">
+                            <p class="text-gray-400">Order</p>
+                            <p class="font-extrabold text-primary">{{ order_count }} pesanan</p>
+                        </div>
+                        <div class="rounded-2xl bg-[#F7F5F2] p-4">
+                            <p class="text-gray-400">Paid</p>
+                            <p class="font-extrabold text-primary">{{ paid_count }} order lunas</p>
+                        </div>
+                        <div class="rounded-2xl bg-[#F7F5F2] p-4">
+                            <p class="text-gray-400">Catatan</p>
+                            <p class="font-semibold text-dark">Laporan kasir/staff belum tersedia.</p>
+                        </div>
                     </div>
-                    <button class="w-full mt-6 py-2.5 text-xs font-bold text-gray-500 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                        Lihat Detail Absensi
-                    </button>
                 </div>
             </div>
-            <!-- 3. RECENT TRANSACTIONS TABLE -->
             <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h3 class="font-bold text-dark text-lg">Riwayat Transaksi Terakhir</h3>
-                    <div class="relative">
-                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                        <input type="text"
-                               placeholder="Cari No. Order..."
-                               class="pl-8 pr-4 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-primary">
+                    <div>
+                        <h3 class="font-bold text-dark text-lg">Riwayat Transaksi Terakhir</h3>
+                        <p class="text-xs text-gray-400">Transaksi terbaru.</p>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -139,21 +129,35 @@
                             <tr class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 <th class="px-6 py-4">No. Order</th>
                                 <th class="px-6 py-4">Waktu</th>
-                                <th class="px-6 py-4">Kasir</th>
-                                <th class="px-6 py-4">Metode</th>
+                                <th class="px-6 py-4">Customer</th>
+                                <th class="px-6 py-4">Status Bayar</th>
                                 <th class="px-6 py-4 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 text-sm text-dark"
-                               id="transaction-table">
-                            <!-- Rows injected by JS -->
+                        <tbody class="divide-y divide-gray-100 text-sm text-dark">
+                            {% for order in recent_transactions %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-primary">
+                                        <a href="{% url 'order_detail' order.pk %}">{{ order.code }}</a>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-500">{{ order.created_at|date:'H:i' }}</td>
+                                    <td class="px-6 py-4 font-bold text-dark">{{ order.customer_name|default:'Customer' }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {% if order.payment_status == 'paid' %}bg-green-50 text-green-600{% else %}bg-yellow-50 text-yellow-700{% endif %}">{{ order.get_payment_status_display }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-bold text-dark">{{ order.total_amount|rupiah }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">Belum ada transaksi.</td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        {% include 'core/partials/dashboard_footer.html' %}
     </div>
 {% endblock %}
-{% block dashboard_page_scripts %}
-    <script src="{% static 'core/js/pages/reports-2.js' %}"></script>
-{% endblock %}
+{% block dashboard_page_scripts %}{% endblock %}

@@ -7,8 +7,8 @@
         <title>
             {% block title %}TapMenu - Dashboard{% endblock %}
         </title>
-        {% block dashboard_tailwind_config %}{% endblock %}
         <script src="https://cdn.tailwindcss.com"></script>
+        {% block dashboard_tailwind_config %}{% endblock %}
         {% block dashboard_vendor_scripts %}{% endblock %}
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
               rel="stylesheet">
@@ -19,11 +19,15 @@
     <body class="{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}">
         <div class="flex h-screen overflow-hidden">
             {% include 'core/partials/dashboard_sidebar.html' %}
+            <div data-dashboard-sidebar-backdrop
+                 class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"
+                 aria-hidden="true"></div>
             <main class="flex-1 flex flex-col h-full relative overflow-hidden">
                 {% block dashboard_main %}{% endblock %}
             </main>
         </div>
         {% block dashboard_overlays %}{% endblock %}
+        <script src="{% static 'core/js/dashboard-shell.js' %}?v=20260608-mobile-sidebar-2"></script>
         {% block dashboard_page_scripts %}{% endblock %}
     </body>
 </html>

@@ -1,85 +1,358 @@
-{% load menu_extras %}
+{% load static menu_extras %}
 <!DOCTYPE html>
 <html lang="id">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Menu {{ restaurant.name }} - Meja {{ dining_table.table_number }}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{% static 'core/js/pages/book-menu-1.js' %}?v=20260609-desktop-responsive"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <style>
+            :root {
+                --menu-primary: {{ appearance_theme.primary_color|default:'#1B4332' }};
+                --menu-secondary: {{ appearance_theme.secondary_color|default:'#D8F3DC' }};
+                --menu-accent: {{ appearance_theme.accent_color|default:'#E07A5F' }};
+                --menu-bg: {{ appearance_theme.background_color|default:'#F7F5F2' }};
+                --menu-text: {{ appearance_theme.text_color|default:'#1F2933' }};
+                --menu-card: {{ appearance_theme.card_color|default:'#FFFFFF' }};
+                --menu-font: '{{ appearance_theme.font_family|default:'Plus Jakarta Sans' }}', sans-serif;
+            }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+            @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+            .fade-item { animation: fadeInUp 0.35s ease-out both; }
+            .fade-item:nth-child(1) { animation-delay: 0.02s; }
+            .fade-item:nth-child(2) { animation-delay: 0.06s; }
+            .fade-item:nth-child(3) { animation-delay: 0.10s; }
+            .fade-item:nth-child(4) { animation-delay: 0.14s; }
+            .fade-item:nth-child(5) { animation-delay: 0.18s; }
+            .fade-item:nth-child(6) { animation-delay: 0.22s; }
+            body[data-menu-theme] { background: var(--menu-bg); color: var(--menu-text); font-family: var(--menu-font); }
+            body[data-menu-theme] main { background: var(--menu-bg); }
+            body[data-menu-theme] header { background: var(--menu-primary); }
+            body[data-menu-theme] .bg-primary { background-color: var(--menu-primary) !important; }
+            body[data-menu-theme] .text-primary { color: var(--menu-primary) !important; }
+            body[data-menu-theme] .bg-secondary { background-color: var(--menu-secondary) !important; }
+            body[data-menu-theme] .bg-accent { background-color: var(--menu-accent) !important; }
+            body[data-menu-theme] .text-dark { color: var(--menu-text) !important; }
+            body[data-menu-theme] article.bg-white,
+            body[data-menu-theme] .menu-tab.bg-white { background-color: var(--menu-card) !important; }
+            body[data-menu-theme] button.bg-accent,
+            body[data-menu-theme] span.bg-accent { background-color: var(--menu-accent) !important; }
+            body[data-menu-theme][data-header-style="minimal"] header { border-radius: 0 !important; padding-bottom: 1.75rem !important; }
+            body[data-menu-theme][data-header-style="hero"] header { min-height: 18rem; display: flex; align-items: end; background: linear-gradient(145deg, var(--menu-primary), var(--menu-accent)) !important; }
+            body[data-menu-theme][data-button-style="pill"] button.bg-accent,
+            body[data-menu-theme][data-button-style="pill"] button.bg-primary { border-radius: 999px !important; }
+            body[data-menu-theme][data-button-style="square"] button.bg-accent,
+            body[data-menu-theme][data-button-style="square"] button.bg-primary { border-radius: 0.65rem !important; }
+            body[data-menu-theme][data-layout-style="compact"] article.fade-item { border-radius: 1rem !important; padding: 0.75rem !important; }
+            body[data-menu-theme][data-layout-style="compact"] article.fade-item img,
+            body[data-menu-theme][data-layout-style="compact"] article.fade-item .bg-secondary { width: 4.5rem !important; height: 4.5rem !important; border-radius: 1rem !important; }
+            body[data-menu-theme][data-layout-style="featured"] .menu-panel .grid article:first-child { grid-column: 1 / -1; }
+        </style>
     </head>
-    <body>
-        <main>
-            <header>
-                <p>Menu Digital</p>
-                <h1>{{ restaurant.name }}</h1>
-                <p>Meja {{ dining_table.table_number }}</p>
+    <body class="font-sans bg-bg text-dark antialiased min-h-screen"
+          data-menu-theme
+          data-layout-style="{{ appearance_theme.layout_style|default:'grid' }}"
+          data-header-style="{{ appearance_theme.header_style|default:'rounded' }}"
+          data-button-style="{{ appearance_theme.button_style|default:'rounded' }}">
+        <main class="min-h-screen bg-bg pb-40">
+            <!-- HEADER -->
+            <header class="bg-primary text-white px-5 sm:px-8 pt-6 sm:pt-10 pb-8 sm:pb-10 rounded-b-[2rem] sm:rounded-b-[3rem] relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-white/10"></div>
+                <div class="absolute -left-20 bottom-0 w-56 h-56 rounded-full bg-accent/20 blur-2xl"></div>
+                <div class="relative z-10 max-w-6xl mx-auto">
+                    <div class="flex items-center justify-between mb-6 sm:mb-8">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Menu Digital</p>
+                            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold mt-1">{{ restaurant.name }}</h1>
+                            <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }}</p>
+                        </div>
+                        <a href="{% url 'customer_cart' dining_table.qr_token %}"
+                           class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+                           aria-label="Buka halaman keranjang">
+                            <i class="fa-solid fa-cart-shopping text-xl sm:text-2xl"></i>
+                            {% if cart_summary.total_quantity %}
+                                <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent text-white text-xs font-extrabold flex items-center justify-center shadow-lg">
+                                    {{ cart_summary.total_quantity }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="relative z-10 bg-white/10 border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-sm max-w-md">
+                        <p class="text-sm text-green-100">Pilih menu favorit</p>
+                        <p class="text-3xl sm:text-4xl font-extrabold">{{ categories|length }} kategori</p>
+                    </div>
+                </div>
             </header>
-            <aside>
-                <h2>Keranjang</h2>
-                {% if cart_summary.total_quantity %}
-                    <p>{{ cart_summary.total_quantity }} item</p>
-                    <p>Total: {{ cart_summary.total_amount|rupiah }}</p>
-                    <ul>
-                        {% for cart_item in cart_summary.items %}
-                            <li>
-                                {{ cart_item.quantity }}x {{ cart_item.menu_item.name }}
-                                - {{ cart_item.line_total|rupiah }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <form method="post"
-                          action="{% url 'customer_checkout' dining_table.qr_token %}">
-                        {% csrf_token %}
-                        <label>
-                            Nama Customer
-                            <input type="text" name="customer_name" placeholder="Nama Anda">
-                        </label>
-                        <label>
-                            Catatan Pesanan
-                            <textarea name="customer_note" placeholder="Catatan untuk restoran"></textarea>
-                        </label>
-                        <label>
-                            Metode Pembayaran
-                            <select name="payment_method">
-                                {% for method_value, method_label in payment_methods %}
-                                    <option value="{{ method_value }}">{{ method_label }}</option>
-                                {% endfor %}
-                            </select>
-                        </label>
-                        <button type="submit">Checkout</button>
-                    </form>
-                {% else %}
-                    <p>Keranjang masih kosong.</p>
-                {% endif %}
-            </aside>
-            {% for category in categories %}
-                <section>
-                    <h2>{{ category.name }}</h2>
-                    {% for item in category.items.all %}
-                        <article>
-                            <h3>{{ item.name }}</h3>
-                            {% if item.description %}<p>{{ item.description }}</p>{% endif %}
-                            <p>{{ item.price|rupiah }}</p>
-                            <form method="post"
-                                  action="{% url 'customer_cart_add' dining_table.qr_token item.id %}">
-                                {% csrf_token %}
-                                <label>
-                                    Jumlah
-                                    <input type="number" name="quantity" value="1" min="1">
-                                </label>
-                                <label>
-                                    Catatan
-                                    <input type="text" name="note" placeholder="Contoh: tanpa gula">
-                                </label>
-                                <button type="submit">Tambah</button>
-                            </form>
-                        </article>
-                    {% empty %}
-                        <p>Belum ada menu tersedia di kategori ini.</p>
+
+            <!-- CATEGORY FILTER TABS -->
+            {% if categories and appearance_theme.show_category_tabs %}
+                <nav class="max-w-6xl mx-auto px-5 sm:px-8 -mt-5 sm:-mt-6 relative z-20 flex gap-2 overflow-x-auto no-scrollbar pb-3"
+                     aria-label="Filter kategori menu">
+                    <button type="button"
+                            data-menu-tab="all"
+                            data-active-tab-class="bg-primary text-white border-primary shadow-floating"
+                            data-default-tab-class="bg-white text-primary border-gray-100 shadow-card"
+                            class="menu-tab shrink-0 border px-4 py-2 rounded-full text-sm font-extrabold transition-all bg-primary text-white border-primary shadow-floating">
+                        Semua
+                    </button>
+                    {% for category in categories %}
+                        <button type="button"
+                                data-menu-tab="cat-{{ category.id }}"
+                                data-active-tab-class="bg-primary text-white border-primary shadow-floating"
+                                data-default-tab-class="bg-white text-primary border-gray-100 shadow-card"
+                                class="menu-tab shrink-0 border px-4 py-2 rounded-full text-sm font-extrabold transition-all bg-white text-primary border-gray-100 shadow-card hover:shadow-md hover:bg-secondary/30">
+                            {{ category.name }}
+                        </button>
                     {% endfor %}
-                </section>
-            {% empty %}
-                <p>Menu belum tersedia.</p>
+                </nav>
+            {% endif %}
+
+            <!-- MENU ITEMS -->
+            <section class="max-w-6xl mx-auto px-5 sm:px-8 pt-4 sm:pt-6">
+                {% for category in categories %}
+                    <div id="cat-{{ category.id }}" data-menu-panel="cat-{{ category.id }}" class="menu-panel scroll-mt-6 mb-8 sm:mb-12">
+                        <div class="flex items-center justify-between mb-4 sm:mb-6">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-extrabold text-dark">{{ category.name }}</h2>
+                                <p class="text-xs sm:text-sm text-gray-500">{{ category.items.all|length }} pilihan menu</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                            {% for item in category.items.all %}
+                                <article class="fade-item bg-white rounded-[1.75rem] p-4 sm:p-5 shadow-card border border-gray-100 flex flex-col h-full transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300">
+                                    <div class="flex items-start gap-4">
+                                        {% if item.image %}
+                                            <img src="{{ item.image.url }}"
+                                                 alt="{{ item.name }}"
+                                                 class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover shrink-0">
+                                        {% else %}
+                                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0">
+                                                <i class="fa-solid fa-bowl-food text-2xl"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex flex-wrap gap-1.5 mb-2">
+                                                {% if item.is_favorite %}<span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>{% endif %}
+                                                {% if item.is_new %}<span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>{% endif %}
+                                            </div>
+                                            <h3 class="font-extrabold text-dark leading-tight text-base sm:text-lg">{{ item.name }}</h3>
+                                            {% if item.description %}<p class="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>{% endif %}
+                                            <p class="font-extrabold text-primary mt-2 sm:mt-3 text-lg sm:text-xl">{{ item.price|rupiah }}</p>
+                                            {% if item.variant_groups.all %}
+                                                <p class="mt-1 text-xs font-bold text-gray-400">Ada pilihan varian</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <button type="button"
+                                            data-open-cart-sheet="order-sheet-{{ item.id }}"
+                                            class="mt-4 w-full h-11 rounded-xl bg-accent text-white flex items-center justify-center shadow-sm font-extrabold hover:bg-[#d06a50] transition-colors gap-2"
+                                            aria-label="Tambah {{ item.name }} ke keranjang">
+                                        <i class="fa-solid fa-plus"></i>
+                                        <span>Tambah ke Keranjang</span>
+                                    </button>
+
+
+                                </article>
+                            {% empty %}
+                                <div class="col-span-full rounded-2xl border border-dashed border-gray-200 p-6 text-center text-gray-500 bg-white">
+                                    Belum ada menu tersedia di kategori ini.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="bg-white rounded-[2rem] p-8 text-center shadow-card border border-gray-100 mt-6 max-w-lg mx-auto">
+                        <div class="w-16 h-16 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-book-open text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-dark mb-2">Menu belum tersedia</h2>
+                        <p class="text-sm text-gray-500">Silakan hubungi kasir/restoran.</p>
+                    </div>
+                {% endfor %}
+            </section>
+
+        <!-- ORDER BOTTOM SHEETS: kept outside menu cards so sheets slide from viewport bottom -->
+        {% for category in categories %}
+            {% for item in category.items.all %}
+        <div id="order-sheet-{{ item.id }}" class="order-sheet fixed inset-0 z-50 hidden" aria-hidden="true">
+            <button type="button" data-close-cart-sheet class="absolute inset-0 bg-black/45"></button>
+            <div data-sheet-panel class="absolute inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-[2rem] bg-white shadow-floating transform translate-y-full transition-transform duration-300 overflow-hidden">
+                <div class="flex justify-center pt-3 pb-2 cursor-grab select-none touch-none" data-sheet-handle data-sheet-drag-zone>
+                    <span class="w-12 h-1.5 rounded-full bg-gray-300"></span>
+                                            </div>
+                <form method="post" action="{% url 'customer_cart_add' dining_table.qr_token item.id %}" class="max-h-[82vh] overflow-y-auto custom-scroll px-5 pb-6 space-y-5">
+                    {% csrf_token %}
+                    <div class="flex items-start gap-4 cursor-grab select-none touch-none" data-sheet-drag-zone>
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-20 h-20 rounded-2xl object-cover shrink-0">
+                        {% else %}
+                            <div class="w-20 h-20 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0"><i class="fa-solid fa-bowl-food text-2xl"></i></div>
+                        {% endif %}
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap gap-1.5 mb-2">
+                                {% if item.is_favorite %}<span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>{% endif %}
+                                {% if item.is_new %}<span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>{% endif %}
+                            </div>
+                            <h3 class="font-extrabold text-dark text-lg leading-tight">{{ item.name }}</h3>
+                            <p class="font-extrabold text-primary mt-1">{{ item.price|rupiah }}</p>
+                        </div>
+                    </div>
+
+                    {% for group in item.variant_groups.all %}
+                        {% if group.is_active %}
+                            <div class="rounded-2xl border border-gray-100 bg-bg p-4">
+                                <div class="flex items-center justify-between gap-3 mb-3">
+                                    <p class="font-extrabold text-dark">{{ group.name }}</p>
+                                    <span class="text-[10px] font-extrabold uppercase text-gray-400">{% if group.type == 'radio' %}Pilih satu{% else %}Opsional{% endif %}</span>
+                                </div>
+                                <div class="space-y-2">
+                                    {% for option in group.options.all %}
+                                        {% if option.is_active %}
+                                            <label class="flex items-center justify-between gap-3 rounded-xl bg-white border border-gray-100 px-3 py-3">
+                                                <span class="flex items-center gap-3 min-w-0">
+                        <input type="{% if group.type == 'radio' %}radio{% else %}checkbox{% endif %}" name="variant_options" value="{{ option.id }}" class="text-primary focus:ring-primary" {% if group.type == 'radio' and forloop.first %}checked{% endif %}>
+                        <span class="font-bold text-sm text-dark truncate">{{ option.name }}</span>
+                                                </span>
+                                                {% if option.price_adjustment %}<span class="text-xs font-extrabold text-primary whitespace-nowrap">{% if option.price_adjustment > 0 %}+ {% endif %}{{ option.price_adjustment|rupiah }}</span>{% endif %}
+                                            </label>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="grid grid-cols-[7rem_1fr] gap-3 items-end">
+                        <label class="block" for="sheet-qty-{{ item.id }}">
+                            <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Jumlah Pesanan</span>
+                            <input id="sheet-qty-{{ item.id }}" type="number" name="quantity" value="1" min="1" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-extrabold text-center focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                        </label>
+                        <label class="block min-w-0" for="sheet-note-{{ item.id }}">
+                            <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Catatan Pesanan</span>
+                            <input id="sheet-note-{{ item.id }}" type="text" name="note" placeholder="Contoh: tanpa bawang" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg font-extrabold hover:bg-primaryLight transition-colors gap-2">
+                        <i class="fa-solid fa-cart-plus"></i>
+                        <span>Masukkan Keranjang</span>
+                    </button>
+                </form>
+            </div>
+        </div>
             {% endfor %}
+        {% endfor %}
         </main>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const tabs = Array.from(document.querySelectorAll('[data-menu-tab]'));
+                const panels = Array.from(document.querySelectorAll('[data-menu-panel]'));
+                const baseTabClass = 'menu-tab shrink-0 border px-4 py-2 rounded-full text-sm font-extrabold transition-all';
+
+                function setActiveTab(target) {
+                    tabs.forEach(function (tab) {
+                        const isActive = tab.dataset.menuTab === target;
+                        const stateClass = isActive ? tab.dataset.activeTabClass : tab.dataset.defaultTabClass;
+                        const hoverClass = isActive ? '' : ' hover:shadow-md hover:bg-secondary/30';
+                        tab.className = `${baseTabClass} ${stateClass}${hoverClass}`;
+                        tab.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+
+                    panels.forEach(function (panel) {
+                        const shouldShow = target === 'all' || panel.dataset.menuPanel === target;
+                        panel.classList.toggle('hidden', !shouldShow);
+                    });
+                }
+
+                tabs.forEach(function (tab) {
+                    tab.addEventListener('click', function () {
+                        setActiveTab(tab.dataset.menuTab);
+                    });
+                });
+
+                setActiveTab('all');
+
+                function openSheet(sheet) {
+                    sheet.classList.remove('hidden');
+                    sheet.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('overflow-hidden');
+                    requestAnimationFrame(function () {
+                        sheet.querySelector('[data-sheet-panel]')?.classList.remove('translate-y-full');
+                    });
+                }
+
+                function closeSheet(sheet) {
+                    sheet.querySelector('[data-sheet-panel]')?.classList.add('translate-y-full');
+                    sheet.setAttribute('aria-hidden', 'true');
+                    document.body.classList.remove('overflow-hidden');
+                    setTimeout(function () {
+                        sheet.classList.add('hidden');
+                    }, 250);
+                }
+
+                document.querySelectorAll('[data-open-cart-sheet]').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const sheet = document.getElementById(button.dataset.openCartSheet);
+                        if (sheet) openSheet(sheet);
+                    });
+                });
+
+                document.querySelectorAll('.order-sheet').forEach(function (sheet) {
+                    sheet.querySelectorAll('[data-close-cart-sheet]').forEach(function (button) {
+                        button.addEventListener('click', function () {
+                            closeSheet(sheet);
+                        });
+                    });
+
+                    const panel = sheet.querySelector('[data-sheet-panel]');
+                    const dragZones = sheet.querySelectorAll('[data-sheet-drag-zone], [data-sheet-handle]');
+                    let startY = 0;
+                    let currentY = 0;
+                    let dragging = false;
+
+                    if (panel && dragZones.length) {
+                        dragZones.forEach(function (dragZone) {
+                            dragZone.addEventListener('pointerdown', function (event) {
+                                dragging = true;
+                                startY = event.clientY;
+                                panel.style.transition = 'none';
+                                dragZone.setPointerCapture(event.pointerId);
+                            });
+
+                            dragZone.addEventListener('pointermove', function (event) {
+                                if (!dragging) return;
+                                currentY = Math.max(0, event.clientY - startY);
+                                panel.style.transform = `translateY(${currentY}px)`;
+                            });
+
+                            dragZone.addEventListener('pointerup', function () {
+                                if (!dragging) return;
+                                dragging = false;
+                                panel.style.transition = '';
+                                panel.style.transform = '';
+                                if (currentY > 80) closeSheet(sheet);
+                                currentY = 0;
+                            });
+                        });
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        document.querySelectorAll('.order-sheet:not(.hidden)').forEach(closeSheet);
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import IntegrityError
 from django.test import TestCase
 
-from restaurants.models import DiningTable, Restaurant
+from restaurants.models import DiningTable, MenuAppearanceTheme, Restaurant
 
 
 class RestaurantModelTests(TestCase):
@@ -105,3 +105,42 @@ class DiningTableModelTests(TestCase):
 
     def test_dining_table_is_registered_in_django_admin(self):
         self.assertIn(DiningTable, admin.site._registry)
+
+
+class MenuAppearanceThemeModelTests(TestCase):
+    def setUp(self):
+        self.restaurant = Restaurant.objects.create(
+            name='Kedai Tema',
+            slug='kedai-tema',
+        )
+
+    def test_theme_can_be_created_with_default_design_tokens(self):
+        theme = MenuAppearanceTheme.objects.create(restaurant=self.restaurant)
+
+        self.assertEqual(theme.restaurant, self.restaurant)
+        self.assertEqual(theme.primary_color, '#1B4332')
+        self.assertEqual(theme.secondary_color, '#D8F3DC')
+        self.assertEqual(theme.accent_color, '#E07A5F')
+        self.assertEqual(theme.background_color, '#F7F5F2')
+        self.assertEqual(theme.text_color, '#1F2933')
+        self.assertEqual(theme.card_color, '#FFFFFF')
+        self.assertEqual(theme.font_family, 'Plus Jakarta Sans')
+        self.assertEqual(theme.layout_style, MenuAppearanceTheme.LayoutStyle.GRID)
+        self.assertEqual(theme.header_style, MenuAppearanceTheme.HeaderStyle.ROUNDED)
+        self.assertTrue(theme.show_category_tabs)
+        self.assertIsNotNone(theme.created_at)
+        self.assertIsNotNone(theme.updated_at)
+
+    def test_theme_string_representation_includes_restaurant(self):
+        theme = MenuAppearanceTheme.objects.create(restaurant=self.restaurant)
+
+        self.assertEqual(str(theme), 'Tema Menu - Kedai Tema')
+
+    def test_theme_is_one_to_one_per_restaurant(self):
+        MenuAppearanceTheme.objects.create(restaurant=self.restaurant)
+
+        with self.assertRaises(IntegrityError):
+            MenuAppearanceTheme.objects.create(restaurant=self.restaurant)
+
+    def test_theme_is_registered_in_django_admin(self):
+        self.assertIn(MenuAppearanceTheme, admin.site._registry)

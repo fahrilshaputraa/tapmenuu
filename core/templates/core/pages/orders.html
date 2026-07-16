@@ -1,139 +1,124 @@
 {% extends 'layouts/dashboard.html' %}
-{% load static %}
+{% load static menu_extras %}
 {% block title %}TapMenu - Daftar Pesanan{% endblock %}
 {% block dashboard_tailwind_config %}
-    <script src="{% static 'core/js/pages/orders-1.js' %}"></script>
+    <script src="{% static 'core/js/pages/orders-1.js' %}?v=20260608-fix-tailwind"></script>
 {% endblock %}
 {% block dashboard_extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/orders-1.css' %}">
 {% endblock %}
 {% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}
 {% block dashboard_main %}
-    <!-- Header -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
-            <button class="md:hidden text-primary text-xl">
+            <button type="button"
+                    data-dashboard-menu-button
+                    aria-controls="dashboard-sidebar"
+                    aria-expanded="false"
+                    class="md:hidden text-primary text-xl">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
                 <h2 class="text-xl font-bold text-dark">Daftar Pesanan</h2>
-                <p class="text-xs text-gray-500">Pantau pesanan masuk dan status dapur</p>
+                <p class="text-xs text-gray-500">Pantau pesanan masuk.</p>
             </div>
         </div>
-        <!-- Date & Time -->
-        <div class="hidden sm:block text-right">
-            <p class="text-sm font-bold text-dark" id="current-time">14:30</p>
-            <p class="text-xs text-gray-500" id="current-date">Rabu, 25 Okt 2023</p>
+        <div class="hidden sm:flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-sm font-bold text-dark">{{ current_time|date:'H:i' }}</p>
+                <p class="text-xs text-gray-500">{{ current_time|date:'l, d M Y' }}</p>
+            </div>
         </div>
     </header>
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-6 custom-scroll">
         <div class="max-w-7xl mx-auto space-y-6 fade-in">
-            <!-- Status Tabs & Search -->
             <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
                 <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1">
-                    <button onclick="filterOrders('all')"
-                            id="tab-all"
-                            class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap">
-                        Semua
-                    </button>
-                    <button onclick="filterOrders('new')"
-                            id="tab-new"
-                            class="px-4 py-2 bg-white text-gray-500 hover:text-pending hover:bg-yellow-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap flex items-center gap-2">
-                        Baru <span class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">3</span>
-                    </button>
-                    <button onclick="filterOrders('process')"
-                            id="tab-process"
-                            class="px-4 py-2 bg-white text-gray-500 hover:text-processing hover:bg-blue-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
-                        Diproses
-                    </button>
-                    <button onclick="filterOrders('ready')"
-                            id="tab-ready"
-                            class="px-4 py-2 bg-white text-gray-500 hover:text-ready hover:bg-green-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
-                        Siap
-                        Saji
-                    </button>
-                    <button onclick="filterOrders('completed')"
-                            id="tab-completed"
-                            class="px-4 py-2 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
-                        Selesai
-                    </button>
+                    <a href="{% url 'orders' %}"
+                       class="px-4 py-2 {% if current_status == 'all' %}bg-primary text-white{% else %}bg-white text-gray-500 border border-gray-200{% endif %} rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap">Semua <span class="ml-1 text-[10px]">{{ status_counts.all }}</span></a>
+                    <a href="{% url 'orders' %}?status=pending"
+                       class="px-4 py-2 {% if current_status == 'pending' %}bg-primary text-white{% else %}bg-white text-gray-500 border border-gray-200{% endif %} rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Baru <span class="ml-1 text-[10px]">{{ status_counts.pending }}</span></a>
+                    <a href="{% url 'orders' %}?status=preparing"
+                       class="px-4 py-2 {% if current_status == 'preparing' %}bg-primary text-white{% else %}bg-white text-gray-500 border border-gray-200{% endif %} rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Diproses <span class="ml-1 text-[10px]">{{ status_counts.preparing }}</span></a>
+                    <a href="{% url 'orders' %}?status=ready"
+                       class="px-4 py-2 {% if current_status == 'ready' %}bg-primary text-white{% else %}bg-white text-gray-500 border border-gray-200{% endif %} rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Siap <span class="ml-1 text-[10px]">{{ status_counts.ready }}</span></a>
+                    <a href="{% url 'orders' %}?status=completed"
+                       class="px-4 py-2 {% if current_status == 'completed' %}bg-primary text-white{% else %}bg-white text-gray-500 border border-gray-200{% endif %} rounded-lg text-sm font-bold transition-colors whitespace-nowrap">Selesai <span class="ml-1 text-[10px]">{{ status_counts.completed }}</span></a>
                 </div>
                 <div class="relative w-full md:w-64">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                     <input type="text"
-                           id="search-order"
-                           oninput="renderOrders()"
-                           placeholder="Cari No. Meja / ID..."
+                           placeholder="Cari visual saja..."
                            class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                 </div>
             </div>
-            <!-- Orders Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-                 id="orders-container">
-                <!-- Orders will be injected here -->
-            </div>
-            <!-- Empty State -->
-            <div id="empty-state"
-                 class="hidden flex flex-col items-center justify-center py-20">
-                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
-                    <i class="fa-solid fa-clipboard-check text-4xl"></i>
-                </div>
-                <h3 class="text-dark font-bold">Tidak ada pesanan</h3>
-                <p class="text-gray-500 text-sm">Belum ada pesanan pada kategori ini.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {% for order in orders %}
+                    <article class="bg-white rounded-2xl p-5 shadow-card border border-gray-100 relative transition-all hover:shadow-md {% if order.status == order.Status.PENDING %}new-order-card{% endif %}">
+                        <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-3">
+                            <div>
+                                <h4 class="font-extrabold text-lg text-dark leading-tight">Meja {{ order.dining_table.table_number }}</h4>
+                                <p class="text-xs text-gray-400 font-mono mt-0.5">{{ order.code }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ order.customer_name|default:'Customer' }}</p>
+                            </div>
+                            <div class="text-right flex flex-col items-end gap-1">
+                                <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">{{ order.get_status_display }}</span>
+                                <span class="text-[10px] text-gray-400 flex items-center gap-1"><i class="fa-regular fa-clock"></i> {{ order.created_at|timesince }} lalu</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'order_detail' order.pk %}"
+                           class="block mb-4 min-h-[60px] hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors">
+                            {% for item in order.items.all|slice:':2' %}
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600"><span class="font-bold text-dark">{{ item.quantity }}x</span> {{ item.item_name }}</span>
+                                </div>
+                            {% empty %}
+                                <p class="text-sm text-gray-400">Belum ada item tercatat.</p>
+                            {% endfor %}
+                            {% if order.items.count > 2 %}
+                                <div class="text-xs text-gray-400 italic mt-1">+{{ order.items.count|add:'-2' }} item lainnya...</div>
+                            {% endif %}
+                        </a>
+                        <div class="flex justify-between items-center border-t border-gray-100 pt-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Total</span>
+                            <span class="font-extrabold text-lg text-primary">{{ order.total_amount|rupiah }}</span>
+                        </div>
+                        <form method="post"
+                              action="{% url 'order_update_status' order.pk %}"
+                              class="mt-4">
+                            {% csrf_token %}
+                            <input type="hidden"
+                                   name="status"
+                                   value="{% if order.status == order.Status.PENDING %}confirmed{% elif order.status == order.Status.CONFIRMED %}preparing{% elif order.status == order.Status.PREPARING %}ready{% elif order.status == order.Status.READY %}completed{% else %}{{ order.status }}{% endif %}">
+                            <button type="submit"
+                                    class="w-full py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primaryLight transition-colors shadow-sm">
+                                {% if order.status == order.Status.PENDING %}
+                                    Terima Pesanan
+                                {% elif order.status == order.Status.CONFIRMED %}
+                                    Mulai Masak
+                                {% elif order.status == order.Status.PREPARING %}
+                                    Selesai Masak
+                                {% elif order.status == order.Status.READY %}
+                                    Antar & Selesai
+                                {% else %}
+                                    Lihat Detail
+                                {% endif %}
+                            </button>
+                        </form>
+                    </article>
+                {% empty %}
+                    <div class="md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                            <i class="fa-solid fa-clipboard-check text-4xl"></i>
+                        </div>
+                        <h3 class="text-dark font-bold">Tidak ada pesanan</h3>
+                        <p class="text-gray-500 text-sm">Belum ada pesanan pada filter ini.</p>
+                    </div>
+                {% endfor %}
             </div>
         </div>
+        {% include 'core/partials/dashboard_footer.html' %}
     </div>
 {% endblock %}
-{% block dashboard_overlays %}
-    <!-- === ORDER DETAIL MODAL === -->
-    <div id="order-modal"
-         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-primary text-white">
-                <div>
-                    <h3 class="font-bold text-lg">Detail Pesanan</h3>
-                    <p class="text-xs text-green-100" id="modal-order-id">#ORD-1023</p>
-                </div>
-                <button onclick="closeModal()" class="text-white/80 hover:text-white">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6 custom-scroll bg-[#F7F5F2]">
-                <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-500 text-xs uppercase font-bold">Pelanggan / Meja</span>
-                        <span class="text-dark font-bold" id="modal-table">Meja 4 (Indoor)</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-500 text-xs uppercase font-bold">Waktu Pesan</span>
-                        <span class="text-dark font-bold text-sm" id="modal-time">14:05</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 text-xs uppercase font-bold">Status</span>
-                        <span class="text-xs font-bold px-2 py-1 rounded bg-yellow-100 text-yellow-700"
-                              id="modal-status">Baru</span>
-                    </div>
-                </div>
-                <div class="space-y-3" id="modal-items">
-                    <!-- Items injected here -->
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                    <span class="font-bold text-lg text-dark">Total</span>
-                    <span class="font-extrabold text-xl text-primary" id="modal-total">Rp 0</span>
-                </div>
-            </div>
-            <div class="p-5 bg-white border-t border-gray-100 grid grid-cols-2 gap-3">
-                <button onclick="closeModal()"
-                        class="py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors">
-                    Tutup
-                </button>
-                <button class="py-3 bg-primary text-white font-bold rounded-xl shadow hover:bg-primaryLight transition-colors"
-                        id="modal-action-btn">Proses Pesanan</button>
-            </div>
-        </div>
-    </div>
-{% endblock %}
-{% block dashboard_page_scripts %}
-    <script src="{% static 'core/js/pages/orders-2.js' %}"></script>
-{% endblock %}
+{% block dashboard_overlays %}{% endblock %}
+{% block dashboard_page_scripts %}{% endblock %}

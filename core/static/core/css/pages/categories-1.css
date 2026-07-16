@@ -1,0 +1,34 @@
+/* Categories page specific styles */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 8px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Fade-in animation */
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toggle checkbox for status */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #1B4332;
+    background-color: #1B4332;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #D8F3DC;
+}

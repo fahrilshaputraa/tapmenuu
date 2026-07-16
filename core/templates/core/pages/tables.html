@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}TapMenu - Meja & QR{% endblock %}
 {% block dashboard_tailwind_config %}
-    <script src="{% static 'core/js/pages/dashboard-1.js' %}"></script>
+    <script src="{% static 'core/js/pages/dashboard-1.js' %}?v=20260608-fix-tailwind"></script>
 {% endblock %}
 {% block dashboard_extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/dashboard-1.css' %}">
@@ -11,7 +11,11 @@
 {% block dashboard_main %}
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
-            <button class="md:hidden text-primary text-xl">
+            <button type="button"
+                    data-dashboard-menu-button
+                    aria-controls="dashboard-sidebar"
+                    aria-expanded="false"
+                    class="md:hidden text-primary text-xl">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
@@ -19,7 +23,9 @@
                 <p class="text-sm text-gray-500">Kelola nomor meja dan tautan QR menu untuk pelanggan.</p>
             </div>
         </div>
-        <button class="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+        <button type="button"
+                onclick="openTableModal()"
+                class="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
             <i class="fa-solid fa-plus"></i>
             <span class="hidden sm:inline">Tambah Meja</span>
         </button>
@@ -29,12 +35,12 @@
             <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
                     <p class="text-sm text-gray-500 mb-1">Total Meja</p>
-                    <h2 class="text-3xl font-extrabold text-primary">12</h2>
-                    <p class="text-xs text-gray-400 mt-1">8 aktif, 4 siap ditambahkan</p>
+                    <h2 class="text-3xl font-extrabold text-primary">{{ tables|length }}</h2>
+                    <p class="text-xs text-gray-400 mt-1">Meja terdaftar di sistem</p>
                 </article>
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
                     <p class="text-sm text-gray-500 mb-1">QR Aktif</p>
-                    <h2 class="text-3xl font-extrabold text-primary">8</h2>
+                    <h2 class="text-3xl font-extrabold text-primary">{{ tables|length }}</h2>
                     <p class="text-xs text-gray-400 mt-1">Tautan langsung ke menu publik</p>
                 </article>
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
@@ -47,7 +53,7 @@
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                     <div>
                         <h2 class="font-extrabold text-dark">Daftar Meja</h2>
-                        <p class="text-sm text-gray-500">Prototype tampilan meja, nanti bisa dihubungkan ke model DiningTable.</p>
+                        <p class="text-sm text-gray-500">Data meja aktif dengan link QR menu pelanggan.</p>
                     </div>
                     <a href="{% url 'book_menu' %}"
                        target="_blank"
@@ -55,24 +61,195 @@
                        class="text-sm font-bold text-primary hover:text-primaryLight">Preview Menu Publik</a>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-6">
-                    {% for table_number in '12345678' %}
-                        <article class="rounded-2xl border border-gray-100 bg-[#F7F5F2] p-4">
+                    {% for table in tables %}
+                        <article class="rounded-2xl border border-gray-100 bg-[#F7F5F2] p-4"
+                                 data-id="{{ table.pk }}"
+                                 data-restaurant-id="{{ table.restaurant.id }}"
+                                 data-table-number="{{ table.table_number }}"
+                                 data-capacity="{{ table.capacity }}"
+                                 data-is-active="{{ table.is_active|yesno:'true,false' }}">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-11 h-11 rounded-2xl bg-secondary text-primary flex items-center justify-center">
                                     <i class="fa-solid fa-chair"></i>
                                 </div>
-                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Aktif</span>
+                                <span class="text-xs font-bold {% if table.is_active %}text-green-600 bg-green-50{% else %}text-red-600 bg-red-50{% endif %} px-2.5 py-1 rounded-full">
+                                    {% if table.is_active %}Aktif{% else %}Nonaktif{% endif %}
+                                </span>
                             </div>
-                            <h3 class="text-lg font-extrabold text-dark">Meja {{ table_number }}</h3>
-                            <p class="text-sm text-gray-500 mb-4">Kapasitas 2 orang</p>
-                            <div class="flex items-center gap-2 text-xs font-bold text-primary">
-                                <i class="fa-solid fa-qrcode"></i>
-                                QR siap dibagikan
+                            <h3 class="text-lg font-extrabold text-dark">Meja {{ table.table_number }}</h3>
+                            <p class="text-sm text-gray-500 mb-2">Kapasitas {{ table.capacity }} orang</p>
+                            <p class="text-[11px] text-gray-400 break-all mb-4">{{ table.qr_token }}</p>
+                            <div class="flex justify-center mb-4">
+                                <a href="{% url 'customer_menu' table.qr_token %}" target="_blank" rel="noopener">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ request.scheme }}://{{ request.get_host }}{% url 'customer_menu' table.qr_token %}"
+                                         alt="QR Meja {{ table.table_number }}"
+                                         class="rounded-lg shadow-sm"
+                                         width="120"
+                                         height="120"
+                                         loading="lazy">
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="{% url 'customer_menu' table.qr_token %}"
+                                   class="col-span-2 text-center px-3 py-2 rounded-lg bg-primary text-white text-xs font-extrabold">Buka Link QR</a>
+                                <button type="button"
+                                        onclick="window.print()"
+                                        class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-xs font-extrabold text-primary">Print QR</button>
+                                <button type="button"
+                                        onclick="navigator.clipboard && navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'customer_menu' table.qr_token %}')"
+                                        class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-xs font-extrabold text-primary">Salin Link</button>
+                                <button type="button"
+                                        onclick="openEditTableModal(this.closest('article'))"
+                                        class="text-center px-3 py-2 rounded-lg bg-gray-50 text-gray-700 text-xs font-extrabold"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+                                <form method="post" action="{% url 'table_delete' table.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="w-full px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-extrabold">Hapus</button>
+                                </form>
                             </div>
                         </article>
+                    {% empty %}
+                        <div class="sm:col-span-2 xl:col-span-4 rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-500">
+                            Belum ada meja. Tambahkan meja untuk membuat link QR menu.
+                        </div>
                     {% endfor %}
                 </div>
             </section>
         </div>
+        {% include 'core/partials/dashboard_footer.html' %}
     </div>
+{% endblock %}
+{% block dashboard_overlays %}
+    <!-- === ADD TABLE MODAL === -->
+    <div id="table-modal"
+         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Meja Baru</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">QR token dibuat otomatis untuk setiap meja.</p>
+                </div>
+                <button onclick="closeTableModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <form id="table-form" method="post" action="{% url 'table_create' %}" class="flex flex-col">
+                <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
+                    {% csrf_token %}
+                    <input type="hidden" name="restaurant" id="form-restaurant" value="{{ restaurant.id }}">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Nomor Meja <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="table_number"
+                               id="form-table-number"
+                               required
+                               placeholder="Contoh: A1, VIP-3, atau 12"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium">
+                        <p class="text-[10px] text-gray-400 mt-1">Nomor unik per restoran. QR token akan dibuat otomatis.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Kapasitas <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number"
+                               name="capacity"
+                               id="form-capacity"
+                               min="1"
+                               value="2"
+                               required
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                               placeholder="Jumlah kursi yang tersedia">
+                        <p class="text-[10px] text-gray-400 mt-1">Berapa orang yang bisa duduk di meja ini.</p>
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                        <div>
+                            <p class="text-sm font-bold text-dark">Meja Aktif</p>
+                            <p class="text-[10px] text-gray-400">Nonaktifkan jika meja sedang tidak tersedia</p>
+                        </div>
+                        <label class="relative inline-block w-11 align-middle select-none cursor-pointer">
+                            <input type="checkbox"
+                                   name="is_active"
+                                   id="form-is-active"
+                                   checked
+                                   class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300 checked:border-primary checked:bg-primary" />
+                            <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                            </label>
+                        </label>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+                    <button type="button"
+                            onclick="closeTableModal()"
+                            class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-plus" id="submit-btn-icon"></i>
+                        <span id="submit-btn-text">Simpan Meja</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_page_scripts %}
+    <script>
+        function openTableModal() {
+            const form = document.getElementById('table-form');
+            form.action = '{% url "table_create" %}';
+            document.getElementById('modal-title').innerText = 'Tambah Meja Baru';
+            document.getElementById('submit-btn-text').innerText = 'Simpan Meja';
+
+            // Reset inputs
+            document.getElementById('form-restaurant').value = '{{ restaurant.id }}';
+            document.getElementById('form-table-number').value = '';
+            document.getElementById('form-capacity').value = '2';
+            document.getElementById('form-is-active').checked = true;
+
+            const modal = document.getElementById('table-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openEditTableModal(cardEl) {
+            const form = document.getElementById('table-form');
+            const id = cardEl.dataset.id;
+            form.action = '/dashboard/tables/' + id + '/update/';
+            document.getElementById('modal-title').innerText = 'Edit Meja';
+            document.getElementById('submit-btn-text').innerText = 'Update Meja';
+
+            // Fill inputs with data from card
+            document.getElementById('form-restaurant').value = cardEl.dataset.restaurantId;
+            document.getElementById('form-table-number').value = cardEl.dataset.tableNumber;
+            document.getElementById('form-capacity').value = cardEl.dataset.capacity;
+            document.getElementById('form-is-active').checked = cardEl.dataset.isActive === 'true';
+
+            const modal = document.getElementById('table-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTableModal() {
+            const modal = document.getElementById('table-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close on backdrop click
+        document.getElementById('table-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeTableModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeTableModal();
+        });
+    </script>
 {% endblock %}

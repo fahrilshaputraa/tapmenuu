@@ -10,7 +10,7 @@
               rel="stylesheet">
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <script src="{% static 'core/js/pages/login-1.js' %}"></script>
+        <script src="{% static 'core/js/pages/login-1.js' %}?v=20260608-fix-tailwind"></script>
         <link rel="stylesheet" href="{% static 'core/css/pages/login-1.css' %}">
     </head>
     <body class="font-sans text-dark antialiased min-h-screen overflow-x-hidden bg-bg">
@@ -100,7 +100,8 @@
                                     Gunakan email dan kata sandi yang terdaftar untuk mengakses operasional toko.
                                 </p>
                             </div>
-                            <form class="space-y-5" method="get" action="{% url 'dashboard' %}">
+                            <form class="space-y-5" method="post" action="{% url 'login' %}">
+                                {% csrf_token %}
                                 <div>
                                     <label for="email"
                                            class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
@@ -110,8 +111,9 @@
                                         <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                             <i class="fa-regular fa-envelope"></i>
                                         </span>
-                                        <input id="email"
-                                               type="email"
+                                        <input id="username"
+                                               name="username"
+                                               type="text"
                                                placeholder="owner@tapmenu.id"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
                                     </div>
@@ -130,6 +132,7 @@
                                             <i class="fa-solid fa-lock"></i>
                                         </span>
                                         <input id="password"
+                                               name="password"
                                                type="password"
                                                placeholder="Masukkan kata sandi"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-12 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">

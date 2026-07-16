@@ -1,0 +1,340 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% block title %}TapMenu - Manajemen Kategori{% endblock %}
+{% block dashboard_tailwind_config %}
+    <script src="{% static 'core/js/pages/categories-1.js' %}?v=20260608-categories"></script>
+{% endblock %}
+{% block dashboard_extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/pages/categories-1.css' %}">
+{% endblock %}
+{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}
+{% block dashboard_main %}
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+            <button type="button"
+                    data-dashboard-menu-button
+                    aria-controls="dashboard-sidebar"
+                    aria-expanded="false"
+                    class="md:hidden text-primary text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <h2 class="text-xl font-bold text-dark">Manajemen Kategori</h2>
+                <p class="text-xs text-gray-500">Kelola kategori menu restoran Anda</p>
+            </div>
+        </div>
+        <button onclick="openAddModal()"
+                class="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-primaryLight transition-all flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span class="hidden sm:inline">Tambah Kategori</span>
+        </button>
+    </header>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+        <div class="max-w-7xl mx-auto space-y-6 fade-in">
+            <!-- Stats & Search -->
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
+                <div class="flex gap-4">
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Total Kategori</p>
+                            <p class="font-bold text-dark leading-none">{{ categories|length }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Aktif</p>
+                            <p class="font-bold text-dark leading-none">{{ active_count }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Nonaktif</p>
+                            <p class="font-bold text-dark leading-none">{{ inactive_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative w-full md:w-72">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text"
+                           id="search-input"
+                           oninput="filterCategories()"
+                           placeholder="Cari nama kategori..."
+                           class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                </div>
+            </div>
+            <!-- Category Table -->
+            <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase font-bold text-gray-500 tracking-wider">
+                                <th class="px-6 py-4 w-12">No</th>
+                                <th class="px-6 py-4">Nama Kategori</th>
+                                <th class="px-6 py-4">Slug</th>
+                                <th class="px-6 py-4 w-20">Urutan</th>
+                                <th class="px-6 py-4 w-28">Status</th>
+                                <th class="px-6 py-4 text-right w-32">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm" id="category-table-body">
+                            {% for cat in categories %}
+                                <tr class="hover:bg-gray-50/50 transition-colors category-row"
+                                    data-name="{{ cat.name|lower }}"
+                                    data-id="{{ cat.pk }}"
+                                    data-restaurant-id="{{ cat.restaurant.id }}"
+                                    data-restaurant-name="{{ cat.restaurant.name }}"
+                                    data-cat-name="{{ cat.name }}"
+                                    data-cat-slug="{{ cat.slug }}"
+                                    data-cat-sort="{{ cat.sort_order }}"
+                                    data-cat-active="{{ cat.is_active|yesno:'true,false' }}">
+                                    <td class="px-6 py-4 text-gray-500 font-medium">{{ forloop.counter }}</td>
+                                    <td class="px-6 py-4 font-bold text-dark">{{ cat.name }}</td>
+                                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">{{ cat.slug }}</td>
+                                    <td class="px-6 py-4 text-gray-500 font-medium">{{ cat.sort_order }}</td>
+                                    <td class="px-6 py-4">
+                                        {% if cat.is_active %}
+                                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-green-50 text-green-700">Aktif</span>
+                                        {% else %}
+                                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-600">Nonaktif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button onclick="openEditModal(this.closest('tr'))"
+                                                    class="text-primary hover:bg-secondary/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                                <i class="fa-solid fa-pen mr-1"></i> Edit
+                                            </button>
+                                            <form method="post" action="{% url 'category_delete' cat.pk %}" class="inline"
+                                                  onsubmit="return confirm('Hapus kategori {{ cat.name }} secara permanen?')">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                                    <i class="fa-solid fa-trash mr-1"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-3">
+                                                <i class="fa-solid fa-layer-group text-2xl"></i>
+                                            </div>
+                                            <h3 class="text-dark font-bold">Belum ada kategori</h3>
+                                            <p class="text-gray-500 text-xs">Tambahkan kategori baru untuk mengorganisir menu Anda.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty State (hidden by default, shown via JS) -->
+                <div id="empty-state"
+                     class="hidden flex flex-col items-center justify-center py-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-3">
+                        <i class="fa-solid fa-search text-2xl"></i>
+                    </div>
+                    <h3 class="text-dark font-bold">Kategori tidak ditemukan</h3>
+                    <p class="text-gray-500 text-xs">Silakan tambah kategori baru atau ubah pencarian.</p>
+                </div>
+            </div>
+        </div>
+        {% include 'core/partials/dashboard_footer.html' %}
+    </div>
+{% endblock %}
+{% block dashboard_overlays %}
+    <!-- === ADD/EDIT CATEGORY MODAL === -->
+    <div id="category-modal"
+         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Kategori</h3>
+                <button onclick="closeModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <form id="category-form" method="post" class="flex flex-col">
+                <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
+                    {% csrf_token %}
+                    <input type="hidden" name="restaurant" id="input-restaurant" value="{{ restaurant.id }}">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Nama Kategori <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               id="input-name"
+                               required
+                               placeholder="Contoh: Makanan Utama"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                               oninput="autoSlug()">
+                        <p class="text-[10px] text-gray-400 mt-1">Slug akan dibuat otomatis dari nama.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Slug
+                        </label>
+                        <input type="text"
+                               name="slug"
+                               id="input-slug"
+                               placeholder="makanan-utama"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Urutan <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number"
+                               name="sort_order"
+                               id="input-sort-order"
+                               min="0"
+                               value="0"
+                               required
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                               placeholder="0">
+                        <p class="text-[10px] text-gray-400 mt-1">Urutan tampil kategori di menu (0 = paling atas).</p>
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                        <div>
+                            <p class="text-sm font-bold text-dark">Status Aktif</p>
+                            <p class="text-[10px] text-gray-400">Nonaktifkan untuk menyembunyikan dari menu</p>
+                        </div>
+                        <label class="relative inline-block w-11 align-middle select-none cursor-pointer">
+                            <input type="checkbox"
+                                   name="is_active"
+                                   id="input-is-active"
+                                   value="true"
+                                   checked
+                                   class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300 checked:border-primary checked:bg-primary" />
+                            <label for="input-is-active"
+                                   class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                            </label>
+                        </label>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+                    <button type="button"
+                            onclick="closeModal()"
+                            class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span id="submit-btn-text">Simpan Kategori</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block dashboard_page_scripts %}
+    <script>
+        // --- SLUG AUTO-GENERATE ---
+        function slugify(text) {
+            return text.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[\s_]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function autoSlug() {
+            const nameInput = document.getElementById('input-name');
+            const slugInput = document.getElementById('input-slug');
+            slugInput.value = slugify(nameInput.value);
+        }
+
+        // --- MODAL ---
+        function openAddModal() {
+            const form = document.getElementById('category-form');
+            form.action = '{% url "category_create" %}';
+            document.getElementById('modal-title').innerText = 'Tambah Kategori';
+            document.getElementById('submit-btn-text').innerText = 'Simpan Kategori';
+
+            // Reset inputs
+            document.getElementById('input-restaurant').value = '{{ restaurant.id }}';
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-slug').value = '';
+            document.getElementById('input-sort-order').value = '0';
+            document.getElementById('input-is-active').checked = true;
+
+            document.getElementById('category-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openEditModal(row) {
+            const form = document.getElementById('category-form');
+            const id = row.dataset.id;
+            form.action = '/dashboard/menus/categories/' + id + '/update/';
+            document.getElementById('modal-title').innerText = 'Edit Kategori';
+            document.getElementById('submit-btn-text').innerText = 'Update Kategori';
+
+            // Fill inputs
+            document.getElementById('input-restaurant').value = row.dataset.restaurantId;
+            document.getElementById('input-name').value = row.dataset.catName;
+            document.getElementById('input-slug').value = row.dataset.catSlug;
+            document.getElementById('input-sort-order').value = row.dataset.catSort;
+            document.getElementById('input-is-active').checked = row.dataset.catActive === 'true';
+
+            document.getElementById('category-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('category-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close on backdrop click
+        document.getElementById('category-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // --- SEARCH / FILTER ---
+        function filterCategories() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('.category-row');
+            let visible = 0;
+            rows.forEach(row => {
+                const name = (row.dataset.name || '').toLowerCase();
+                if (name.includes(query)) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const emptyState = document.getElementById('empty-state');
+            const tableBody = document.getElementById('category-table-body');
+            if (visible === 0 && rows.length > 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+    </script>
+{% endblock %}

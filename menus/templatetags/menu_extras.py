@@ -10,4 +10,4 @@ def rupiah(value):
     except (TypeError, ValueError):
         amount = 0
 
-    return f"Rp {amount:,}".replace(',', '.')
+    return f'Rp {amount:,}'.replace(',', '.')

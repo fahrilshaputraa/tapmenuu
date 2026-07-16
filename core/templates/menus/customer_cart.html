@@ -1,0 +1,239 @@
+{% load static menu_extras %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Keranjang {{ restaurant.name }} - Meja {{ dining_table.table_number }}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{% static 'core/js/pages/book-menu-1.js' %}?v=20260609-desktop-responsive"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <style>
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+        </style>
+    </head>
+    <body class="font-sans bg-bg text-dark antialiased min-h-screen">
+        <main class="min-h-screen bg-bg pb-8">
+            <!-- HEADER -->
+            <header class="bg-primary text-white px-5 sm:px-8 pt-6 sm:pt-10 pb-8 sm:pb-10 rounded-b-[2rem] sm:rounded-b-[3rem] relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-white/10"></div>
+                <div class="absolute -left-20 bottom-0 w-56 h-56 rounded-full bg-accent/20 blur-2xl"></div>
+                <div class="relative z-10 max-w-4xl mx-auto">
+                    <div class="flex items-start sm:items-center justify-between mb-6 sm:mb-8">
+                        <a href="{% url 'customer_menu' dining_table.qr_token %}"
+                           class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+                           aria-label="Kembali ke menu">
+                            <i class="fa-solid fa-arrow-left text-lg sm:text-xl"></i>
+                        </a>
+                        <div class="text-right">
+                            <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Keranjang</p>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold mt-1">Pesanan Anda</h1>
+                            <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }} · {{ restaurant.name }}</p>
+                        </div>
+                    </div>
+                    <div class="relative z-10 bg-white/10 border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 backdrop-blur-sm sm:flex sm:items-center sm:justify-between sm:gap-6 max-w-sm md:max-w-full">
+                        <div>
+                            <p class="text-sm text-green-100">Ringkasan pesanan</p>
+                            <p class="text-3xl sm:text-4xl font-extrabold">{{ cart_summary.total_quantity }} item</p>
+                        </div>
+                        <p class="text-green-100 font-bold mt-2 sm:mt-0 text-lg sm:text-xl md:text-2xl">{{ cart_summary.total_amount|rupiah }}</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CART CONTENT -->
+            <section class="max-w-4xl mx-auto px-5 sm:px-8 -mt-5 relative z-20">
+                <div class="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-card border border-gray-100">
+                    {% if cart_summary.total_quantity %}
+                        <!-- CART ITEMS -->
+                        <div class="space-y-3 mb-5 max-h-96 md:max-h-[30rem] overflow-y-auto custom-scroll pr-1">
+                            {% for cart_item in cart_summary.items %}
+                                <div class="relative overflow-hidden rounded-2xl bg-red-500" data-cart-swipe-item>
+                                    <form method="post"
+                                          action="{% url 'customer_cart_remove' dining_table.qr_token cart_item.line_key %}"
+                                          class="absolute inset-y-0 right-0 w-24 flex">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                data-cart-delete-action
+                                                class="w-full h-full flex flex-col items-center justify-center gap-1 text-white font-extrabold text-xs sm:text-sm">
+                                            <i class="fa-solid fa-trash text-lg"></i>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                    <div class="relative z-10 flex items-start justify-between gap-4 rounded-2xl bg-bg p-4 sm:p-5 transition-transform duration-200 touch-pan-y"
+                                         data-cart-swipe-content>
+                                        <div class="min-w-0">
+                                            <p class="font-extrabold text-dark leading-tight">{{ cart_item.menu_item.name }}</p>
+                                            <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ cart_item.quantity }} x {{ cart_item.unit_price|rupiah }}</p>
+                                            {% for variant_label in cart_item.variant_labels %}<p class="text-xs text-primary font-bold mt-1">{{ variant_label }}</p>{% endfor %}
+                                            {% if cart_item.note %}<p class="text-xs text-gray-500 mt-1">Catatan: {{ cart_item.note }}</p>{% endif %}
+                                            <p class="text-[10px] sm:text-xs text-gray-400 font-bold mt-2">Geser kiri untuk hapus</p>
+                                        </div>
+                                        <div class="shrink-0 flex flex-col items-end gap-3" data-cart-qty-control>
+                                            <p class="font-extrabold text-primary whitespace-nowrap text-sm sm:text-base">{{ cart_item.line_total|rupiah }}</p>
+                                            <div class="flex items-center gap-1.5 rounded-full bg-white border border-gray-200 p-1 shadow-sm">
+                                                <form method="post"
+                                                      action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="decrement">
+                                                    <button type="submit"
+                                                            aria-label="Kurangi qty {{ cart_item.menu_item.name }}"
+                                                            class="w-8 h-8 rounded-full bg-gray-100 text-dark font-extrabold flex items-center justify-center hover:bg-secondary hover:text-primary transition-colors">
+                                                        <i class="fa-solid fa-minus text-xs"></i>
+                                                    </button>
+                                                </form>
+                                                <span class="min-w-6 text-center text-sm font-extrabold text-dark">{{ cart_item.quantity }}</span>
+                                                <form method="post"
+                                                      action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="increment">
+                                                    <button type="submit"
+                                                            aria-label="Tambah qty {{ cart_item.menu_item.name }}"
+                                                            class="w-8 h-8 rounded-full bg-primary text-white font-extrabold flex items-center justify-center hover:bg-primaryLight transition-colors">
+                                                        <i class="fa-solid fa-plus text-xs"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- TOTAL & CHECKOUT FORM -->
+                        <div class="border-t border-dashed border-gray-200 pt-4 sm:pt-5 mb-5 flex items-center justify-between">
+                            <span class="text-sm sm:text-base md:text-lg text-gray-500">Total Pembayaran</span>
+                            <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent">{{ cart_summary.total_amount|rupiah }}</span>
+                        </div>
+
+                        <form method="post"
+                              action="{% url 'customer_checkout' dining_table.qr_token %}"
+                              class="space-y-3 sm:space-y-4">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+                                <label class="block">
+                                    <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Nama Customer <span class="text-red-500">*</span></span>
+                                    <input type="text"
+                                           name="customer_name"
+                                           required
+                                           placeholder="Nama Anda"
+                                           class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                </label>
+                                <label class="block">
+                                    <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pembayaran</span>
+                                    <select name="payment_method"
+                                            class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                        {% for method_value, method_label in payment_methods %}
+                                            <option value="{{ method_value }}">{{ method_label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </div>
+                            <label class="block">
+                                <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Catatan Pesanan</span>
+                                <textarea name="customer_note"
+                                          rows="3"
+                                          placeholder="Catatan untuk restoran"
+                                          class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60"></textarea>
+                            </label>
+                            <button type="submit"
+                                    class="w-full md:w-auto md:px-12 py-4 bg-primary text-white font-extrabold rounded-xl shadow-lg hover:bg-[#143326] transition-all flex justify-center items-center gap-2 text-base sm:text-lg mx-auto md:mx-0">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                Checkout Sekarang
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="rounded-2xl border border-dashed border-gray-200 p-8 sm:p-12 md:p-16 text-center text-gray-500 bg-bg">
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-5">
+                                <i class="fa-solid fa-cart-shopping text-3xl sm:text-4xl"></i>
+                            </div>
+                            <p class="font-extrabold text-dark text-xl sm:text-2xl">Keranjang masih kosong</p>
+                            <p class="text-sm sm:text-base mt-2 max-w-md mx-auto">Pilih menu dulu, lalu kembali ke halaman keranjang untuk checkout.</p>
+                            <a href="{% url 'customer_menu' dining_table.qr_token %}"
+                               class="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl bg-primary text-white font-extrabold hover:bg-primaryLight transition-colors text-base">
+                                <i class="fa-solid fa-utensils"></i>
+                                Pilih Menu
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const revealDistance = 96;
+                const openThreshold = 44;
+
+                document.querySelectorAll('[data-cart-swipe-item]').forEach(function (item) {
+                    const content = item.querySelector('[data-cart-swipe-content]');
+                    if (!content) return;
+
+                    let startX = 0;
+                    let startY = 0;
+                    let currentX = 0;
+                    let isDragging = false;
+                    let isOpen = false;
+
+                    function setOffset(offset) {
+                        content.style.transform = `translateX(${offset}px)`;
+                    }
+
+                    function openItem() {
+                        isOpen = true;
+                        content.style.transition = '';
+                        setOffset(-revealDistance);
+                    }
+
+                    function closeItem() {
+                        isOpen = false;
+                        content.style.transition = '';
+                        setOffset(0);
+                    }
+
+                    content.addEventListener('pointerdown', function (event) {
+                        if (event.target.closest('button, form, input, select, textarea, a')) return;
+                        startX = event.clientX;
+                        startY = event.clientY;
+                        currentX = isOpen ? -revealDistance : 0;
+                        isDragging = true;
+                        content.style.transition = 'none';
+                        content.setPointerCapture(event.pointerId);
+                    });
+
+                    content.addEventListener('pointermove', function (event) {
+                        if (!isDragging) return;
+                        const deltaX = event.clientX - startX;
+                        const deltaY = event.clientY - startY;
+                        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12) return;
+
+                        const offset = Math.max(-revealDistance, Math.min(0, currentX + deltaX));
+                        setOffset(offset);
+                    });
+
+                    content.addEventListener('pointerup', function (event) {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        content.style.transition = '';
+                        const deltaX = event.clientX - startX;
+
+                        if ((!isOpen && deltaX < -openThreshold) || (isOpen && deltaX < openThreshold)) {
+                            openItem();
+                        } else {
+                            closeItem();
+                        }
+                    });
+
+                    content.addEventListener('click', function () {
+                        if (isOpen) closeItem();
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

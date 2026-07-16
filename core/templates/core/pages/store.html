@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}TapMenu - Profil Toko{% endblock %}
 {% block dashboard_tailwind_config %}
-    <script src="{% static 'core/js/pages/store-1.js' %}"></script>
+    <script src="{% static 'core/js/pages/store-1.js' %}?v=20260608-fix-tailwind"></script>
 {% endblock %}
 {% block dashboard_extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/store-1.css' %}">
@@ -12,7 +12,11 @@
     <!-- Header -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
-            <button class="md:hidden text-primary text-xl">
+            <button type="button"
+                    data-dashboard-menu-button
+                    aria-controls="dashboard-sidebar"
+                    aria-expanded="false"
+                    class="md:hidden text-primary text-xl">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
@@ -186,6 +190,7 @@
                 </div>
             </div>
         </div>
+        {% include 'core/partials/dashboard_footer.html' %}
     </div>
 {% endblock %}
 {% block dashboard_page_scripts %}
