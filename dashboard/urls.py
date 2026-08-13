@@ -45,7 +45,16 @@ urlpatterns = [
         views.order_update_status,
         name='order_update_status',
     ),
+    path(
+        'orders/<int:pk>/receipt/',
+        views.admin_receipt,
+        name='order_receipt',
+    ),
     path('reports/', views.reports, name='reports'),
     path('employees/', views.employee, name='employee'),
+    path('employees/create/', views.employee_create, name='employee_create'),
+    path('employees/<int:pk>/update/', views.employee_update, name='employee_update'),
+    path('employees/<int:pk>/delete/', views.employee_delete, name='employee_delete'),
     path('categories/', views.category_management, name='category_management'),
+    path('kitchen/', views.kitchen, name='kitchen'),
 ]

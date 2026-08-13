@@ -50,4 +50,16 @@ class Payment(models.Model):
         self.save(update_fields=['status', 'paid_at', 'updated_at'])
 
         self.order.payment_status = Order.PaymentStatus.PAID
+        # Persist payment_status first so it survives the status transition
+        # save below (which only writes status/updated_at).
         self.order.save(update_fields=['payment_status', 'updated_at'])
+        # Advance the order status through the state machine when it is still
+        # waiting for payment (new -> paid). Later transitions (processing,
+        # ready, completed) are driven by staff.
+        if self.order.status == Order.Status.NEW:
+            from orders.services import transition_order_status
+
+            transition_order_status(
+                order=self.order,
+                new_status=Order.Status.PAID,
+            )

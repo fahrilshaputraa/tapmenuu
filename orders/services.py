@@ -10,6 +10,80 @@ class OrderCreationError(ValueError):
     """Raised when an order cannot be created from cart data."""
 
 
+class OrderStatusTransitionError(ValueError):
+    """Raised when an order status transition is not allowed."""
+
+
+# Allowed transitions for the order status state machine.
+# new → paid → processing → ready → completed
+# Cancellable from new and processing only.
+ORDER_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    Order.Status.NEW: {
+        Order.Status.PAID,
+        Order.Status.PROCESSING,
+        Order.Status.CANCELLED,
+    },
+    Order.Status.PAID: {Order.Status.PROCESSING},
+    Order.Status.PROCESSING: {Order.Status.READY, Order.Status.CANCELLED},
+    Order.Status.READY: {Order.Status.COMPLETED},
+    Order.Status.COMPLETED: set(),
+    Order.Status.CANCELLED: set(),
+}
+
+
+@transaction.atomic
+def transition_order_status(*, order: Order, new_status: str) -> Order:
+    """Enforce the order status state machine.
+
+    Args:
+        order: The Order instance to transition.
+        new_status: The target status value (e.g. 'processing').
+
+    Returns:
+        The saved Order instance with the new status.
+
+    Raises:
+        OrderStatusTransitionError: If the transition is not allowed.
+    """
+    valid_statuses = Order.Status.values
+    if new_status not in valid_statuses:
+        raise OrderStatusTransitionError(
+            f'Status "{new_status}" bukan status yang valid. '
+            f'Pilihan: {", ".join(valid_statuses)}.',
+        )
+
+    allowed = ORDER_STATUS_TRANSITIONS.get(order.status, set())
+    if new_status not in allowed:
+        # Build a helpful error message with allowed next statuses.
+        if allowed:
+            labels = [Order.Status(s).label for s in allowed]
+            hint = f'Hanya bisa ke: {", ".join(labels)}.'
+        else:
+            hint = 'Status ini adalah status akhir, tidak bisa diubah lagi.'
+        raise OrderStatusTransitionError(
+            f'Tidak bisa mengubah status dari "{Order.Status(order.status).label}" '
+            f'ke "{Order.Status(new_status).label}". {hint}',
+        )
+
+    order.status = new_status
+    order.save(update_fields=['status', 'updated_at'])
+    return order
+
+
+def can_transition_status(order_or_status, new_status: str) -> bool:
+    """Check if a status transition is allowed without executing it.
+
+    Accepts either an Order instance or a plain status string as the
+    current status.
+    """
+    if isinstance(order_or_status, Order):
+        current_status = order_or_status.status
+    else:
+        current_status = order_or_status
+    allowed = ORDER_STATUS_TRANSITIONS.get(current_status, set())
+    return new_status in allowed
+
+
 def create_order_from_cart(*, table, cart_items, customer_name='', customer_note=''):
     """Create an order and order item snapshots from cart data.
 

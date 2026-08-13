@@ -1,0 +1,113 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static menu_extras %}
+{% block title %}TapMenu - Dapur{% endblock %}
+{% block dashboard_tailwind_config %}
+    <script src="{% static 'core/js/pages/dashboard-1.js' %}?v=20260608-fix-tailwind"></script>
+{% endblock %}
+{% block dashboard_extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/pages/dashboard-1.css' %}">
+{% endblock %}
+{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-bg{% endblock %}
+{% block dashboard_main %}
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">Dapur</p>
+            <h1 class="text-2xl font-extrabold text-dark">Kitchen Board</h1>
+            <p class="text-sm text-gray-500">
+                {{ kitchen_total }} pesanan aktif · diperbarui otomatis tiap 15 detik
+            </p>
+        </div>
+        <span class="px-4 py-2 rounded-full bg-secondary text-primary font-bold text-sm">
+            <i class="fa-solid fa-fire-burner mr-1"></i> Dapur
+        </span>
+    </header>
+    <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+        {% if kitchen_orders %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {% for order in kitchen_orders %}
+                    <article class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-card flex flex-col">
+                        <div class="flex items-start justify-between gap-3 mb-4">
+                            <div>
+                                <p class="text-3xl font-extrabold text-primary">Meja {{ order.dining_table.table_number }}</p>
+                                <p class="text-xs text-gray-400 font-bold mt-1">{{ order.code }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-extrabold {% if order.status == 'paid' %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                        {% if order.customer_name %}
+                            <p class="text-sm text-gray-500 mb-2">
+                                <i class="fa-solid fa-user mr-1"></i>{{ order.customer_name }}
+                            </p>
+                        {% endif %}
+                        <div class="flex-1 space-y-2 mb-4">
+                            {% for item in order.items.all %}
+                                <div class="rounded-xl bg-[#F7F5F2] p-3">
+                                    <div class="flex justify-between gap-2">
+                                        <span class="font-bold text-dark">{{ item.quantity }}x {{ item.item_name }}</span>
+                                        <span class="font-extrabold text-primary text-sm">{{ item.line_total|rupiah }}</span>
+                                    </div>
+                                    {% if item.notes %}
+                                        <p class="text-xs text-gray-500 mt-1">{{ item.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                            <span class="font-extrabold text-dark">{{ order.total_amount|rupiah }}</span>
+                            <div class="flex gap-2">
+                                {% if order.status == 'new' or order.status == 'paid' %}
+                                    <form method="post"
+                                          action="{% url 'order_update_status' order.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="processing">
+                                        <button type="submit"
+                                                class="px-4 py-2 bg-primary text-white font-bold text-sm rounded-xl hover:bg-[#143326] transition-all">
+                                            <i class="fa-solid fa-fire-burner mr-1"></i>Proses
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                {% if order.status == 'processing' %}
+                                    <form method="post"
+                                          action="{% url 'order_update_status' order.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="ready">
+                                        <button type="submit"
+                                                class="px-4 py-2 bg-accent text-white font-bold text-sm rounded-xl hover:bg-[#d06a50] transition-all">
+                                            <i class="fa-solid fa-utensils mr-1"></i>Siap
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                {% if order.status == 'ready' %}
+                                    <form method="post"
+                                          action="{% url 'order_update_status' order.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit"
+                                                class="px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-all">
+                                            <i class="fa-solid fa-check mr-1"></i>Selesai
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="h-full flex flex-col items-center justify-center text-center py-24">
+                <div class="w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-utensils text-3xl text-primary"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-dark mb-2">Tidak ada pesanan aktif</h2>
+                <p class="text-gray-500">Pesanan baru dari pelanggan akan muncul di sini.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+{% block dashboard_page_scripts %}
+    <script>
+        // Auto-refresh the kitchen board every 15 seconds.
+        setTimeout(function () { window.location.reload(); }, 15000);
+    </script>
+{% endblock %}

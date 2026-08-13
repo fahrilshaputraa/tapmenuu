@@ -1,0 +1,3 @@
+# Order status uses PRD vocabulary, enforced as a state machine
+
+The code had drifted from the PRD: `pending/confirmed/preparing` instead of `new/paid/processing/ready/completed/cancelled`, and statuses could be set to anything via the dashboard form. We decided to retire the drifted vocabulary and align exactly with the PRD (and CONTEXT.md): `new → paid → processing → ready → completed`, cancellable from `new` and `processing`. Transitions are enforced in a service function with a transition map; invalid transitions are rejected, not silently accepted. This keeps the customer-facing status messages, kitchen board, and reports speaking one consistent language, and prevents invalid order states from being reachable in the UI.

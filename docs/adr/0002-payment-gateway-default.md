@@ -1,0 +1,3 @@
+# Dummy payment gateway stays default until Midtrans keys exist
+
+The payment gateway abstraction (`create_payment`, `verify_callback`) already exists with a `dummy` implementation. We decided the `dummy` gateway remains the active default for development (no network, no keys), while a `midtrans` gateway (QRIS + Virtual Account + e-wallet via Snap) is implemented behind the same interface and auto-activated when `MIDTRANS_SERVER_KEY` / `MIDTRANS_CLIENT_KEY` environment variables are present. Gateway selection is centralized in the payment service layer, so flipping to production is a config change, not a code change. This keeps local development and tests hermetic while the real integration is ready to switch on when the merchant obtains Midtrans keys.

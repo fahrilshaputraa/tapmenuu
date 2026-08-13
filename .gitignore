@@ -56,6 +56,14 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# OpenCode
+.opencode/
+
+# Playwright debug screenshots
+*.playwright-mcp/
+debug-*.png
+onboarding-*.png
+
 # Logs
 *.log
 logs/

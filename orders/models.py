@@ -6,12 +6,12 @@ from restaurants.models import DiningTable, Restaurant
 
 class Order(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending'
-        CONFIRMED = 'confirmed', 'Confirmed'
-        PREPARING = 'preparing', 'Preparing'
-        READY = 'ready', 'Ready'
-        COMPLETED = 'completed', 'Completed'
-        CANCELLED = 'cancelled', 'Cancelled'
+        NEW = 'new', 'Pesanan Baru'
+        PAID = 'paid', 'Dibayar'
+        PROCESSING = 'processing', 'Diproses'
+        READY = 'ready', 'Siap Disajikan'
+        COMPLETED = 'completed', 'Selesai'
+        CANCELLED = 'cancelled', 'Dibatalkan'
 
     class PaymentStatus(models.TextChoices):
         UNPAID = 'unpaid', 'Unpaid'
@@ -33,7 +33,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.PENDING,
+        default=Status.NEW,
     )
     payment_status = models.CharField(
         max_length=20,

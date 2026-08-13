@@ -7,6 +7,7 @@
         <title>
             {% block title %}TapMenu - Dashboard{% endblock %}
         </title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
         <script src="https://cdn.tailwindcss.com"></script>
         {% block dashboard_tailwind_config %}{% endblock %}
         {% block dashboard_vendor_scripts %}{% endblock %}
@@ -16,7 +17,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         {% block dashboard_extra_css %}{% endblock %}
     </head>
-    <body class="{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-[#F7F5F2]{% endblock %}">
+    <body class="{% block dashboard_body_class %}font-sans text-dark antialiased overflow-x-hidden bg-bg{% endblock %}">
         <div class="flex h-screen overflow-hidden">
             {% include 'core/partials/dashboard_sidebar.html' %}
             <div data-dashboard-sidebar-backdrop

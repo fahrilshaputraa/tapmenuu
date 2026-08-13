@@ -21,7 +21,7 @@
             </button>
             <div>
                 <h2 class="text-xl font-bold text-dark">Manajemen Karyawan</h2>
-                <p class="text-xs text-gray-500">Atur akses, peran, dan PIN login staf Anda</p>
+                <p class="text-xs text-gray-500">Atur akses dan peran staf Anda</p>
             </div>
         </div>
         <button onclick="openAddModal()"
@@ -33,7 +33,16 @@
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-6 custom-scroll">
         <div class="max-w-7xl mx-auto space-y-6 fade-in">
-            <!-- Stats & Search -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="px-4 py-3 rounded-xl text-sm font-medium
+                        {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+                        {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <!-- Stats -->
             <div class="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
                 <div class="flex gap-4">
                     <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
@@ -42,7 +51,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-500 uppercase font-bold">Total</p>
-                            <p class="font-bold text-dark leading-none" id="total-count">4</p>
+                            <p class="font-bold text-dark leading-none">{{ profiles|length }}</p>
                         </div>
                     </div>
                     <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
@@ -51,20 +60,21 @@
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-500 uppercase font-bold">Aktif</p>
-                            <p class="font-bold text-dark leading-none" id="active-count">3</p>
+                            <p class="font-bold text-dark leading-none">{{ active_count }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center">
+                            <i class="fa-solid fa-user-slash"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Nonaktif</p>
+                            <p class="font-bold text-dark leading-none">{{ inactive_count }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="relative w-full md:w-72">
-                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text"
-                           id="search-input"
-                           oninput="renderEmployees()"
-                           placeholder="Cari nama karyawan..."
-                           class="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                </div>
             </div>
-            <!-- Employee Table (Layout Baru) -->
+            <!-- Employee Table -->
             <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -72,24 +82,91 @@
                             <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase font-bold text-gray-500 tracking-wider">
                                 <th class="px-6 py-4">Karyawan</th>
                                 <th class="px-6 py-4">Peran / Role</th>
-                                <th class="px-6 py-4">PIN Akses</th>
                                 <th class="px-6 py-4">Status</th>
                                 <th class="px-6 py-4 text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 text-sm" id="employee-table-body">
-                            <!-- Items will be injected here -->
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            {% for profile in profiles %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm uppercase">
+                                                {{ profile.user.username|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-dark">{{ profile.user.username }}</p>
+                                                {% if profile.user.email %}
+                                                    <p class="text-xs text-gray-400">{{ profile.user.email }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold
+                                            {% if profile.role == 'admin' %}bg-blue-50 text-blue-600
+                                            {% elif profile.role == 'kasir' %}bg-amber-50 text-amber-600
+                                            {% elif profile.role == 'dapur' %}bg-orange-50 text-orange-600
+                                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                            {{ profile.get_role_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <form method="post" action="{% url 'employee_update' profile.pk %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="role" value="{{ profile.role }}">
+                                            <input type="hidden" name="is_active" value="{% if profile.user.is_active %}on{% endif %}">
+                                            <button type="button"
+                                                    data-pk="{{ profile.pk }}"
+                                                    data-active="{{ profile.user.is_active|yesno:'true,false' }}"
+                                                    onclick="toggleActive(this)"
+                                                    class="flex items-center gap-2 text-xs font-semibold
+                                                        {% if profile.user.is_active %}text-green-600{% else %}text-gray-400{% endif %}">
+                                                <span class="w-8 h-4 rounded-full relative inline-block transition-colors
+                                                    {% if profile.user.is_active %}bg-green-400{% else %}bg-gray-200{% endif %}">
+                                                    <span class="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform
+                                                        {% if profile.user.is_active %}translate-x-4{% else %}translate-x-0.5{% endif %}"></span>
+                                                </span>
+                                                {% if profile.user.is_active %}Aktif{% else %}Nonaktif{% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button data-pk="{{ profile.pk }}"
+                                                    data-username="{{ profile.user.username }}"
+                                                    data-role="{{ profile.role }}"
+                                                    data-active="{{ profile.user.is_active|yesno:'true,false' }}"
+                                                    data-update-url="{% url 'employee_update' profile.pk %}"
+                                                    onclick="openEditModal(this)"
+                                                    class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-primary transition-colors"
+                                                    title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button data-pk="{{ profile.pk }}"
+                                                    data-username="{{ profile.user.username }}"
+                                                    data-delete-url="{% url 'employee_delete' profile.pk %}"
+                                                    onclick="confirmDelete(this)"
+                                                    class="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors"
+                                                    title="Hapus">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center gap-3 text-gray-400">
+                                            <i class="fa-solid fa-user-slash text-3xl"></i>
+                                            <p class="font-semibold text-dark">Belum ada karyawan</p>
+                                            <p class="text-xs">Klik "Tambah Karyawan" untuk menambahkan staf baru.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
-                </div>
-                <!-- Empty State (Inside Table) -->
-                <div id="empty-state"
-                     class="hidden flex flex-col items-center justify-center py-12 text-center">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-3">
-                        <i class="fa-solid fa-user-slash text-2xl"></i>
-                    </div>
-                    <h3 class="text-dark font-bold">Karyawan tidak ditemukan</h3>
-                    <p class="text-gray-500 text-xs">Silakan tambah karyawan baru atau ubah pencarian.</p>
                 </div>
             </div>
         </div>
@@ -97,7 +174,7 @@
     </div>
 {% endblock %}
 {% block dashboard_overlays %}
-    <!-- === ADD/EDIT MODAL === -->
+    <!-- === ADD MODAL === -->
     <div id="employee-modal"
          class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -108,76 +185,150 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
-                <!-- Avatar Upload -->
-                <div class="flex justify-center mb-4">
-                    <div class="relative">
-                        <img id="preview-avatar"
-                             src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                             class="w-24 h-24 rounded-full object-cover border-4 border-gray-50 shadow-sm">
-                        <div class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full border border-gray-200 shadow flex items-center justify-center cursor-pointer hover:text-primary text-gray-500 overflow-hidden">
-                            <i class="fa-solid fa-camera text-xs"></i>
-                            <input type="file"
-                                   accept="image/*"
-                                   class="absolute inset-0 opacity-0 cursor-pointer"
-                                   onchange="handleAvatarUpload(this)">
+            <form method="post" action="{% url 'employee_create' %}" id="add-employee-form">
+                {% csrf_token %}
+                <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
+                    {% if create_form.errors %}
+                        <div class="px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200">
+                            {% for field, errors in create_form.errors.items %}
+                                {% for error in errors %}{{ error }}{% endfor %}
+                            {% endfor %}
                         </div>
+                    {% endif %}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email"
+                               name="email"
+                               value="{{ create_form.email.value|default:'' }}"
+                               required
+                               autocomplete="email"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium"
+                               placeholder="kasir@warung.com">
                     </div>
-                </div>
-                <!-- Inputs -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                        Nama Lengkap <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text"
-                           id="input-name"
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium"
-                           placeholder="Contoh: Siti Aminah">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                        Posisi / Role <span class="text-red-500">*</span>
-                    </label>
-                    <select id="input-role"
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium">
-                        <option value="Kasir">Kasir</option>
-                        <option value="Dapur">Staf Dapur</option>
-                        <option value="Pelayan">Pelayan (Waiter)</option>
-                        <option value="Manajer">Manajer Toko</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                        PIN Akses (6 Digit) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Password <span class="text-red-500">*</span>
+                        </label>
                         <input type="password"
-                               id="input-pin"
-                               maxlength="6"
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium tracking-widest"
-                               placeholder="******">
-                        <button type="button"
-                                onclick="togglePinVisibility()"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark">
-                            <i class="fa-regular fa-eye" id="pin-icon"></i>
-                        </button>
+                               name="password"
+                               required
+                               minlength="6"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium"
+                               placeholder="Min. 6 karakter">
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-1">Digunakan untuk login ke aplikasi POS.</p>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                            Peran / Role <span class="text-red-500">*</span>
+                        </label>
+                        <select name="role"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium">
+                            <option value="admin">Admin</option>
+                            <option value="kasir">Kasir</option>
+                            <option value="dapur">Dapur</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
-                <button onclick="closeModal()"
-                        class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
-                    Batal
-                </button>
-                <button onclick="saveEmployee()"
-                        class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
-                    Simpan
-                </button>
-            </div>
+                <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+                    <button type="button"
+                            onclick="closeModal()"
+                            class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
+                        Simpan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- === EDIT MODAL === -->
+    <div id="edit-modal"
+         class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-dark">Edit Karyawan: <span id="edit-username"></span></h3>
+                <button onclick="closeEditModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form method="post" id="edit-employee-form" action="">
+                {% csrf_token %}
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Peran / Role</label>
+                        <select name="role" id="edit-role"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium">
+                            <option value="admin">Admin</option>
+                            <option value="kasir">Kasir</option>
+                            <option value="dapur">Dapur</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" name="is_active" id="edit-is-active"
+                               class="w-4 h-4 accent-primary">
+                        <label for="edit-is-active" class="text-sm font-medium text-dark">Akun aktif</label>
+                    </div>
+                </div>
+                <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+                    <button type="button"
+                            onclick="closeEditModal()"
+                            class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- === DELETE FORM (hidden) === -->
+    <form method="post" id="delete-form" action="">
+        {% csrf_token %}
+    </form>
 {% endblock %}
 {% block dashboard_page_scripts %}
-    <script src="{% static 'core/js/pages/employee-2.js' %}"></script>
+<script>
+    function openAddModal() {
+        document.getElementById('employee-modal').classList.remove('hidden');
+    }
+    function closeModal() {
+        document.getElementById('employee-modal').classList.add('hidden');
+    }
+    function openEditModal(btn) {
+        const modal = document.getElementById('edit-modal');
+        document.getElementById('edit-username').textContent = btn.dataset.username;
+        document.getElementById('edit-role').value = btn.dataset.role;
+        document.getElementById('edit-is-active').checked = btn.dataset.active === 'true';
+        document.getElementById('edit-employee-form').action = btn.dataset.updateUrl;
+        modal.classList.remove('hidden');
+    }
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden');
+    }
+    function confirmDelete(btn) {
+        if (confirm(`Hapus karyawan "${btn.dataset.username}"? Tindakan ini tidak dapat dibatalkan.`)) {
+            const form = document.getElementById('delete-form');
+            form.action = btn.dataset.deleteUrl;
+            form.submit();
+        }
+    }
+    function toggleActive(btn) {
+        const currentActive = btn.dataset.active === 'true';
+        const form = btn.closest('form');
+        form.querySelector('[name="is_active"]').value = currentActive ? '' : 'on';
+        form.submit();
+    }
+    // Open add modal if form has errors (re-render after POST failure)
+    {% if create_form.errors %}
+        document.addEventListener('DOMContentLoaded', function() { openAddModal(); });
+    {% endif %}
+</script>
 {% endblock %}

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
+from accounts.models import Role, UserProfile
 from menus.models import MenuCategory, MenuItem
 from orders.models import Order, OrderItem
 from payments.models import Payment
@@ -33,6 +34,20 @@ class Command(BaseCommand):
                 'phone': '081234567890',
             },
         )
+
+        # Create/update UserProfile for owner
+        owner_profile, _ = UserProfile.objects.get_or_create(
+            user=owner,
+            defaults={'role': Role.OWNER, 'restaurant': restaurant},
+        )
+        owner_profile.role = Role.OWNER
+        owner_profile.restaurant = restaurant
+        owner_profile.save()
+
+        # Create demo users for role testing
+        self._create_demo_user('admin', Role.ADMIN, restaurant)
+        self._create_demo_user('kasir', Role.KASIR, restaurant)
+        self._create_demo_user('dapur', Role.DAPUR, restaurant)
 
         tables = []
         for number in ['1', '2', '3', '4']:
@@ -80,7 +95,7 @@ class Command(BaseCommand):
             defaults={
                 'dining_table': tables[0],
                 'customer_name': 'Customer Demo',
-                'status': Order.Status.PREPARING,
+                'status': Order.Status.PROCESSING,
                 'total_amount': 0,
             },
         )
@@ -112,6 +127,28 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                'Seed data TapMenu siap. Login: owner / password12345',
+                'Seed data TapMenu siap. Login: owner / password12345\n'
+                'Demo users: admin/kasir/dapur (password: password12345)',
             ),
         )
+
+    def _create_demo_user(self, username, role, restaurant):
+        user, _ = User.objects.get_or_create(
+            username=username,
+            defaults={
+                'email': f'{username}@tapmenu.test',
+                'is_staff': True,
+            },
+        )
+        user.set_password('password12345')
+        user.is_staff = True
+        user.save()
+
+        profile, _ = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={'restaurant': restaurant},
+        )
+        profile.role = role
+        profile.restaurant = restaurant
+        profile.save()
+        return user

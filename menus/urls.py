@@ -30,4 +30,19 @@ urlpatterns = [
         views.customer_order_success,
         name='customer_order_success',
     ),
+    path(
+        'm/<slug:qr_token>/orders/<int:order_id>/status/',
+        views.customer_order_status,
+        name='customer_order_status',
+    ),
+    path(
+        'm/<slug:qr_token>/orders/<int:order_id>/stream/',
+        views.customer_order_stream,
+        name='customer_order_stream',
+    ),
+    path(
+        'm/<slug:qr_token>/orders/<int:order_id>/receipt/',
+        views.customer_receipt,
+        name='customer_receipt',
+    ),
 ]

@@ -118,3 +118,131 @@ class MenuAppearanceDashboardTests(TestCase):
 
         self.assertContains(response, reverse('menu_appearance'))
         self.assertContains(response, 'Appearance Menu')
+
+
+class KitchenBoardTests(TestCase):
+    def setUp(self):
+        from accounts.models import Role, UserProfile
+        from menus.models import MenuCategory, MenuItem
+        from orders.models import Order
+        from restaurants.models import DiningTable
+
+        self.user = User.objects.create_user(
+            username='dapur',
+            password='password12345',
+            is_staff=True,
+        )
+        UserProfile.objects.create(user=self.user, role=Role.DAPUR)
+        self.restaurant = Restaurant.objects.create(
+            name='Kedai Dapur',
+            slug='kedai-dapur',
+        )
+        self.table = DiningTable.objects.create(
+            restaurant=self.restaurant,
+            table_number='A1',
+        )
+        self.category = MenuCategory.objects.create(
+            restaurant=self.restaurant,
+            name='Makanan',
+            slug='makanan',
+        )
+        self.item = MenuItem.objects.create(
+            restaurant=self.restaurant,
+            category=self.category,
+            name='Nasi Goreng',
+            slug='nasi-goreng',
+            price=15000,
+        )
+        self.new_order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-KIT-001',
+            status=Order.Status.PAID,
+            payment_status=Order.PaymentStatus.PAID,
+            total_amount=15000,
+        )
+        self.completed_order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-KIT-002',
+            status=Order.Status.COMPLETED,
+            total_amount=15000,
+        )
+
+    def test_dapur_can_access_kitchen_but_not_menu_management(self):
+        self.client.force_login(self.user)
+
+        kitchen_response = self.client.get(reverse('kitchen'))
+        self.assertEqual(kitchen_response.status_code, 200)
+
+        menu_response = self.client.get(reverse('management_menu'))
+        self.assertEqual(menu_response.status_code, 403)
+
+    def test_kitchen_shows_active_orders_only(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('kitchen'))
+
+        self.assertContains(response, 'ORD-KIT-001')
+        self.assertNotContains(response, 'ORD-KIT-002')
+
+    def test_admin_receipt_requires_owner_role(self):
+        kasir = User.objects.create_user(
+            username='kasir',
+            password='password12345',
+            is_staff=True,
+        )
+        from accounts.models import Role, UserProfile
+
+        UserProfile.objects.create(user=kasir, role=Role.KASIR)
+        self.client.force_login(kasir)
+
+        response = self.client.get(
+            reverse('order_receipt', kwargs={'pk': self.new_order.pk}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'ORD-KIT-001')
+        self.assertContains(response, 'Cetak Struk')
+
+
+class DashboardRevenueTests(TestCase):
+    def setUp(self):
+        from orders.models import Order
+        from restaurants.models import DiningTable
+
+        self.user = User.objects.create_user(
+            username='owner',
+            password='password12345',
+            is_staff=True,
+        )
+        self.restaurant = Restaurant.objects.create(
+            name='Kedai Revenue',
+            slug='kedai-revenue',
+        )
+        self.table = DiningTable.objects.create(
+            restaurant=self.restaurant,
+            table_number='A1',
+        )
+        self.paid_order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-REV-001',
+            total_amount=100000,
+            payment_status=Order.PaymentStatus.PAID,
+        )
+        self.unpaid_order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-REV-002',
+            total_amount=50000,
+            payment_status=Order.PaymentStatus.UNPAID,
+        )
+
+    def test_dashboard_revenue_counts_only_paid_orders(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['revenue'], 100000)
+        self.assertEqual(response.context['pending_payments'], 50000)
