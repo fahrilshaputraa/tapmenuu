@@ -19,6 +19,12 @@ MENU_THEME_DEFAULTS = {
     'header_style': 'rounded',
     'button_style': 'rounded',
     'show_category_tabs': True,
+    'banner_image': '',
+    'tagline': '',
+    'greeting_message': '',
+    'receipt_footer_text': 'Terima kasih atas kunjungan Anda',
+    'contact_phone': '',
+    'contact_instagram': '',
 }
 
 
@@ -105,6 +111,38 @@ class MenuAppearanceTheme(models.Model):
         default=ButtonStyle.ROUNDED,
     )
     show_category_tabs = models.BooleanField(default=True)
+    banner_image = models.ImageField(
+        upload_to='restaurants/banners/',
+        blank=True,
+        null=True,
+        help_text='Banner tampilan customer (opsional).',
+    )
+    tagline = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Tagline / slogan singkat resto.',
+    )
+    greeting_message = models.CharField(
+        max_length=300,
+        blank=True,
+        help_text='Pesan sambutan untuk pelanggan.',
+    )
+    receipt_footer_text = models.CharField(
+        max_length=200,
+        blank=True,
+        default=MENU_THEME_DEFAULTS['receipt_footer_text'],
+        help_text='Teks penutup pada struk (receipt).',
+    )
+    contact_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        help_text='Nomor telepon yang tampil untuk pelanggan.',
+    )
+    contact_instagram = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text='Username Instagram (opsional).',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

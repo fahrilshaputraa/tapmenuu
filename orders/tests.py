@@ -31,7 +31,7 @@ class OrderModelTests(TestCase):
         self.assertEqual(order.dining_table, self.table)
         self.assertEqual(order.code, 'ORD-0001')
         self.assertEqual(order.customer_name, 'Budi')
-        self.assertEqual(order.status, Order.Status.PENDING)
+        self.assertEqual(order.status, Order.Status.NEW)
         self.assertEqual(order.payment_status, Order.PaymentStatus.UNPAID)
         self.assertEqual(order.notes, '')
         self.assertEqual(order.total_amount, 0)
@@ -294,3 +294,101 @@ class CreateOrderFromCartServiceTests(TestCase):
         self.assertEqual(order_item.item_name, 'Nasi Service')
         self.assertEqual(order_item.unit_price, 12000)
         self.assertEqual(order.total_amount, 12000)
+
+
+class OrderStatusTransitionTests(TestCase):
+    def setUp(self):
+        self.restaurant = Restaurant.objects.create(
+            name='Kedai Status',
+            slug='kedai-status',
+        )
+        self.table = DiningTable.objects.create(
+            restaurant=self.restaurant,
+            table_number='A1',
+        )
+        self.order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-TRANS-001',
+        )
+
+    def test_new_to_processing_is_allowed(self):
+        from orders.services import transition_order_status
+
+        result = transition_order_status(
+            order=self.order,
+            new_status=Order.Status.PROCESSING,
+        )
+        self.assertEqual(result.status, Order.Status.PROCESSING)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PROCESSING)
+
+    def test_new_to_completed_is_rejected(self):
+        from orders.services import (
+            OrderStatusTransitionError,
+            transition_order_status,
+        )
+
+        with self.assertRaises(OrderStatusTransitionError):
+            transition_order_status(
+                order=self.order,
+                new_status=Order.Status.COMPLETED,
+            )
+
+    def test_processing_to_cancelled_is_allowed(self):
+        from orders.services import transition_order_status
+
+        self.order.status = Order.Status.PROCESSING
+        self.order.save(update_fields=['status'])
+
+        result = transition_order_status(
+            order=self.order,
+            new_status=Order.Status.CANCELLED,
+        )
+        self.assertEqual(result.status, Order.Status.CANCELLED)
+
+    def test_ready_to_completed_is_allowed(self):
+        from orders.services import transition_order_status
+
+        self.order.status = Order.Status.READY
+        self.order.save(update_fields=['status'])
+
+        result = transition_order_status(
+            order=self.order,
+            new_status=Order.Status.COMPLETED,
+        )
+        self.assertEqual(result.status, Order.Status.COMPLETED)
+
+    def test_completed_cannot_transition(self):
+        from orders.services import (
+            OrderStatusTransitionError,
+            transition_order_status,
+        )
+
+        self.order.status = Order.Status.COMPLETED
+        self.order.save(update_fields=['status'])
+
+        with self.assertRaises(OrderStatusTransitionError):
+            transition_order_status(
+                order=self.order,
+                new_status=Order.Status.READY,
+            )
+
+    def test_invalid_status_value_is_rejected(self):
+        from orders.services import (
+            OrderStatusTransitionError,
+            transition_order_status,
+        )
+
+        with self.assertRaises(OrderStatusTransitionError):
+            transition_order_status(
+                order=self.order,
+                new_status='not-a-status',
+            )
+
+    def test_can_transition_status_accepts_string_status(self):
+        from orders.services import can_transition_status
+
+        self.assertTrue(can_transition_status('new', 'processing'))
+        self.assertFalse(can_transition_status('new', 'completed'))
+        self.assertTrue(can_transition_status('processing', 'ready'))

@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TapMenu - Pilih Tema</title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{% static 'core/js/pages/register-1.js' %}?v=20260608-fix-tailwind"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+    <body class="font-sans text-dark antialiased min-h-screen bg-bg">
+        <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+            <!-- Progress Steps -->
+            <div class="w-full max-w-2xl mb-8">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-400">Profil Toko</span>
+                    </div>
+                    <div class="flex-1 max-w-[60px] h-0.5 bg-green-300"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</div>
+                        <span class="text-sm font-bold text-primary">Tema Warna</span>
+                    </div>
+                    <div class="flex-1 max-w-[60px] h-0.5 bg-gray-200"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">3</div>
+                        <span class="text-sm font-medium text-gray-400">Tim</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Card -->
+            <div class="w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl p-8">
+                <div class="mb-7">
+                    <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white mb-4">
+                        <i class="fa-solid fa-palette text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-extrabold text-dark mb-1">Pilih tema warna menu kamu</h1>
+                    <p class="text-sm text-gray-500">Ini tampilan yang akan dilihat pelanggan. Bisa diganti kapan saja.</p>
+                </div>
+                <form method="post" id="theme-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="palette_id" id="selected-palette" value="tapmenu">
+                    <!-- Palette Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+                        {% for palette in palettes %}
+                            <div class="palette-card cursor-pointer rounded-2xl border-2 p-3 transition-all hover:scale-105
+                                        {% if forloop.first %}border-primary ring-2 ring-primary/30{% else %}border-gray-200{% endif %}"
+                                 data-id="{{ palette.id }}"
+                                 onclick="selectPalette('{{ palette.id }}', this)"
+                                 style="background-color: {{ palette.bg }}">
+                                <!-- Color swatches -->
+                                <div class="flex gap-1 mb-2">
+                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm" style="background-color: {{ palette.primary }}"></div>
+                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm" style="background-color: {{ palette.secondary }}"></div>
+                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm" style="background-color: {{ palette.accent }}"></div>
+                                </div>
+                                <!-- Mini preview -->
+                                <div class="rounded-xl overflow-hidden mb-2" style="background-color: {{ palette.card }}">
+                                    <div class="px-2 py-1.5" style="background-color: {{ palette.primary }}">
+                                        <div class="w-8 h-1 rounded-full bg-white/70"></div>
+                                    </div>
+                                    <div class="px-2 py-1.5 flex items-center gap-1">
+                                        <div class="w-4 h-4 rounded-md" style="background-color: {{ palette.secondary }}"></div>
+                                        <div class="flex-1">
+                                            <div class="w-full h-1 rounded-full mb-1" style="background-color: {{ palette.primary }}; opacity: 0.3"></div>
+                                            <div class="w-2/3 h-1 rounded-full" style="background-color: {{ palette.accent }}; opacity: 0.5"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs font-bold text-dark truncate">{{ palette.name }}</p>
+                                <p class="text-[10px] text-gray-500 truncate">{{ palette.description }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="flex gap-3">
+                        <a href="{% url 'onboarding_step3' %}"
+                           class="flex-1 px-6 py-3.5 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-colors text-center text-sm">
+                            Lewati
+                        </a>
+                        <button type="submit"
+                                class="flex-1 px-6 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-all flex items-center justify-center gap-3 text-sm">
+                            <span>Lanjut ke Tim</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            function selectPalette(id, el) {
+                document.querySelectorAll('.palette-card').forEach(card => {
+                    card.classList.remove('border-primary', 'ring-2', 'ring-primary/30');
+                    card.classList.add('border-gray-200');
+                });
+                el.classList.remove('border-gray-200');
+                el.classList.add('border-primary', 'ring-2', 'ring-primary/30');
+                document.getElementById('selected-palette').value = id;
+            }
+        </script>
+    </body>
+</html>

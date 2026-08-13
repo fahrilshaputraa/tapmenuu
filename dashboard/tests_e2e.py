@@ -16,6 +16,9 @@ class DashboardEndToEndTests(TestCase):
             password='password12345',
             is_staff=True,
         )
+        from accounts.models import Role, UserProfile
+
+        UserProfile.objects.create(user=self.user, role=Role.OWNER)
         self.restaurant = Restaurant.objects.create(
             name='Warung Test',
             slug='warung-test',
@@ -201,6 +204,17 @@ class DashboardEndToEndTests(TestCase):
 
         response = self.client.post(
             reverse('order_update_status', kwargs={'pk': self.order.pk}),
+            {'status': Order.Status.PROCESSING},
+        )
+        self.assertRedirects(
+            response,
+            reverse('order_detail', kwargs={'pk': self.order.pk}),
+        )
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PROCESSING)
+
+        response = self.client.post(
+            reverse('order_update_status', kwargs={'pk': self.order.pk}),
             {'status': Order.Status.READY},
         )
         self.assertRedirects(
@@ -269,5 +283,15 @@ class DashboardEndToEndTests(TestCase):
             data={'reference': self.payment.reference, 'status': 'paid'},
             content_type='application/json',
         )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['status'], 'ignored')
+
+        with self.settings(PAYMENT_WEBHOOK_SECRET='test-webhook-secret'):
+            response = self.client.post(
+                reverse('payment_webhook'),
+                data={'reference': self.payment.reference, 'status': 'paid'},
+                content_type='application/json',
+                HTTP_AUTHORIZATION='Bearer test-webhook-secret',
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['status'], 'ok')

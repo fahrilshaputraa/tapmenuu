@@ -41,7 +41,7 @@
                 table: "Meja 1",
                 time: "15 Menit lalu",
                 timestamp: Date.now() - 900000,
-                status: "process",
+                status: "processing",
                 total: 120000,
                 items: [
                     { name: "Ayam Bakar Madu", qty: 2, price: 30000, notes: "" },
@@ -119,9 +119,9 @@
 
                 if (order.status === 'new') {
                     statusBadge = `<span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Baru</span>`;
-                    actionBtn = `<button onclick="updateStatus('${order.id}', 'process')" class="w-full py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primaryLight transition-colors shadow-sm mt-4">Terima Pesanan</button>`;
+                    actionBtn = `<button onclick="updateStatus('${order.id}', 'processing')" class="w-full py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primaryLight transition-colors shadow-sm mt-4">Terima Pesanan</button>`;
                     cardClass += ' new-order-card'; // Blinking border
-                } else if (order.status === 'process') {
+                } else if (order.status === 'processing') {
                     statusBadge = `<span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"><i class="fa-solid fa-fire-burner mr-1"></i> Dimasak</span>`;
                     actionBtn = `<button onclick="updateStatus('${order.id}', 'ready')" class="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-sm mt-4">Selesai Masak</button>`;
                 } else if (order.status === 'ready') {
@@ -178,14 +178,14 @@
         }
 
         function updateTabs() {
-            const tabs = ['all', 'new', 'process', 'ready', 'completed'];
+            const tabs = ['all', 'new', 'processing', 'ready', 'completed'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if (t === currentFilter) {
                     btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
                     btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200', 'hover:bg-gray-50', 'hover:text-gray-700');
                     // Remove specific hover colors for active tab to keep it consistent
-                    btn.classList.remove('hover:text-pending', 'hover:text-processing', 'hover:text-ready');
+                    btn.classList.remove('hover:text-new-order', 'hover:text-processing', 'hover:text-ready');
                 } else {
                     btn.classList.remove('bg-primary', 'text-white', 'shadow-sm');
                     btn.classList.add('bg-white', 'text-gray-500', 'border-gray-200');
@@ -203,7 +203,7 @@
             if (order) {
                 order.status = newStatus;
                 // Move timestamp to simulate real-time
-                if (newStatus === 'process') order.time = 'Sedang Dimasak';
+                if (newStatus === 'processing') order.time = 'Sedang Dimasak';
                 if (newStatus === 'ready') order.time = 'Baru Saja';
                 renderOrders();
             }
@@ -222,7 +222,7 @@
             // Status Badge in Modal
             const statusEl = document.getElementById('modal-status');
             if (order.status === 'new') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-100 text-yellow-700"; statusEl.innerText = "Baru"; }
-            else if (order.status === 'process') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700"; statusEl.innerText = "Diproses"; }
+            else if (order.status === 'processing') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700"; statusEl.innerText = "Diproses"; }
             else if (order.status === 'ready') { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700"; statusEl.innerText = "Siap Saji"; }
             else { statusEl.className = "text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-600"; statusEl.innerText = "Selesai"; }
 
@@ -246,7 +246,7 @@
             btn.onclick = () => { updateStatus(id, getNextStatus(order.status)); closeModal(); };
 
             if (order.status === 'new') { btn.innerText = "Terima Pesanan"; btn.className = "py-3 bg-primary text-white font-bold rounded-xl shadow hover:bg-primaryLight transition-colors"; btn.disabled = false; }
-            else if (order.status === 'process') { btn.innerText = "Selesai Masak"; btn.className = "py-3 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700 transition-colors"; btn.disabled = false; }
+            else if (order.status === 'processing') { btn.innerText = "Selesai Masak"; btn.className = "py-3 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700 transition-colors"; btn.disabled = false; }
             else if (order.status === 'ready') { btn.innerText = "Antar & Selesai"; btn.className = "py-3 bg-green-600 text-white font-bold rounded-xl shadow hover:bg-green-700 transition-colors"; btn.disabled = false; }
             else { btn.innerText = "Pesanan Selesai"; btn.className = "py-3 bg-gray-200 text-gray-400 font-bold rounded-xl cursor-not-allowed"; btn.disabled = true; }
 
@@ -258,8 +258,8 @@
         }
 
         function getNextStatus(current) {
-            if (current === 'new') return 'process';
-            if (current === 'process') return 'ready';
+            if (current === 'new') return 'processing';
+            if (current === 'processing') return 'ready';
             if (current === 'ready') return 'completed';
             return 'completed';
         }

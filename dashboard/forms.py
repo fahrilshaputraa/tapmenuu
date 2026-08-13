@@ -1,9 +1,47 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 
+from accounts.models import Role, UserProfile
 from menus.models import MenuCategory, MenuItem
 from orders.models import Order
+from orders.services import can_transition_status, transition_order_status
 from restaurants.models import DiningTable, MenuAppearanceTheme, Restaurant
+
+
+class EmployeeCreateForm(forms.Form):
+    email = forms.EmailField(label='Email')
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        min_length=6,
+        label='Password',
+    )
+    role = forms.ChoiceField(
+        choices=[
+            (Role.ADMIN, 'Admin'),
+            (Role.KASIR, 'Kasir'),
+            (Role.DAPUR, 'Dapur'),
+        ],
+        label='Peran',
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Email sudah digunakan.')
+        return email
+
+
+class EmployeeUpdateForm(forms.Form):
+    role = forms.ChoiceField(
+        choices=[
+            (Role.ADMIN, 'Admin'),
+            (Role.KASIR, 'Kasir'),
+            (Role.DAPUR, 'Dapur'),
+        ],
+        label='Peran',
+    )
+    is_active = forms.BooleanField(required=False, label='Aktif')
 
 
 class RestaurantForm(forms.ModelForm):
@@ -36,6 +74,12 @@ class MenuAppearanceThemeForm(forms.ModelForm):
             'header_style',
             'button_style',
             'show_category_tabs',
+            'banner_image',
+            'tagline',
+            'greeting_message',
+            'receipt_footer_text',
+            'contact_phone',
+            'contact_instagram',
         ]
         widgets = {
             'font_family': forms.Select(
@@ -52,6 +96,37 @@ class MenuAppearanceThemeForm(forms.ModelForm):
             'header_style': forms.Select(attrs={'class': 'theme-input'}),
             'button_style': forms.Select(attrs={'class': 'theme-input'}),
             'show_category_tabs': forms.CheckboxInput(attrs={'class': 'theme-checkbox'}),
+            'banner_image': forms.ClearableFileInput(attrs={'class': 'theme-input'}),
+            'tagline': forms.TextInput(
+                attrs={
+                    'class': 'theme-input',
+                    'placeholder': 'Contoh: Jagonya Ayam Geprek',
+                },
+            ),
+            'greeting_message': forms.TextInput(
+                attrs={
+                    'class': 'theme-input',
+                    'placeholder': 'Contoh: Selamat datang di Warung Bu Dewi 👋',
+                },
+            ),
+            'receipt_footer_text': forms.TextInput(
+                attrs={
+                    'class': 'theme-input',
+                    'placeholder': 'Terima kasih atas kunjungan Anda',
+                },
+            ),
+            'contact_phone': forms.TextInput(
+                attrs={
+                    'class': 'theme-input',
+                    'placeholder': '0812xxxx',
+                },
+            ),
+            'contact_instagram': forms.TextInput(
+                attrs={
+                    'class': 'theme-input',
+                    'placeholder': 'username_tanpa_at',
+                },
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -165,3 +240,41 @@ class OrderStatusForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ['status']
+
+    def clean_status(self):
+        new_status = self.cleaned_data['status']
+        instance = self.instance
+        if instance and instance.pk:
+            # NOTE: construct_instance() may already have mutated instance.status,
+            # so always validate against the persisted DB value.
+            persisted_status = Order.objects.filter(pk=instance.pk).values_list(
+                'status',
+                flat=True,
+            ).first()
+            current_status = persisted_status or instance.status
+            if not can_transition_status(current_status, new_status):
+                raise forms.ValidationError(
+                    f'Tidak bisa mengubah status dari '
+                    f'"{dict(Order.Status.choices).get(current_status, current_status)}" '
+                    f'ke "{dict(Order.Status.choices).get(new_status, new_status)}".',
+                )
+        return new_status
+
+    def save(self, commit=True):
+        order = self.instance
+        new_status = self.cleaned_data['status']
+        if not commit:
+            # Return the instance with the pending status applied, but do not
+            # persist (used when the caller wants to inspect first).
+            order.status = new_status
+            return order
+        # Re-fetch the persisted status because construct_instance() may have
+        # mutated order.status before save() is called.
+        if order.pk:
+            persisted_status = Order.objects.filter(pk=order.pk).values_list(
+                'status',
+                flat=True,
+            ).first()
+            if persisted_status and persisted_status != order.status:
+                order.status = persisted_status
+        return transition_order_status(order=order, new_status=new_status)

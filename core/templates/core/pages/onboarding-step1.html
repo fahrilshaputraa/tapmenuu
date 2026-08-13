@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TapMenu - Setup Toko</title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{% static 'core/js/pages/register-1.js' %}?v=20260608-fix-tailwind"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+    <body class="font-sans text-dark antialiased min-h-screen bg-bg">
+        <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+            <!-- Progress Steps -->
+            <div class="w-full max-w-lg mb-8">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">1</div>
+                        <span class="text-sm font-bold text-primary">Profil Toko</span>
+                    </div>
+                    <div class="flex-1 max-w-[60px] h-0.5 bg-gray-200"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">2</div>
+                        <span class="text-sm font-medium text-gray-400">Tema</span>
+                    </div>
+                    <div class="flex-1 max-w-[60px] h-0.5 bg-gray-200"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">3</div>
+                        <span class="text-sm font-medium text-gray-400">Tim</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Card -->
+            <div class="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl p-8">
+                <div class="mb-7">
+                    <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white mb-4">
+                        <i class="fa-solid fa-store text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-extrabold text-dark mb-1">Setup profil toko</h1>
+                    <p class="text-sm text-gray-500">Mulai dengan nama toko kamu. Sisanya bisa diisi nanti.</p>
+                </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <form method="post" enctype="multipart/form-data" class="space-y-5">
+                    {% csrf_token %}
+                    <!-- Nama Restaurant (required) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
+                            Nama Restoran / Toko <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="restaurant_name"
+                               required
+                               autofocus
+                               placeholder="Contoh: Warung Bu Dewi"
+                               class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] px-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
+                    </div>
+                    <!-- Logo (optional) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
+                            Logo Toko <span class="text-gray-400 font-normal normal-case">(opsional)</span>
+                        </label>
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center border-2 border-dashed border-secondary shrink-0" id="logo-preview-wrap">
+                                <i class="fa-solid fa-image text-primary/40 text-xl" id="logo-placeholder"></i>
+                                <img id="logo-preview" class="hidden w-16 h-16 rounded-2xl object-cover">
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" name="logo" id="logo-input" accept="image/*" class="hidden" onchange="previewLogo(this)">
+                                <label for="logo-input" class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-primary hover:text-primary transition-colors">
+                                    <i class="fa-solid fa-upload"></i>
+                                    Pilih Gambar
+                                </label>
+                                <p class="text-xs text-gray-400 mt-1">PNG, JPG, maks. 2MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Deskripsi (optional) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
+                            Deskripsi <span class="text-gray-400 font-normal normal-case">(opsional)</span>
+                        </label>
+                        <textarea name="description"
+                                  rows="3"
+                                  placeholder="Ceritakan sedikit tentang toko kamu..."
+                                  class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] px-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all resize-none"></textarea>
+                    </div>
+                    <!-- No Telepon (optional) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
+                            No. Telepon <span class="text-gray-400 font-normal normal-case">(opsional)</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel"
+                                   name="phone"
+                                   placeholder="08xxxxxxxxxx"
+                                   class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-11 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
+                        </div>
+                    </div>
+                    <button type="submit"
+                            class="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-all flex items-center justify-center gap-3">
+                        <span>Lanjut ke Pilihan Tema</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+            <p class="text-xs text-gray-400 mt-6">Sudah punya akun? <a href="{% url 'login' %}" class="text-primary font-semibold hover:underline">Masuk di sini</a></p>
+        </div>
+        <script>
+            function previewLogo(input) {
+                const file = input.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('logo-placeholder').classList.add('hidden');
+                        const img = document.getElementById('logo-preview');
+                        img.src = e.target.result;
+                        img.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        </script>
+    </body>
+</html>

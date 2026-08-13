@@ -9,7 +9,7 @@ tailwind.config = {
                         accent: '#E07A5F',     /* Terracotta */
                         bg: '#F7F5F2',         /* Bone White */
                         dark: '#2D3436',       /* Charcoal */
-                        pending: '#F59E0B',    /* Amber for New Orders */
+                        'new-order': '#F59E0B',    /* Amber for New Orders */
                         processing: '#3B82F6', /* Blue for Cooking */
                         ready: '#10B981',      /* Green for Ready */
                     },

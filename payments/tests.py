@@ -1,6 +1,9 @@
+import json
+
 from django.contrib import admin
 from django.db import IntegrityError
 from django.test import TestCase
+from django.urls import reverse
 
 from orders.models import Order
 from payments.gateways.base import PaymentGateway
@@ -256,3 +259,200 @@ class InitiatePaymentServiceTests(TestCase):
         self.assertEqual(payment.provider, 'fixed')
         self.assertEqual(payment.provider_reference, 'FIXED-REF-001')
         self.assertIn('https://fixed.test/pay', payment.notes)
+
+
+class MidtransGatewayTests(TestCase):
+    def setUp(self):
+        from payments.gateways.midtrans import MidtransPaymentGateway
+
+        self.restaurant = Restaurant.objects.create(
+            name='Kedai Midtrans',
+            slug='kedai-midtrans',
+        )
+        self.table = DiningTable.objects.create(
+            restaurant=self.restaurant,
+            table_number='D1',
+        )
+        self.order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='MID-ORDER-001',
+            customer_name='Budi',
+            total_amount=50000,
+        )
+        self.gateway = MidtransPaymentGateway(
+            server_key='SB-Mid-server-abc123',
+            client_key='SB-Mid-client-xyz789',
+            is_production=False,
+        )
+
+    def _mock_urlopen(self, response_body, status_code=200):
+        from unittest import mock
+        from urllib.error import HTTPError
+
+        class FakeResponse:
+            def __init__(self, body):
+                self._body = body
+
+            def read(self):
+                return self._body.encode('utf-8')
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        if status_code >= 400:
+            def raise_error(*args, **kwargs):
+                raise HTTPError(
+                    'https://app.sandbox.midtrans.com/snap/v1/transactions',
+                    status_code,
+                    'Error',
+                    {},
+                    FakeResponse(response_body),
+                )
+            return mock.patch('payments.gateways.midtrans.urlopen', raise_error)
+
+        return mock.patch(
+            'payments.gateways.midtrans.urlopen',
+            return_value=FakeResponse(response_body),
+        )
+
+    def test_create_payment_qris_returns_snap_redirect_url(self):
+        with self._mock_urlopen(
+            json.dumps({'token': 'snap-token-1', 'redirect_url': 'https://snap.test/pay/1'})
+        ):
+            result = self.gateway.create_payment(self._make_payment())
+
+        self.assertEqual(result.provider, 'midtrans')
+        self.assertEqual(result.payment_url, 'https://snap.test/pay/1')
+
+    def test_verify_callback_valid_signature_marks_paid(self):
+        import hashlib
+
+        order_id = 'MID-ORDER-001'
+        status_code = '200'
+        gross_amount = '50000.00'
+        signature_key = hashlib.sha512(
+            f'{order_id}{status_code}{gross_amount}SB-Mid-server-abc123'.encode()
+        ).hexdigest()
+        payload = {
+            'order_id': order_id,
+            'status_code': status_code,
+            'gross_amount': gross_amount,
+            'transaction_status': 'settlement',
+            'signature_key': signature_key,
+        }
+
+        verified = self.gateway.verify_callback(payload)
+
+        self.assertEqual(verified['provider'], 'midtrans')
+        self.assertEqual(verified['status'], Payment.Status.PAID)
+        self.assertEqual(verified['reference'], order_id)
+
+    def test_verify_callback_invalid_signature_raises(self):
+        payload = {
+            'order_id': 'MID-ORDER-001',
+            'status_code': '200',
+            'gross_amount': '50000.00',
+            'transaction_status': 'settlement',
+            'signature_key': 'wrong-signature',
+        }
+
+        from payments.gateways.midtrans import MidtransError
+
+        with self.assertRaises(MidtransError):
+            self.gateway.verify_callback(payload)
+
+    def test_verify_callback_capture_with_accept_fraud_is_paid(self):
+        import hashlib
+
+        order_id = 'MID-ORDER-001'
+        status_code = '200'
+        gross_amount = '50000.00'
+        signature_key = hashlib.sha512(
+            f'{order_id}{status_code}{gross_amount}SB-Mid-server-abc123'.encode()
+        ).hexdigest()
+        payload = {
+            'order_id': order_id,
+            'status_code': status_code,
+            'gross_amount': gross_amount,
+            'transaction_status': 'capture',
+            'fraud_status': 'accept',
+            'signature_key': signature_key,
+        }
+
+        verified = self.gateway.verify_callback(payload)
+
+        self.assertEqual(verified['status'], Payment.Status.PAID)
+
+    def test_webhook_midtrans_notification_marks_order_paid(self):
+        import hashlib
+
+        payment = Payment.objects.create(
+            order=self.order,
+            reference='PAY-MID-WEBHOOK-001',
+            method=Payment.Method.QRIS,
+            amount=50000,
+        )
+        order_id = payment.reference
+        status_code = '200'
+        gross_amount = '50000.00'
+        signature_key = hashlib.sha512(
+            f'{order_id}{status_code}{gross_amount}SB-Mid-server-abc123'.encode()
+        ).hexdigest()
+        payload = {
+            'order_id': order_id,
+            'status_code': status_code,
+            'gross_amount': gross_amount,
+            'transaction_status': 'settlement',
+            'signature_key': signature_key,
+        }
+
+        from payments.gateways.midtrans import MidtransPaymentGateway
+
+        with self.settings(
+            MIDTRANS_SERVER_KEY='SB-Mid-server-abc123',
+            MIDTRANS_CLIENT_KEY='SB-Mid-client-xyz789',
+        ):
+            gateway = MidtransPaymentGateway()
+            self.assertEqual(gateway.server_key, 'SB-Mid-server-abc123')
+            response = self.client.post(
+                reverse('payment_webhook'),
+                data=json.dumps(payload),
+                content_type='application/json',
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payment.refresh_from_db()
+        self.assertEqual(payment.status, Payment.Status.PAID)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PaymentStatus.PAID)
+
+    def test_gateway_selection_uses_dummy_without_keys(self):
+        from payments.services import get_payment_gateway
+
+        with self.settings(MIDTRANS_SERVER_KEY='', MIDTRANS_CLIENT_KEY=''):
+            gateway = get_payment_gateway()
+            self.assertEqual(gateway.provider, 'dummy')
+
+    def test_gateway_selection_uses_midtrans_with_keys(self):
+        from payments.services import get_payment_gateway
+
+        with self.settings(
+            MIDTRANS_SERVER_KEY='SB-Mid-server-abc123',
+            MIDTRANS_CLIENT_KEY='SB-Mid-client-xyz789',
+        ):
+            gateway = get_payment_gateway()
+            self.assertEqual(gateway.provider, 'midtrans')
+
+    def _make_payment(self):
+        from payments.gateways.base import PaymentGatewayResult  # noqa: F401
+
+        return Payment(
+            order=self.order,
+            reference='PAY-MID-0001',
+            method=Payment.Method.QRIS,
+            amount=50000,
+        )

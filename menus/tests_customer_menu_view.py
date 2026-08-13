@@ -557,3 +557,111 @@ class CustomerMenuViewTests(TestCase):
             },
         }
         session.save()
+
+    def _create_order_with_item(self):
+        order = Order.objects.create(
+            restaurant=self.restaurant,
+            dining_table=self.table,
+            code='ORD-STATUS-001',
+            customer_name='Fahril',
+            total_amount=self.item.price,
+        )
+        from orders.models import OrderItem
+
+        OrderItem.objects.create(
+            order=order,
+            menu_item=self.item,
+            item_name=self.item.name,
+            unit_price=self.item.price,
+            quantity=1,
+        )
+        return order
+
+    def test_customer_order_status_renders_timeline_and_code(self):
+        order = self._create_order_with_item()
+
+        response = self.client.get(
+            reverse(
+                'customer_order_status',
+                kwargs={
+                    'qr_token': self.table.qr_token,
+                    'order_id': order.id,
+                },
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'ORD-STATUS-001')
+        self.assertContains(response, 'Pesanan Baru')
+        self.assertContains(response, 'Cetak Struk')
+
+    def test_customer_order_stream_returns_event_stream_content_type(self):
+        order = self._create_order_with_item()
+
+        response = self.client.get(
+            reverse(
+                'customer_order_stream',
+                kwargs={
+                    'qr_token': self.table.qr_token,
+                    'order_id': order.id,
+                },
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'].startswith('text/event-stream'), True)
+
+    def test_customer_receipt_renders_order_snapshot(self):
+        order = self._create_order_with_item()
+
+        response = self.client.get(
+            reverse(
+                'customer_receipt',
+                kwargs={
+                    'qr_token': self.table.qr_token,
+                    'order_id': order.id,
+                },
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'ORD-STATUS-001')
+        self.assertContains(response, f'1x {self.item.name}')
+        self.assertContains(response, 'Cetak Struk')
+
+    def test_customer_menu_renders_greeting_and_tagline_from_theme(self):
+        MenuAppearanceTheme.objects.create(
+            restaurant=self.restaurant,
+            tagline='Jagonya Es Teh',
+            greeting_message='Selamat datang di Kedai QR 👋',
+        )
+
+        response = self.client.get(
+            reverse('customer_menu', kwargs={'qr_token': self.table.qr_token}),
+        )
+
+        self.assertContains(response, 'Jagonya Es Teh')
+        self.assertContains(response, 'Selamat datang di Kedai QR 👋')
+
+    def test_customer_receipt_renders_theme_footer_text(self):
+        MenuAppearanceTheme.objects.create(
+            restaurant=self.restaurant,
+            receipt_footer_text='Terima kasih sudah mampir!',
+            contact_phone='0812-0000-0000',
+            contact_instagram='kedaiqr',
+        )
+        order = self._create_order_with_item()
+
+        response = self.client.get(
+            reverse(
+                'customer_receipt',
+                kwargs={
+                    'qr_token': self.table.qr_token,
+                    'order_id': order.id,
+                },
+            ),
+        )
+
+        self.assertContains(response, 'Terima kasih sudah mampir!')
+        self.assertContains(response, '0812-0000-0000')
+        self.assertContains(response, 'IG: kedaiqr')

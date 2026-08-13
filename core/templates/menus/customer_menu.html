@@ -73,6 +73,9 @@
                         <div>
                             <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Menu Digital</p>
                             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold mt-1">{{ restaurant.name }}</h1>
+                            {% if appearance_theme.tagline %}
+                                <p class="text-sm text-green-100 mt-1">{{ appearance_theme.tagline }}</p>
+                            {% endif %}
                             <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }}</p>
                         </div>
                         <a href="{% url 'customer_cart' dining_table.qr_token %}"
@@ -87,7 +90,11 @@
                         </a>
                     </div>
                     <div class="relative z-10 bg-white/10 border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-sm max-w-md">
-                        <p class="text-sm text-green-100">Pilih menu favorit</p>
+                        {% if appearance_theme.greeting_message %}
+                            <p class="text-sm text-green-100">{{ appearance_theme.greeting_message }}</p>
+                        {% else %}
+                            <p class="text-sm text-green-100">Pilih menu favorit</p>
+                        {% endif %}
                         <p class="text-3xl sm:text-4xl font-extrabold">{{ categories|length }} kategori</p>
                     </div>
                 </div>

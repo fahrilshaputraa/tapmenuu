@@ -1,4 +1,8 @@
+import json
+import time
+
 from django.db.models import Prefetch
+from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -10,6 +14,17 @@ from payments.services import PaymentInitiationError, initiate_payment
 from restaurants.models import DiningTable, MenuAppearanceTheme
 
 CUSTOMER_CART_SESSION_KEY = 'customer_cart'
+
+ORDER_STATUS_FLOW = ['new', 'paid', 'processing', 'ready', 'completed']
+
+ORDER_STATUS_LABELS = {
+    Order.Status.NEW: 'Pesanan Baru',
+    Order.Status.PAID: 'Dibayar',
+    Order.Status.PROCESSING: 'Diproses',
+    Order.Status.READY: 'Siap Disajikan',
+    Order.Status.COMPLETED: 'Selesai',
+    Order.Status.CANCELLED: 'Dibatalkan',
+}
 
 
 def customer_menu(request, qr_token):
@@ -198,6 +213,143 @@ def customer_order_success(request, qr_token, order_id):
             'payment': payment,
             'payment_details': _parse_payment_notes(payment.notes if payment else ''),
         },
+    )
+
+
+def customer_order_status(request, qr_token, order_id):
+    """Customer-facing order status page with a live timeline."""
+    dining_table = _get_active_table(qr_token)
+    order = _get_customer_order(dining_table, order_id)
+    payment = order.payments.first()
+
+    current_index = _status_flow_index(order.status)
+    steps = []
+    for index, status_value in enumerate(ORDER_STATUS_FLOW):
+        steps.append(
+            {
+                'value': status_value,
+                'label': ORDER_STATUS_LABELS[status_value],
+                'state': (
+                    'done'
+                    if index < current_index
+                    else 'current'
+                    if index == current_index
+                    else 'upcoming'
+                ),
+            },
+        )
+
+    return render(
+        request,
+        'menus/customer_order_status.html',
+        {
+            'dining_table': dining_table,
+            'restaurant': dining_table.restaurant,
+            'order': order,
+            'payment': payment,
+            'payment_details': _parse_payment_notes(payment.notes if payment else ''),
+            'steps': steps,
+            'current_index': current_index,
+            'status_labels': ORDER_STATUS_LABELS,
+            'status_flow': ORDER_STATUS_FLOW,
+        },
+    )
+
+
+def customer_order_stream(request, qr_token, order_id):
+    """SSE endpoint that streams order status/payment updates to the customer."""
+    dining_table = _get_active_table(qr_token)
+    order = _get_customer_order(dining_table, order_id)
+
+    def event_stream():
+        last_status = None
+        last_payment_status = None
+        try:
+            yield 'retry: 3000\n\n'
+            for _ in range(30):  # ~60s at 2s interval
+                try:
+                    fresh = Order.objects.only('status', 'payment_status').get(
+                        pk=order.id,
+                    )
+                except Order.DoesNotExist:
+                    break
+
+                if (
+                    fresh.status != last_status
+                    or fresh.payment_status != last_payment_status
+                ):
+                    data = json.dumps(_build_order_status_event(fresh))
+                    yield f'event: update\ndata: {data}\n\n'
+                    last_status = fresh.status
+                    last_payment_status = fresh.payment_status
+                else:
+                    yield 'event: heartbeat\ndata: ping\n\n'
+
+                time.sleep(2)
+            yield 'event: close\ndata: done\n\n'
+        except (GeneratorExit, BrokenPipeError, ConnectionResetError):
+            return
+
+    return StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream',
+    )
+
+
+def customer_receipt(request, qr_token, order_id):
+    """Customer-facing printable 80mm thermal receipt."""
+    dining_table = _get_active_table(qr_token)
+    order = _get_customer_order(dining_table, order_id, with_items=True)
+    payment = order.payments.first()
+    subtotal = sum(item.line_total for item in order.items.all())
+    theme, _ = MenuAppearanceTheme.objects.get_or_create(
+        restaurant=dining_table.restaurant,
+    )
+
+    return render(
+        request,
+        'menus/customer_receipt.html',
+        {
+            'dining_table': dining_table,
+            'restaurant': dining_table.restaurant,
+            'order': order,
+            'payment': payment,
+            'subtotal': subtotal,
+            'theme': theme,
+            'is_staff_view': False,
+        },
+    )
+
+
+def _build_order_status_event(order):
+    """Serialize order status for an SSE update event."""
+    return {
+        'status': order.status,
+        'status_label': ORDER_STATUS_LABELS.get(order.status, order.status),
+        'payment_status': order.payment_status,
+    }
+
+
+def _status_flow_index(status_value):
+    if status_value == Order.Status.CANCELLED:
+        return -1
+    try:
+        return ORDER_STATUS_FLOW.index(status_value)
+    except ValueError:
+        return -1
+
+
+def _get_customer_order(dining_table, order_id, with_items=False):
+    queryset = Order.objects.select_related('restaurant', 'dining_table')
+    if with_items:
+        queryset = queryset.prefetch_related('items', 'payments')
+    else:
+        queryset = queryset.prefetch_related('payments')
+    return get_object_or_404(
+        queryset,
+        id=order_id,
+        dining_table=dining_table,
+        restaurant=dining_table.restaurant,
     )
 
 

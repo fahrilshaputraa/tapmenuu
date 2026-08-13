@@ -5,6 +5,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TapMenu - Daftar</title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
               rel="stylesheet">
@@ -118,6 +119,18 @@
                             </div>
                             <form class="space-y-5" method="post" action="{% url 'register' %}">
                                 {% csrf_token %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="px-4 py-3 rounded-xl text-sm font-medium
+                                            {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+                                            {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                                                {{ message }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
                                 <div>
                                     <label for="fullname"
                                            class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
@@ -159,9 +172,10 @@
                                         <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                             <i class="fa-regular fa-envelope"></i>
                                         </span>
-                                        <input id="email"
+                                         <input id="email"
                                                name="email"
                                                type="email"
+                                               autocomplete="email"
                                                placeholder="owner@tapmenu.id"
                                                class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
                                     </div>
@@ -176,10 +190,11 @@
                                             <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                                 <i class="fa-solid fa-lock"></i>
                                             </span>
-                                            <input id="password"
-                                                   name="password1"
-                                                   type="password"
-                                                   placeholder="Min. 8 karakter"
+                                             <input id="password"
+                                                    name="password1"
+                                                    type="password"
+                                                    autocomplete="new-password"
+                                                    placeholder="Min. 8 karakter"
                                                    class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-12 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
                                             <button type="button"
                                                     onclick="togglePassword('password', 'password-icon')"
@@ -198,10 +213,11 @@
                                             <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                                 <i class="fa-solid fa-shield-heart"></i>
                                             </span>
-                                            <input id="confirm-password"
-                                                   name="password2"
-                                                   type="password"
-                                                   placeholder="Ulangi kata sandi"
+                                             <input id="confirm-password"
+                                                    name="password2"
+                                                    type="password"
+                                                    autocomplete="new-password"
+                                                    placeholder="Ulangi kata sandi"
                                                    class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] pl-12 pr-12 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
                                             <button type="button"
                                                     onclick="togglePassword('confirm-password', 'confirm-password-icon')"
@@ -238,10 +254,11 @@
                                 </div>
                             </div>
                             <div class="grid sm:grid-cols-2 gap-3">
-                                <button class="px-4 py-3.5 bg-white border border-gray-200 rounded-xl font-bold text-sm text-dark hover:border-primary hover:bg-secondary/30 transition-colors flex items-center justify-center gap-3">
+                                <a href="{% url 'google_login' %}"
+                                   class="px-4 py-3.5 bg-white border border-gray-200 rounded-xl font-bold text-sm text-dark hover:border-primary hover:bg-secondary/30 transition-colors flex items-center justify-center gap-3">
                                     <i class="fa-brands fa-google text-[#DB4437]"></i>
                                     Daftar dengan Google
-                                </button>
+                                </a>
                                 <a href="{% url 'login' %}"
                                    class="px-4 py-3.5 bg-white border border-gray-200 rounded-xl font-bold text-sm text-dark hover:border-primary hover:bg-secondary/30 transition-colors flex items-center justify-center gap-3">
                                     <i class="fa-solid fa-right-to-bracket text-primary"></i>
