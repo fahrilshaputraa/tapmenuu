@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "a674b7d81066e3cc471a7512ddb4ae724418cbfefa75cbb050b0dc430e4d57a0"
+    },
+    "django-patterns": {
+      "source": "affaan-m/ecc",
+      "sourceType": "github",
+      "skillPath": "skills/django-patterns/SKILL.md",
+      "computedHash": "93fc4501b3dfc6fae1e40dc8b0114681838e308ddb865966bfcd57125df7b2d5"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
+      "computedHash": "35e62aa423aaeab6a414bcac273f56dfb17802ef2334b41b6a3b00f28196c8cf"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "computedHash": "2449db6ab1ded9581f69fcc56c1f64818112d05e271fd4c5da23c6523f9d3d9d"
+    },
+    "programmatic-seo": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/programmatic-seo/SKILL.md",
+      "computedHash": "0bbdcbacfbe46fd78d774041ee49afd313505bb435b775dc246f4b8e6981d797"
+    },
+    "to-spec": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/to-spec/SKILL.md",
+      "computedHash": "3fa1a0695d4ea242fae9e569e4d22aa1788623197abb33bfadafae7315789bbf"
+    }
+  }
+}
