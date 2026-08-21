@@ -5,11 +5,15 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TapMenu - Tambah Tim</title>
-        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{% static 'core/img/favicon.svg' %}">
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="{% static 'core/js/pages/register-1.js' %}?v=20260608-fix-tailwind"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="font-sans text-dark antialiased min-h-screen bg-bg">
         <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
@@ -47,9 +51,7 @@
                 </div>
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium
-                            {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}
-                            flex items-center gap-2">
+                        <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %} flex items-center gap-2">
                             <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
                             {{ message }}
                         </div>
@@ -60,9 +62,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="add_employee">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">
-                            Email Karyawan
-                        </label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">Email Karyawan</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                 <i class="fa-regular fa-envelope"></i>
@@ -79,9 +79,7 @@
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-[0.18em] mb-2">Peran</label>
                             <select name="role"
                                     class="w-full rounded-xl border border-gray-200 bg-[#FCFBF9] px-4 py-3.5 text-sm font-medium text-dark focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60 transition-all">
-                                {% for value, label in role_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
+                                {% for value, label in role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
                             </select>
                         </div>
                         <div>

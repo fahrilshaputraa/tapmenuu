@@ -23,11 +23,22 @@ def payment_staff_required(view_func):
         from accounts.models import Role, UserProfile
 
         try:
-            role = request.user.profile.role
+            profile = request.user.profile
+            role = profile.role
+            profile_restaurant_id = profile.restaurant_id
         except (UserProfile.DoesNotExist, AttributeError):
             role = None
+            profile_restaurant_id = None
         if role not in (Role.OWNER, Role.ADMIN, Role.KASIR):
             raise PermissionDenied('Tidak memiliki akses pembayaran.')
+        # Scope check: staff can only act on payments belonging to their restaurant.
+        if profile_restaurant_id is not None and 'reference' in kwargs:
+            payment = get_object_or_404(
+                Payment.objects.select_related('order'),
+                reference=kwargs['reference'],
+            )
+            if payment.order.restaurant_id != profile_restaurant_id:
+                raise PermissionDenied('Akses pembayaran ditolak untuk restoran lain.')
         return view_func(request, *args, **kwargs)
 
     return wrapper
@@ -82,6 +93,18 @@ def webhook(request):
 
     reference = payload.get('reference')
     status = payload.get('status')
+
+    # When Midtrans is configured, the generic (dummy) webhook is disabled
+    # entirely — even with a valid PAYMENT_WEBHOOK_SECRET. This prevents
+    # unsigned generic payloads from mutating payments in production.
+    if settings.MIDTRANS_SERVER_KEY and settings.MIDTRANS_CLIENT_KEY:
+        return JsonResponse(
+            {
+                'status': 'ignored',
+                'reason': 'generic webhook disabled when midtrans configured',
+            },
+            status=403,
+        )
 
     # Generic (non-Midtrans) notifications are only allowed in development
     # when a shared secret is configured and provided.

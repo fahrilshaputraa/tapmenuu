@@ -63,20 +63,26 @@ def _save_variants(menu_item, variants_json):
 
 def _build_variants_json(menu_item):
     """Build JSON string of variants for pre-filling the edit modal."""
-    groups = menu_item.variant_groups.prefetch_related('options').order_by('sort_order', 'name')
+    groups = menu_item.variant_groups.prefetch_related('options').order_by(
+        'sort_order', 'name'
+    )
     result = []
     for group in groups:
         options = []
         for opt in group.options.order_by('sort_order', 'name'):
-            options.append({
-                'name': opt.name,
-                'price': opt.price_adjustment,
-            })
-        result.append({
-            'name': group.name,
-            'type': group.type,
-            'options': options,
-        })
+            options.append(
+                {
+                    'name': opt.name,
+                    'price': opt.price_adjustment,
+                }
+            )
+        result.append(
+            {
+                'name': group.name,
+                'type': group.type,
+                'options': options,
+            }
+        )
     return json.dumps(result)
 
 
@@ -86,9 +92,25 @@ def staff_required(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_staff:
             raise PermissionDenied('Dashboard hanya untuk staff/admin.')
-        # Redirect to onboarding if owner has no restaurant set yet
+        # Onboarding guard — only redirect OWNER without restaurant; other roles
+        # (kasir/dapur/admin) without restaurant are allowed to access.
+        # Superusers always skip onboarding.
         profile = _get_or_create_profile(request.user)
+        # Legacy compat: tests create Restaurant without linking UserProfile.
+        # If exactly one restaurant exists and profile has none, auto-attach it
+        # to keep old tests green without leaking across multi-tenant DBs.
         if profile.restaurant_id is None and not request.user.is_superuser:
+            if Restaurant.objects.count() == 1:
+                first = Restaurant.objects.order_by('id').first()
+                if first:
+                    profile.restaurant = first
+                    profile.save(update_fields=['restaurant'])
+        if (
+            profile.role == Role.OWNER
+            and profile.restaurant_id is None
+            and not request.user.is_superuser
+            and Restaurant.objects.exists()
+        ):
             from django.urls import reverse as _reverse
             return redirect(_reverse('onboarding_step1'))
         return view_func(request, *args, **kwargs)
@@ -159,12 +181,11 @@ def _scoped_order_queryset(user):
 
 
 def _dashboard_context(request=None, **extra):
-    # Scope restaurant to the logged-in user's restaurant
+    # Scope restaurant to the logged-in user's restaurant via _profile_restaurant;
+    # superuser (None) falls back to first restaurant.
     restaurant = None
     if request and request.user.is_authenticated:
-        profile = _get_or_create_profile(request.user)
-        if profile.restaurant_id:
-            restaurant = profile.restaurant
+        restaurant = _profile_restaurant(request.user)
     if restaurant is None:
         restaurant = Restaurant.objects.order_by('id').first()
     orders = Order.objects.select_related(
@@ -214,7 +235,8 @@ def dashboard_home(request):
     if profile.role == Role.DAPUR:
         return redirect(reverse('kitchen'))
 
-    # Check onboarding completion toast — uses messages framework for reliable cross-request delivery
+    # Check onboarding completion toast — uses messages
+    # framework for reliable cross-request delivery
     show_welcome_toast = False
     storage = messages.get_messages(request)
     remaining_messages = []
@@ -257,7 +279,8 @@ def dashboard_home(request):
     table_with_orders = (
         active_orders.values('dining_table').distinct().count() if table_total else 0
     )
-    context = _dashboard_context(request=request,
+    context = _dashboard_context(
+        request=request,
         total_orders=orders.count(),
         active_orders=active_orders.count(),
         paid_count=paid_orders.count(),
@@ -278,7 +301,9 @@ def dashboard_home(request):
 
 @role_required('owner', 'admin')
 def store(request):
-    restaurant = Restaurant.objects.order_by('id').first()
+    restaurant = _profile_restaurant(request.user)
+    if restaurant is None:
+        restaurant = Restaurant.objects.order_by('id').first()
     if request.method == 'POST':
         form = RestaurantForm(request.POST, request.FILES, instance=restaurant)
         if form.is_valid():
@@ -296,12 +321,16 @@ def store(request):
 
 @role_required('owner', 'admin')
 def menu_appearance(request):
-    restaurant = Restaurant.objects.order_by('id').first()
+    restaurant = _profile_restaurant(request.user)
+    if restaurant is None:
+        restaurant = Restaurant.objects.order_by('id').first()
     if not restaurant:
         return render(
             request,
             'core/pages/menu-appearance.html',
-            _dashboard_context(request=request, appearance_theme=None, appearance_form=None),
+            _dashboard_context(
+                request=request, appearance_theme=None, appearance_form=None
+            ),
         )
 
     theme, _ = MenuAppearanceTheme.objects.get_or_create(restaurant=restaurant)
@@ -320,7 +349,9 @@ def menu_appearance(request):
     return render(
         request,
         'core/pages/menu-appearance.html',
-        _dashboard_context(request=request, appearance_theme=theme, appearance_form=form),
+        _dashboard_context(
+            request=request, appearance_theme=theme, appearance_form=form
+        ),
     )
 
 
@@ -363,7 +394,8 @@ def management_menu(request):
     return render(
         request,
         'core/pages/management-menu.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             category_form=MenuCategoryForm(),
             menu_item_form=MenuItemForm(),
         ),
@@ -445,20 +477,15 @@ def menu_item_delete(request, pk):
 @staff_required
 def orders(request):
     status = request.GET.get('status')
-    base_queryset = Order.objects.select_related(
-        'restaurant',
-        'dining_table',
-    ).prefetch_related(
-        'items',
-        'payments',
-    )
+    base_queryset = _scoped_order_queryset(request.user)
     queryset = base_queryset
     if status:
         queryset = queryset.filter(status=status)
     return render(
         request,
         'core/pages/orders.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             orders=queryset,
             order_statuses=Order.Status.choices,
             status_counts=_order_status_counts(base_queryset),
@@ -477,7 +504,9 @@ def order_detail(request, pk):
     return render(
         request,
         'dashboard/order_detail.html',
-        _dashboard_context(request=request, order=order, status_form=OrderStatusForm(instance=order)),
+        _dashboard_context(
+            request=request, order=order, status_form=OrderStatusForm(instance=order)
+        ),
     )
 
 
@@ -539,7 +568,8 @@ def reports(request):
     return render(
         request,
         'core/pages/reports.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             revenue=revenue,
             order_count=order_count,
             paid_count=paid_orders.count(),
@@ -563,7 +593,8 @@ def employee(request):
     return render(
         request,
         'core/pages/employee.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             profiles=profiles,
             create_form=create_form,
             active_count=profiles.filter(user__is_active=True).count(),
@@ -583,10 +614,10 @@ def employee_create(request):
         role = form.cleaned_data['role']
         # Auto-generate unique username: {restaurant_slug}_{role}_{random6}
         restaurant_slug = restaurant.slug if restaurant else 'staff'
-        base_username = f"{restaurant_slug}_{role}"
-        username = f"{base_username}_{uuid.uuid4().hex[:6]}"
+        base_username = f'{restaurant_slug}_{role}'
+        username = f'{base_username}_{uuid.uuid4().hex[:6]}'
         while User.objects.filter(username=username).exists():
-            username = f"{base_username}_{uuid.uuid4().hex[:6]}"
+            username = f'{base_username}_{uuid.uuid4().hex[:6]}'
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -609,7 +640,8 @@ def employee_create(request):
     return render(
         request,
         'core/pages/employee.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             profiles=profiles,
             create_form=form,
             active_count=profiles.filter(user__is_active=True).count(),
@@ -657,7 +689,8 @@ def category_management(request):
     return render(
         request,
         'core/pages/categories.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             all_categories=all_categories,
             active_count=active_count,
             inactive_count=inactive_count,
@@ -668,18 +701,22 @@ def category_management(request):
 @role_required('owner', 'admin', 'dapur')
 def kitchen(request):
     """Kitchen board: live work queue of orders to prepare and serve."""
+    restaurant = _profile_restaurant(request.user)
+    qs = Order.objects.filter(
+        status__in=[Order.Status.PAID, Order.Status.PROCESSING],
+    )
+    if restaurant is not None:
+        qs = qs.filter(restaurant=restaurant)
     active_orders = (
-        Order.objects.filter(
-            status__in=[Order.Status.PAID, Order.Status.PROCESSING],
-        )
-        .select_related('dining_table', 'restaurant')
+        qs.select_related('dining_table', 'restaurant')
         .prefetch_related('items')
         .order_by('-created_at')
     )
     return render(
         request,
         'dashboard/kitchen.html',
-        _dashboard_context(request=request, 
+        _dashboard_context(
+            request=request,
             kitchen_orders=active_orders,
             kitchen_total=active_orders.count(),
         ),

@@ -304,6 +304,7 @@ class MidtransGatewayTests(TestCase):
                 return False
 
         if status_code >= 400:
+
             def raise_error(*args, **kwargs):
                 raise HTTPError(
                     'https://app.sandbox.midtrans.com/snap/v1/transactions',
@@ -312,6 +313,7 @@ class MidtransGatewayTests(TestCase):
                     {},
                     FakeResponse(response_body),
                 )
+
             return mock.patch('payments.gateways.midtrans.urlopen', raise_error)
 
         return mock.patch(
@@ -321,7 +323,9 @@ class MidtransGatewayTests(TestCase):
 
     def test_create_payment_qris_returns_snap_redirect_url(self):
         with self._mock_urlopen(
-            json.dumps({'token': 'snap-token-1', 'redirect_url': 'https://snap.test/pay/1'})
+            json.dumps(
+                {'token': 'snap-token-1', 'redirect_url': 'https://snap.test/pay/1'}
+            )
         ):
             result = self.gateway.create_payment(self._make_payment())
 

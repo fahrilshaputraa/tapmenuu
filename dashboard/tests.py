@@ -45,7 +45,9 @@ class MenuAppearanceDashboardTests(TestCase):
         self.assertContains(response, 'Ya, Reset Default')
         self.assertContains(response, 'name="reset_theme"')
         self.assertNotContains(response, 'confirm(')
-        self.assertEqual(response.context['appearance_theme'].restaurant, self.restaurant)
+        self.assertEqual(
+            response.context['appearance_theme'].restaurant, self.restaurant
+        )
 
     def test_appearance_post_saves_theme_to_database(self):
         self.login_staff()

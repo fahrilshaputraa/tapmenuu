@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,13 +25,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-^fx^017nzetc+@y3a-n27=d1eb1zq$3o$kpcs3@3d4_34_gno^')
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') != 'False'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') != 'False'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+# SECRET_KEY must come from env in production (DEBUG=False). In DEV (DEBUG=True)
+# a fallback insecure key is allowed for convenience, but production aborts.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = (
+            'django-insecure-^fx^017nzetc+@y3a-n27=d1eb1zq$3o$kpcs3@3d4_34_gno^'
+        )
+    else:
+        raise ImproperlyConfigured(
+            'DJANGO_SECRET_KEY must be set via environment when DEBUG is False.'
+        )
+
+if DEBUG:
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+else:
+    _allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
+    if not _allowed_hosts_env:
+        raise ImproperlyConfigured(
+            'ALLOWED_HOSTS must be set via environment when DEBUG is False '
+            '(comma-separated, e.g. tapmenu.example.com).'
+        )
+    ALLOWED_HOSTS = _allowed_hosts_env.split(',')
+    if ALLOWED_HOSTS == ['*']:
+        raise ImproperlyConfigured(
+            'ALLOWED_HOSTS cannot be wildcard (*) when DEBUG is False.'
+        )
 
 
 # Application definition
@@ -149,7 +173,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication backends
-# EmailBackend first so staff log in with email; ModelBackend fallback for superuser/admin panel
+# EmailBackend first so staff log in with email;
+# ModelBackend fallback for superuser/admin panel
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',

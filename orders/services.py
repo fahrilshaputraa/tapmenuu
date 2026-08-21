@@ -109,7 +109,29 @@ def create_order_from_cart(*, table, cart_items, customer_name='', customer_note
             menu_item = cart_item['menu_item']
             quantity = int(cart_item.get('quantity', 1))
             note = cart_item.get('note', '')
-            unit_price = int(cart_item.get('unit_price', menu_item.price))
+            # Never trust unit_price from cart/client —
+            # recalculate from DB as source of truth.
+            # Variant price adjustments are re-validated via
+            # MenuItemVariantOption.
+            unit_price = menu_item.price
+            variant_option_ids = cart_item.get('variant_option_ids') or cart_item.get(
+                'variant_options', []
+            )
+            if variant_option_ids:
+                from menus.models import MenuItemVariantOption
+
+                try:
+                    ids = [int(v) for v in variant_option_ids]
+                except (TypeError, ValueError):
+                    ids = []
+                if ids:
+                    adjustments = MenuItemVariantOption.objects.filter(
+                        id__in=ids,
+                        group__menu_item=menu_item,
+                        group__is_active=True,
+                        is_active=True,
+                    ).values_list('price_adjustment', flat=True)
+                    unit_price += sum(adjustments)
 
             if quantity < 1:
                 raise OrderCreationError('Quantity menu minimal 1.')

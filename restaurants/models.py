@@ -150,13 +150,13 @@ class MenuAppearanceTheme(models.Model):
         verbose_name = 'Menu appearance theme'
         verbose_name_plural = 'Menu appearance themes'
 
+    def __str__(self):
+        return f'Tema Menu - {self.restaurant.name}'
+
     def reset_to_defaults(self):
         for field_name, value in MENU_THEME_DEFAULTS.items():
             setattr(self, field_name, value)
         self.save(update_fields=[*MENU_THEME_DEFAULTS.keys(), 'updated_at'])
-
-    def __str__(self):
-        return f'Tema Menu - {self.restaurant.name}'
 
 
 class DiningTable(models.Model):

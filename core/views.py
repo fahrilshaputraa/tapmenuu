@@ -6,17 +6,15 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.text import slugify
 from django.views.decorators.http import require_http_methods
-from django.db.models import Prefetch
 
 from accounts.models import Role, UserProfile
 from menus.models import MenuCategory, MenuItem
-from menus.views import _build_cart_summary
-from restaurants.models import DiningTable, MenuAppearanceTheme
-from restaurants.models import Restaurant
+from restaurants.models import DiningTable, MenuAppearanceTheme, Restaurant
 
 # 10 color palette presets for onboarding
 PALETTE_PRESETS = [
@@ -195,8 +193,12 @@ def register(request):
     if request.method == 'POST':
         email = (request.POST.get('email') or '').strip().lower()
         password1 = request.POST.get('password1') or request.POST.get('password')
-        password2 = request.POST.get('password2') or request.POST.get('confirm_password')
-        restaurant_name = request.POST.get('restaurant_name') or request.POST.get('business_name')
+        password2 = request.POST.get('password2') or request.POST.get(
+            'confirm_password'
+        )
+        restaurant_name = request.POST.get('restaurant_name') or request.POST.get(
+            'business_name'
+        )
 
         # Validate required fields
         if not email:
@@ -213,14 +215,16 @@ def register(request):
 
         # Check email uniqueness
         if User.objects.filter(email__iexact=email).exists():
-            messages.error(request, 'Email sudah terdaftar. Silakan login atau gunakan email lain.')
+            messages.error(
+                request, 'Email sudah terdaftar. Silakan login atau gunakan email lain.'
+            )
             return render(request, 'core/pages/register.html')
 
         # Auto-generate unique username from email prefix + random suffix
         base_username = slugify(email.split('@')[0]).replace('-', '_') or 'owner'
-        username = f"{base_username}_{uuid.uuid4().hex[:6]}"
+        username = f'{base_username}_{uuid.uuid4().hex[:6]}'
         while User.objects.filter(username=username).exists():
-            username = f"{base_username}_{uuid.uuid4().hex[:6]}"
+            username = f'{base_username}_{uuid.uuid4().hex[:6]}'
 
         user = User.objects.create_user(
             username=username,
@@ -259,6 +263,7 @@ def _unique_restaurant_slug(name):
 
 
 # ─── Onboarding Wizard ────────────────────────────────────────────────────────
+
 
 def _onboarding_guard(request):
     """Return redirect if user should not be in onboarding (already has restaurant)."""
@@ -329,7 +334,9 @@ def onboarding_step2(request):
 
     if request.method == 'POST':
         palette_id = request.POST.get('palette_id', 'tapmenu')
-        palette = next((p for p in PALETTE_PRESETS if p['id'] == palette_id), PALETTE_PRESETS[0])
+        palette = next(
+            (p for p in PALETTE_PRESETS if p['id'] == palette_id), PALETTE_PRESETS[0]
+        )
 
         theme, _ = MenuAppearanceTheme.objects.get_or_create(
             restaurant=profile.restaurant,
@@ -339,13 +346,25 @@ def onboarding_step2(request):
         theme.accent_color = palette['accent']
         theme.background_color = palette['bg']
         theme.card_color = palette['card']
-        theme.save(update_fields=['primary_color', 'secondary_color', 'accent_color', 'background_color', 'card_color'])
+        theme.save(
+            update_fields=[
+                'primary_color',
+                'secondary_color',
+                'accent_color',
+                'background_color',
+                'card_color',
+            ]
+        )
 
         return redirect('onboarding_step3')
 
-    return render(request, 'core/pages/onboarding-step2.html', {
-        'palettes': PALETTE_PRESETS,
-    })
+    return render(
+        request,
+        'core/pages/onboarding-step2.html',
+        {
+            'palettes': PALETTE_PRESETS,
+        },
+    )
 
 
 @login_required(login_url='login')
@@ -373,7 +392,7 @@ def onboarding_step3(request):
                     messages.error(request, f'Email {email} sudah digunakan.')
                 else:
                     restaurant_slug = profile.restaurant.slug
-                    emp_username = f"{restaurant_slug}_{role}_{uuid.uuid4().hex[:6]}"
+                    emp_username = f'{restaurant_slug}_{role}_{uuid.uuid4().hex[:6]}'
                     emp_user = User.objects.create_user(
                         username=emp_username,
                         email=email,
@@ -392,10 +411,14 @@ def onboarding_step3(request):
         messages.success(request, '__onboarding_complete__')
         return redirect('dashboard')
 
-    return render(request, 'core/pages/onboarding-step3.html', {
-        'role_choices': [
-            ('admin', 'Admin'),
-            ('kasir', 'Kasir'),
-            ('dapur', 'Dapur'),
-        ],
-    })
+    return render(
+        request,
+        'core/pages/onboarding-step3.html',
+        {
+            'role_choices': [
+                ('admin', 'Admin'),
+                ('kasir', 'Kasir'),
+                ('dapur', 'Dapur'),
+            ],
+        },
+    )

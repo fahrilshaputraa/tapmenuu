@@ -12,7 +12,8 @@
               rel="stylesheet">
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <link rel="stylesheet"
+              href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
         <style>
             .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -42,11 +43,12 @@
                             <p class="text-sm text-green-100">Ringkasan pesanan</p>
                             <p class="text-3xl sm:text-4xl font-extrabold">{{ cart_summary.total_quantity }} item</p>
                         </div>
-                        <p class="text-green-100 font-bold mt-2 sm:mt-0 text-lg sm:text-xl md:text-2xl">{{ cart_summary.total_amount|rupiah }}</p>
+                        <p class="text-green-100 font-bold mt-2 sm:mt-0 text-lg sm:text-xl md:text-2xl">
+                            {{ cart_summary.total_amount|rupiah }}
+                        </p>
                     </div>
                 </div>
             </header>
-
             <!-- CART CONTENT -->
             <section class="max-w-4xl mx-auto px-5 sm:px-8 -mt-5 relative z-20">
                 <div class="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-card border border-gray-100">
@@ -54,7 +56,8 @@
                         <!-- CART ITEMS -->
                         <div class="space-y-3 mb-5 max-h-96 md:max-h-[30rem] overflow-y-auto custom-scroll pr-1">
                             {% for cart_item in cart_summary.items %}
-                                <div class="relative overflow-hidden rounded-2xl bg-red-500" data-cart-swipe-item>
+                                <div class="relative overflow-hidden rounded-2xl bg-red-500"
+                                     data-cart-swipe-item>
                                     <form method="post"
                                           action="{% url 'customer_cart_remove' dining_table.qr_token cart_item.line_key %}"
                                           class="absolute inset-y-0 right-0 w-24 flex">
@@ -71,7 +74,9 @@
                                         <div class="min-w-0">
                                             <p class="font-extrabold text-dark leading-tight">{{ cart_item.menu_item.name }}</p>
                                             <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ cart_item.quantity }} x {{ cart_item.unit_price|rupiah }}</p>
-                                            {% for variant_label in cart_item.variant_labels %}<p class="text-xs text-primary font-bold mt-1">{{ variant_label }}</p>{% endfor %}
+                                            {% for variant_label in cart_item.variant_labels %}
+                                                <p class="text-xs text-primary font-bold mt-1">{{ variant_label }}</p>
+                                            {% endfor %}
                                             {% if cart_item.note %}<p class="text-xs text-gray-500 mt-1">Catatan: {{ cart_item.note }}</p>{% endif %}
                                             <p class="text-[10px] sm:text-xs text-gray-400 font-bold mt-2">Geser kiri untuk hapus</p>
                                         </div>
@@ -105,13 +110,11 @@
                                 </div>
                             {% endfor %}
                         </div>
-
                         <!-- TOTAL & CHECKOUT FORM -->
                         <div class="border-t border-dashed border-gray-200 pt-4 sm:pt-5 mb-5 flex items-center justify-between">
                             <span class="text-sm sm:text-base md:text-lg text-gray-500">Total Pembayaran</span>
                             <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent">{{ cart_summary.total_amount|rupiah }}</span>
                         </div>
-
                         <form method="post"
                               action="{% url 'customer_checkout' dining_table.qr_token %}"
                               class="space-y-3 sm:space-y-4">
@@ -154,7 +157,9 @@
                                 <i class="fa-solid fa-cart-shopping text-3xl sm:text-4xl"></i>
                             </div>
                             <p class="font-extrabold text-dark text-xl sm:text-2xl">Keranjang masih kosong</p>
-                            <p class="text-sm sm:text-base mt-2 max-w-md mx-auto">Pilih menu dulu, lalu kembali ke halaman keranjang untuk checkout.</p>
+                            <p class="text-sm sm:text-base mt-2 max-w-md mx-auto">
+                                Pilih menu dulu, lalu kembali ke halaman keranjang untuk checkout.
+                            </p>
                             <a href="{% url 'customer_menu' dining_table.qr_token %}"
                                class="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl bg-primary text-white font-extrabold hover:bg-primaryLight transition-colors text-base">
                                 <i class="fa-solid fa-utensils"></i>

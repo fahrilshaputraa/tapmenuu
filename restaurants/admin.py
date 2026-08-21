@@ -14,7 +14,13 @@ class RestaurantAdmin(admin.ModelAdmin):
 
 @admin.register(MenuAppearanceTheme)
 class MenuAppearanceThemeAdmin(admin.ModelAdmin):
-    list_display = ('restaurant', 'primary_color', 'layout_style', 'header_style', 'updated_at')
+    list_display = (
+        'restaurant',
+        'primary_color',
+        'layout_style',
+        'header_style',
+        'updated_at',
+    )
     list_filter = ('layout_style', 'header_style', 'button_style', 'show_category_tabs')
     search_fields = ('restaurant__name',)
     readonly_fields = ('created_at', 'updated_at')

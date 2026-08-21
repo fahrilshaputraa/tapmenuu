@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
-from accounts.models import Role, UserProfile
+from accounts.models import Role
 from menus.models import MenuCategory, MenuItem
 from orders.models import Order
 from orders.services import can_transition_status, transition_order_status
@@ -95,7 +95,9 @@ class MenuAppearanceThemeForm(forms.ModelForm):
             'layout_style': forms.Select(attrs={'class': 'theme-input'}),
             'header_style': forms.Select(attrs={'class': 'theme-input'}),
             'button_style': forms.Select(attrs={'class': 'theme-input'}),
-            'show_category_tabs': forms.CheckboxInput(attrs={'class': 'theme-checkbox'}),
+            'show_category_tabs': forms.CheckboxInput(
+                attrs={'class': 'theme-checkbox'}
+            ),
             'banner_image': forms.ClearableFileInput(attrs={'class': 'theme-input'}),
             'tagline': forms.TextInput(
                 attrs={
@@ -159,20 +161,20 @@ class MenuCategoryForm(forms.ModelForm):
         name = self.cleaned_data.get('name', '')
         base_slug = slugify(slug or name) or 'kategori'
         restaurant = self.cleaned_data.get('restaurant')
-        
+
         if not restaurant:
             return base_slug
-            
+
         unique_slug = base_slug
         counter = 1
         qs = MenuCategory.objects.filter(restaurant=restaurant)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
-            
+
         while qs.filter(slug=unique_slug).exists():
-            unique_slug = f"{base_slug}-{counter}"
+            unique_slug = f'{base_slug}-{counter}'
             counter += 1
-            
+
         return unique_slug
 
 
@@ -199,51 +201,128 @@ class MenuItemForm(forms.ModelForm):
             'sort_order',
         ]
         widgets = {
-            'restaurant': forms.Select(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-            }),
-            'category': forms.Select(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-            }),
-            'name': forms.TextInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-                'placeholder': 'Contoh: Ayam Geprek',
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium resize-none',
-                'rows': 3,
-                'placeholder': 'Jelaskan bahan utama atau rasa...',
-            }),
-            'price': forms.NumberInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg font-bold text-dark',
-                'placeholder': '0',
-            }),
-            'discount': forms.NumberInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-                'placeholder': '0',
-                'min': 0,
-                'max': 100,
-            }),
-            'tax': forms.NumberInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-                'placeholder': '10',
-                'min': 0,
-                'max': 100,
-            }),
-            'stock': forms.NumberInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary text-sm font-medium',
-                'placeholder': '0',
-            }),
-            'sort_order': forms.NumberInput(attrs={
-                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium',
-            }),
-            'is_available': forms.CheckboxInput(attrs={
-                'class': 'toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300',
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300',
-                'checked': True,
-            }),
+            'restaurant': forms.Select(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                }
+            ),
+            'category': forms.Select(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                }
+            ),
+            'name': forms.TextInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                    'placeholder': 'Contoh: Ayam Geprek',
+                }
+            ),
+            'description': forms.Textarea(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium '
+                        'resize-none'
+                    ),
+                    'rows': 3,
+                    'placeholder': 'Jelaskan bahan utama atau rasa...',
+                }
+            ),
+            'price': forms.NumberInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl pl-10 pr-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-lg font-bold text-dark'
+                    ),
+                    'placeholder': '0',
+                }
+            ),
+            'discount': forms.NumberInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-2.5 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                    'placeholder': '0',
+                    'min': 0,
+                    'max': 100,
+                }
+            ),
+            'tax': forms.NumberInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-2.5 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                    'placeholder': '10',
+                    'min': 0,
+                    'max': 100,
+                }
+            ),
+            'stock': forms.NumberInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-2.5 focus:outline-none '
+                        'focus:border-primary text-sm font-medium'
+                    ),
+                    'placeholder': '0',
+                }
+            ),
+            'sort_order': forms.NumberInput(
+                attrs={
+                    'class': (
+                        'w-full bg-gray-50 border border-gray-200 '
+                        'rounded-xl px-4 py-3 focus:outline-none '
+                        'focus:border-primary focus:ring-1 '
+                        'focus:ring-primary text-sm font-medium'
+                    ),
+                }
+            ),
+            'is_available': forms.CheckboxInput(
+                attrs={
+                    'class': (
+                        'toggle-checkbox absolute block w-5 h-5 '
+                        'rounded-full bg-white border-4 appearance-none '
+                        'cursor-pointer transition-all duration-300 left-0 '
+                        'border-gray-300'
+                    ),
+                }
+            ),
+            'is_active': forms.CheckboxInput(
+                attrs={
+                    'class': (
+                        'toggle-checkbox absolute block w-5 h-5 '
+                        'rounded-full bg-white border-4 appearance-none '
+                        'cursor-pointer transition-all duration-300 left-0 '
+                        'border-gray-300'
+                    ),
+                    'checked': True,
+                }
+            ),
         }
 
     def clean_slug(self):
@@ -251,20 +330,20 @@ class MenuItemForm(forms.ModelForm):
         name = self.cleaned_data.get('name', '')
         base_slug = slugify(slug or name) or 'menu'
         restaurant = self.cleaned_data.get('restaurant')
-        
+
         if not restaurant:
             return base_slug
-            
+
         unique_slug = base_slug
         counter = 1
         qs = MenuItem.objects.filter(restaurant=restaurant)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
-            
+
         while qs.filter(slug=unique_slug).exists():
-            unique_slug = f"{base_slug}-{counter}"
+            unique_slug = f'{base_slug}-{counter}'
             counter += 1
-            
+
         return unique_slug
 
 
@@ -279,16 +358,22 @@ class OrderStatusForm(forms.ModelForm):
         if instance and instance.pk:
             # NOTE: construct_instance() may already have mutated instance.status,
             # so always validate against the persisted DB value.
-            persisted_status = Order.objects.filter(pk=instance.pk).values_list(
-                'status',
-                flat=True,
-            ).first()
+            persisted_status = (
+                Order.objects.filter(pk=instance.pk)
+                .values_list(
+                    'status',
+                    flat=True,
+                )
+                .first()
+            )
             current_status = persisted_status or instance.status
             if not can_transition_status(current_status, new_status):
+                cur_label = dict(Order.Status.choices).get(
+                    current_status, current_status
+                )
+                new_label = dict(Order.Status.choices).get(new_status, new_status)
                 raise forms.ValidationError(
-                    f'Tidak bisa mengubah status dari '
-                    f'"{dict(Order.Status.choices).get(current_status, current_status)}" '
-                    f'ke "{dict(Order.Status.choices).get(new_status, new_status)}".',
+                    f'Tidak bisa mengubah status dari "{cur_label}" ke "{new_label}".',
                 )
         return new_status
 
@@ -303,10 +388,14 @@ class OrderStatusForm(forms.ModelForm):
         # Re-fetch the persisted status because construct_instance() may have
         # mutated order.status before save() is called.
         if order.pk:
-            persisted_status = Order.objects.filter(pk=order.pk).values_list(
-                'status',
-                flat=True,
-            ).first()
+            persisted_status = (
+                Order.objects.filter(pk=order.pk)
+                .values_list(
+                    'status',
+                    flat=True,
+                )
+                .first()
+            )
             if persisted_status and persisted_status != order.status:
                 order.status = persisted_status
         return transition_order_status(order=order, new_status=new_status)

@@ -35,9 +35,7 @@
         <div class="max-w-7xl mx-auto space-y-6 fade-in">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="px-4 py-3 rounded-xl text-sm font-medium
-                        {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
-                        {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+                    <div class="px-4 py-3 rounded-xl text-sm font-medium {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200 {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -96,18 +94,12 @@
                                             </div>
                                             <div>
                                                 <p class="font-semibold text-dark">{{ profile.user.username }}</p>
-                                                {% if profile.user.email %}
-                                                    <p class="text-xs text-gray-400">{{ profile.user.email }}</p>
-                                                {% endif %}
+                                                {% if profile.user.email %}<p class="text-xs text-gray-400">{{ profile.user.email }}</p>{% endif %}
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold
-                                            {% if profile.role == 'admin' %}bg-blue-50 text-blue-600
-                                            {% elif profile.role == 'kasir' %}bg-amber-50 text-amber-600
-                                            {% elif profile.role == 'dapur' %}bg-orange-50 text-orange-600
-                                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold {% if profile.role == 'admin' %}bg-blue-50 text-blue-600 {% elif profile.role == 'kasir' %}bg-amber-50 text-amber-600 {% elif profile.role == 'dapur' %}bg-orange-50 text-orange-600 {% else %}bg-gray-100 text-gray-600{% endif %}">
                                             {{ profile.get_role_display }}
                                         </span>
                                     </td>
@@ -115,19 +107,22 @@
                                         <form method="post" action="{% url 'employee_update' profile.pk %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="role" value="{{ profile.role }}">
-                                            <input type="hidden" name="is_active" value="{% if profile.user.is_active %}on{% endif %}">
+                                            <input type="hidden"
+                                                   name="is_active"
+                                                   value="{% if profile.user.is_active %}on{% endif %}">
                                             <button type="button"
                                                     data-pk="{{ profile.pk }}"
                                                     data-active="{{ profile.user.is_active|yesno:'true,false' }}"
                                                     onclick="toggleActive(this)"
-                                                    class="flex items-center gap-2 text-xs font-semibold
-                                                        {% if profile.user.is_active %}text-green-600{% else %}text-gray-400{% endif %}">
-                                                <span class="w-8 h-4 rounded-full relative inline-block transition-colors
-                                                    {% if profile.user.is_active %}bg-green-400{% else %}bg-gray-200{% endif %}">
-                                                    <span class="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform
-                                                        {% if profile.user.is_active %}translate-x-4{% else %}translate-x-0.5{% endif %}"></span>
+                                                    class="flex items-center gap-2 text-xs font-semibold {% if profile.user.is_active %}text-green-600{% else %}text-gray-400{% endif %}">
+                                                <span class="w-8 h-4 rounded-full relative inline-block transition-colors {% if profile.user.is_active %}bg-green-400{% else %}bg-gray-200{% endif %}">
+                                                    <span class="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform {% if profile.user.is_active %}translate-x-4{% else %}translate-x-0.5{% endif %}"></span>
                                                 </span>
-                                                {% if profile.user.is_active %}Aktif{% else %}Nonaktif{% endif %}
+                                                {% if profile.user.is_active %}
+                                                    Aktif
+                                                {% else %}
+                                                    Nonaktif
+                                                {% endif %}
                                             </button>
                                         </form>
                                     </td>
@@ -185,7 +180,9 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <form method="post" action="{% url 'employee_create' %}" id="add-employee-form">
+            <form method="post"
+                  action="{% url 'employee_create' %}"
+                  id="add-employee-form">
                 {% csrf_token %}
                 <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
                     {% if create_form.errors %}
@@ -244,7 +241,6 @@
             </form>
         </div>
     </div>
-
     <!-- === EDIT MODAL === -->
     <div id="edit-modal"
          class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
@@ -261,7 +257,8 @@
                 <div class="p-6 space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Peran / Role</label>
-                        <select name="role" id="edit-role"
+                        <select name="role"
+                                id="edit-role"
                                 class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-medium">
                             <option value="admin">Admin</option>
                             <option value="kasir">Kasir</option>
@@ -269,7 +266,9 @@
                         </select>
                     </div>
                     <div class="flex items-center gap-3">
-                        <input type="checkbox" name="is_active" id="edit-is-active"
+                        <input type="checkbox"
+                               name="is_active"
+                               id="edit-is-active"
                                class="w-4 h-4 accent-primary">
                         <label for="edit-is-active" class="text-sm font-medium text-dark">Akun aktif</label>
                     </div>
@@ -288,14 +287,13 @@
             </form>
         </div>
     </div>
-
     <!-- === DELETE FORM (hidden) === -->
     <form method="post" id="delete-form" action="">
         {% csrf_token %}
     </form>
 {% endblock %}
 {% block dashboard_page_scripts %}
-<script>
+    <script>
     function openAddModal() {
         document.getElementById('employee-modal').classList.remove('hidden');
     }
@@ -330,5 +328,5 @@
     {% if create_form.errors %}
         document.addEventListener('DOMContentLoaded', function() { openAddModal(); });
     {% endif %}
-</script>
+    </script>
 {% endblock %}

@@ -1,236 +1,234 @@
 {% extends 'layouts/dashboard.html' %}
 {% load static %}
-
 {% block title %}TapMenu - Appearance Menu{% endblock %}
-
 {% block dashboard_tailwind_config %}
-<script src="{% static 'core/js/pages/appearance-1.js' %}"></script>
+    <script src="{% static 'core/js/pages/appearance-1.js' %}"></script>
 {% endblock %}
-
 {% block dashboard_extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'core/css/pages/appearance-1.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="{% static 'core/css/pages/appearance-1.css' %}">
 {% endblock %}
-
 {% block dashboard_main %}
-<header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 lg:px-8 shrink-0">
-    <div>
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Pengaturan</p>
-        <h1 class="text-2xl font-extrabold text-dark">Appearance Menu</h1>
-    </div>
-    <a href="{% url 'book_menu' %}" target="_blank" rel="noopener"
-       class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-extrabold hover:bg-primaryLight transition-colors">
-        <i class="fa-solid fa-eye"></i>
-        Lihat Menu Publik
-    </a>
-</header>
-
-<div class="flex-1 overflow-y-auto bg-[#F7F5F2] p-4 sm:p-6 lg:p-8">
-    {% if not appearance_form %}
-        <div class="bg-white rounded-3xl shadow-card p-8 text-center max-w-xl mx-auto">
-            <div class="w-16 h-16 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-store-slash text-2xl"></i>
-            </div>
-            <h2 class="text-xl font-extrabold text-dark">Restoran belum tersedia</h2>
-            <p class="text-sm text-gray-500 mt-2">Buat profil restoran dulu sebelum mengatur appearance menu.</p>
+    <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 lg:px-8 shrink-0">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Pengaturan</p>
+            <h1 class="text-2xl font-extrabold text-dark">Appearance Menu</h1>
         </div>
-    {% else %}
-        <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 items-start">
-            <form method="post" id="appearance-theme-form" class="space-y-6" data-theme-form enctype="multipart/form-data">
-                {% csrf_token %}
-                <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
-                    <div class="flex items-start justify-between gap-4 mb-6">
-                        <div>
-                            <h2 class="text-lg font-extrabold text-dark">Warna Tema</h2>
-                            <p class="text-sm text-gray-500 mt-1">Atur warna utama menu customer sesuai brand restoran.</p>
+        <a href="{% url 'book_menu' %}"
+           target="_blank"
+           rel="noopener"
+           class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-extrabold hover:bg-primaryLight transition-colors">
+            <i class="fa-solid fa-eye"></i>
+            Lihat Menu Publik
+        </a>
+    </header>
+    <div class="flex-1 overflow-y-auto bg-[#F7F5F2] p-4 sm:p-6 lg:p-8">
+        {% if not appearance_form %}
+            <div class="bg-white rounded-3xl shadow-card p-8 text-center max-w-xl mx-auto">
+                <div class="w-16 h-16 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-store-slash text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-dark">Restoran belum tersedia</h2>
+                <p class="text-sm text-gray-500 mt-2">Buat profil restoran dulu sebelum mengatur appearance menu.</p>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 items-start">
+                <form method="post"
+                      id="appearance-theme-form"
+                      class="space-y-6"
+                      data-theme-form
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
+                        <div class="flex items-start justify-between gap-4 mb-6">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-dark">Warna Tema</h2>
+                                <p class="text-sm text-gray-500 mt-1">Atur warna utama menu customer sesuai brand restoran.</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-secondary text-primary text-xs font-extrabold">Live Preview</span>
                         </div>
-                        <span class="px-3 py-1 rounded-full bg-secondary text-primary text-xs font-extrabold">Live Preview</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <label class="theme-field">
-                            <span>Warna Utama</span>
-                            {{ appearance_form.primary_color }}
-                        </label>
-                        <label class="theme-field">
-                            <span>Warna Sekunder</span>
-                            {{ appearance_form.secondary_color }}
-                        </label>
-                        <label class="theme-field">
-                            <span>Warna Aksen</span>
-                            {{ appearance_form.accent_color }}
-                        </label>
-                        <label class="theme-field">
-                            <span>Background</span>
-                            {{ appearance_form.background_color }}
-                        </label>
-                        <label class="theme-field">
-                            <span>Text</span>
-                            {{ appearance_form.text_color }}
-                        </label>
-                        <label class="theme-field">
-                            <span>Card</span>
-                            {{ appearance_form.card_color }}
-                        </label>
-                    </div>
-                </section>
-
-                <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
-                    <h2 class="text-lg font-extrabold text-dark mb-1">Branding & Kontak</h2>
-                    <p class="text-sm text-gray-500 mb-6">Banner, tagline, sambutan, dan info kontak untuk halaman pelanggan & struk.</p>
-                    <div class="space-y-4">
-                        <label class="theme-field block">
-                            <span>Banner Image</span>
-                            {{ appearance_form.banner_image }}
-                            <span class="block text-xs text-gray-400 mt-1">Gambar banner tampilan customer (opsional).</span>
-                        </label>
-                        <label class="theme-field block">
-                            <span>Tagline</span>
-                            {{ appearance_form.tagline }}
-                        </label>
-                        <label class="theme-field block">
-                            <span>Pesan Sambutan</span>
-                            {{ appearance_form.greeting_message }}
-                        </label>
-                        <label class="theme-field block">
-                            <span>Teks Struk (Receipt Footer)</span>
-                            {{ appearance_form.receipt_footer_text }}
-                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <label class="theme-field">
+                                <span>Warna Utama</span>
+                                {{ appearance_form.primary_color }}
+                            </label>
+                            <label class="theme-field">
+                                <span>Warna Sekunder</span>
+                                {{ appearance_form.secondary_color }}
+                            </label>
+                            <label class="theme-field">
+                                <span>Warna Aksen</span>
+                                {{ appearance_form.accent_color }}
+                            </label>
+                            <label class="theme-field">
+                                <span>Background</span>
+                                {{ appearance_form.background_color }}
+                            </label>
+                            <label class="theme-field">
+                                <span>Text</span>
+                                {{ appearance_form.text_color }}
+                            </label>
+                            <label class="theme-field">
+                                <span>Card</span>
+                                {{ appearance_form.card_color }}
+                            </label>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
+                        <h2 class="text-lg font-extrabold text-dark mb-1">Branding & Kontak</h2>
+                        <p class="text-sm text-gray-500 mb-6">Banner, tagline, sambutan, dan info kontak untuk halaman pelanggan & struk.</p>
+                        <div class="space-y-4">
+                            <label class="theme-field block">
+                                <span>Banner Image</span>
+                                {{ appearance_form.banner_image }}
+                                <span class="block text-xs text-gray-400 mt-1">Gambar banner tampilan customer (opsional).</span>
+                            </label>
+                            <label class="theme-field block">
+                                <span>Tagline</span>
+                                {{ appearance_form.tagline }}
+                            </label>
+                            <label class="theme-field block">
+                                <span>Pesan Sambutan</span>
+                                {{ appearance_form.greeting_message }}
+                            </label>
+                            <label class="theme-field block">
+                                <span>Teks Struk (Receipt Footer)</span>
+                                {{ appearance_form.receipt_footer_text }}
+                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="theme-field block">
+                                    <span>Kontak Telepon</span>
+                                    {{ appearance_form.contact_phone }}
+                                </label>
+                                <label class="theme-field block">
+                                    <span>Instagram</span>
+                                    {{ appearance_form.contact_instagram }}
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
+                        <h2 class="text-lg font-extrabold text-dark mb-1">Text & Layout</h2>
+                        <p class="text-sm text-gray-500 mb-6">Pilih font, bentuk header, layout card, dan bentuk tombol.</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="theme-field block">
-                                <span>Kontak Telepon</span>
-                                {{ appearance_form.contact_phone }}
+                            <label class="theme-select-field">
+                                <span>Font Menu</span>
+                                {{ appearance_form.font_family }}
                             </label>
-                            <label class="theme-field block">
-                                <span>Instagram</span>
-                                {{ appearance_form.contact_instagram }}
+                            <label class="theme-select-field">
+                                <span>Layout Menu</span>
+                                {{ appearance_form.layout_style }}
+                            </label>
+                            <label class="theme-select-field">
+                                <span>Style Header</span>
+                                {{ appearance_form.header_style }}
+                            </label>
+                            <label class="theme-select-field">
+                                <span>Style Tombol</span>
+                                {{ appearance_form.button_style }}
                             </label>
                         </div>
+                        <label class="mt-5 flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3 cursor-pointer">
+                            {{ appearance_form.show_category_tabs }}
+                            <span>
+                                <span class="block text-sm font-extrabold text-dark">Tampilkan tab kategori</span>
+                                <span class="block text-xs text-gray-500">Matikan jika ingin menu tampil sebagai list langsung.</span>
+                            </span>
+                        </label>
+                    </section>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-end">
+                        <button type="button"
+                                data-reset-theme-trigger
+                                class="px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-extrabold text-center"
+                                aria-haspopup="dialog">Reset Default</button>
+                        <button type="submit"
+                                class="px-6 py-3 rounded-xl bg-primary text-white font-extrabold shadow-lg hover:bg-primaryLight transition-colors">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Appearance
+                        </button>
                     </div>
-                </section>
-
-                <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
-                    <h2 class="text-lg font-extrabold text-dark mb-1">Text & Layout</h2>
-                    <p class="text-sm text-gray-500 mb-6">Pilih font, bentuk header, layout card, dan bentuk tombol.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="theme-select-field">
-                            <span>Font Menu</span>
-                            {{ appearance_form.font_family }}
-                        </label>
-                        <label class="theme-select-field">
-                            <span>Layout Menu</span>
-                            {{ appearance_form.layout_style }}
-                        </label>
-                        <label class="theme-select-field">
-                            <span>Style Header</span>
-                            {{ appearance_form.header_style }}
-                        </label>
-                        <label class="theme-select-field">
-                            <span>Style Tombol</span>
-                            {{ appearance_form.button_style }}
-                        </label>
-                    </div>
-                    <label class="mt-5 flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3 cursor-pointer">
-                        {{ appearance_form.show_category_tabs }}
-                        <span>
-                            <span class="block text-sm font-extrabold text-dark">Tampilkan tab kategori</span>
-                            <span class="block text-xs text-gray-500">Matikan jika ingin menu tampil sebagai list langsung.</span>
-                        </span>
-                    </label>
-                </section>
-
-                <div class="flex flex-col sm:flex-row gap-3 justify-end">
-                    <button type="button"
-                            data-reset-theme-trigger
-                            class="px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-extrabold text-center"
-                            aria-haspopup="dialog">
-                        Reset Default
-                    </button>
-                    <button type="submit" class="px-6 py-3 rounded-xl bg-primary text-white font-extrabold shadow-lg hover:bg-primaryLight transition-colors">
-                        <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Appearance
-                    </button>
-                </div>
-            </form>
-
-            <aside class="xl:sticky xl:top-6" data-theme-preview>
-                <div class="mb-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Preview HP</p>
-                        <h2 class="text-lg font-extrabold text-dark">Menu Customer</h2>
-                    </div>
-                    <i class="fa-solid fa-mobile-screen-button text-2xl text-primary"></i>
-                </div>
-                <div class="phone-shell">
-                    <div class="phone-screen" data-preview-phone>
-                        <div class="preview-header" data-preview-header>
-                            <p class="preview-kicker">Menu Digital</p>
-                            <h3>{{ restaurant.name }}</h3>
-                            <p>Meja A1</p>
-                            <div class="preview-stat">3 kategori</div>
+                </form>
+                <aside class="xl:sticky xl:top-6" data-theme-preview>
+                    <div class="mb-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Preview HP</p>
+                            <h2 class="text-lg font-extrabold text-dark">Menu Customer</h2>
                         </div>
-                        <div class="preview-tabs" data-preview-tabs>
-                            <span>Semua</span>
-                            <span>Makanan</span>
-                            <span>Minuman</span>
-                        </div>
-                        <div class="preview-list" data-preview-list>
-                            <article class="preview-card">
-                                <div class="preview-img"><i class="fa-solid fa-bowl-food"></i></div>
-                                <div>
-                                    <p class="preview-title">Nasi Goreng Spesial</p>
-                                    <p class="preview-desc">Pedas gurih dengan telur</p>
-                                    <p class="preview-price">Rp 25.000</p>
-                                </div>
-                            </article>
-                            <article class="preview-card">
-                                <div class="preview-img"><i class="fa-solid fa-mug-hot"></i></div>
-                                <div>
-                                    <p class="preview-title">Es Kopi Susu</p>
-                                    <p class="preview-desc">Creamy dan segar</p>
-                                    <p class="preview-price">Rp 18.000</p>
-                                </div>
-                            </article>
-                        </div>
-                        <button type="button" class="preview-button">Tambah ke Keranjang</button>
+                        <i class="fa-solid fa-mobile-screen-button text-2xl text-primary"></i>
                     </div>
-                </div>
-            </aside>
-        </div>
-
-        <div id="reset-theme-modal"
-             class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm"
-             role="dialog"
-             aria-modal="true"
-             aria-labelledby="reset-theme-modal-title"
-             data-reset-theme-modal>
-            <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-gray-100 transform transition-all"
-                 data-reset-theme-panel>
-                <div class="w-14 h-14 rounded-2xl bg-secondary text-primary flex items-center justify-center mb-4">
-                    <i class="fa-solid fa-rotate-left text-xl"></i>
-                </div>
-                <h2 id="reset-theme-modal-title" class="text-xl font-extrabold text-dark">Reset ke tema default?</h2>
-                <p class="text-sm text-gray-500 mt-2 leading-relaxed">
-                    Semua pengaturan warna, font, layout, header, tombol, dan tab kategori akan dikembalikan ke default TapMenu.
-                </p>
-                <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
-                    <button type="button"
-                            class="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-extrabold hover:bg-gray-50 transition-colors"
-                            data-reset-theme-cancel>
-                        Batal
-                    </button>
-                    <button type="submit"
-                            form="appearance-theme-form"
-                            name="reset_theme"
-                            value="1"
-                            class="px-5 py-3 rounded-xl bg-primary text-white font-extrabold shadow-lg hover:bg-primaryLight transition-colors">
-                        Ya, Reset Default
-                    </button>
+                    <div class="phone-shell">
+                        <div class="phone-screen" data-preview-phone>
+                            <div class="preview-header" data-preview-header>
+                                <p class="preview-kicker">Menu Digital</p>
+                                <h3>{{ restaurant.name }}</h3>
+                                <p>Meja A1</p>
+                                <div class="preview-stat">3 kategori</div>
+                            </div>
+                            <div class="preview-tabs" data-preview-tabs>
+                                <span>Semua</span>
+                                <span>Makanan</span>
+                                <span>Minuman</span>
+                            </div>
+                            <div class="preview-list" data-preview-list>
+                                <article class="preview-card">
+                                    <div class="preview-img">
+                                        <i class="fa-solid fa-bowl-food"></i>
+                                    </div>
+                                    <div>
+                                        <p class="preview-title">Nasi Goreng Spesial</p>
+                                        <p class="preview-desc">Pedas gurih dengan telur</p>
+                                        <p class="preview-price">Rp 25.000</p>
+                                    </div>
+                                </article>
+                                <article class="preview-card">
+                                    <div class="preview-img">
+                                        <i class="fa-solid fa-mug-hot"></i>
+                                    </div>
+                                    <div>
+                                        <p class="preview-title">Es Kopi Susu</p>
+                                        <p class="preview-desc">Creamy dan segar</p>
+                                        <p class="preview-price">Rp 18.000</p>
+                                    </div>
+                                </article>
+                            </div>
+                            <button type="button" class="preview-button">Tambah ke Keranjang</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <div id="reset-theme-modal"
+                 class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="reset-theme-modal-title"
+                 data-reset-theme-modal>
+                <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-gray-100 transform transition-all"
+                     data-reset-theme-panel>
+                    <div class="w-14 h-14 rounded-2xl bg-secondary text-primary flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-rotate-left text-xl"></i>
+                    </div>
+                    <h2 id="reset-theme-modal-title" class="text-xl font-extrabold text-dark">Reset ke tema default?</h2>
+                    <p class="text-sm text-gray-500 mt-2 leading-relaxed">
+                        Semua pengaturan warna, font, layout, header, tombol, dan tab kategori akan dikembalikan ke default TapMenu.
+                    </p>
+                    <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                        <button type="button"
+                                class="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-extrabold hover:bg-gray-50 transition-colors"
+                                data-reset-theme-cancel>Batal</button>
+                        <button type="submit"
+                                form="appearance-theme-form"
+                                name="reset_theme"
+                                value="1"
+                                class="px-5 py-3 rounded-xl bg-primary text-white font-extrabold shadow-lg hover:bg-primaryLight transition-colors">
+                            Ya, Reset Default
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endif %}
-</div>
+        {% endif %}
+    </div>
 {% endblock %}
-
 {% block dashboard_page_scripts %}
-<script src="{% static 'core/js/pages/appearance-1-page.js' %}"></script>
+    <script src="{% static 'core/js/pages/appearance-1-page.js' %}"></script>
 {% endblock %}

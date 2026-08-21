@@ -5,11 +5,15 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TapMenu - Setup Toko</title>
-        <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{% static 'core/img/favicon.svg' %}">
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="{% static 'core/js/pages/register-1.js' %}?v=20260608-fix-tailwind"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="font-sans text-dark antialiased min-h-screen bg-bg">
         <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
@@ -69,13 +73,21 @@
                             Logo Toko <span class="text-gray-400 font-normal normal-case">(opsional)</span>
                         </label>
                         <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center border-2 border-dashed border-secondary shrink-0" id="logo-preview-wrap">
-                                <i class="fa-solid fa-image text-primary/40 text-xl" id="logo-placeholder"></i>
+                            <div class="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center border-2 border-dashed border-secondary shrink-0"
+                                 id="logo-preview-wrap">
+                                <i class="fa-solid fa-image text-primary/40 text-xl"
+                                   id="logo-placeholder"></i>
                                 <img id="logo-preview" class="hidden w-16 h-16 rounded-2xl object-cover">
                             </div>
                             <div class="flex-1">
-                                <input type="file" name="logo" id="logo-input" accept="image/*" class="hidden" onchange="previewLogo(this)">
-                                <label for="logo-input" class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-primary hover:text-primary transition-colors">
+                                <input type="file"
+                                       name="logo"
+                                       id="logo-input"
+                                       accept="image/*"
+                                       class="hidden"
+                                       onchange="previewLogo(this)">
+                                <label for="logo-input"
+                                       class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-primary hover:text-primary transition-colors">
                                     <i class="fa-solid fa-upload"></i>
                                     Pilih Gambar
                                 </label>
@@ -115,7 +127,10 @@
                     </button>
                 </form>
             </div>
-            <p class="text-xs text-gray-400 mt-6">Sudah punya akun? <a href="{% url 'login' %}" class="text-primary font-semibold hover:underline">Masuk di sini</a></p>
+            <p class="text-xs text-gray-400 mt-6">
+                Sudah punya akun? <a href="{% url 'login' %}"
+    class="text-primary font-semibold hover:underline">Masuk di sini</a>
+            </p>
         </div>
         <script>
             function previewLogo(input) {

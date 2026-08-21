@@ -7,11 +7,13 @@
               content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Status Pesanan {{ order.code }} - {{ restaurant.name }}</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{% static 'core/js/pages/book-menu-1.js' %}?v=20260609-desktop-responsive"></script>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
               rel="stylesheet">
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <link rel="stylesheet"
+              href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
     </head>
     <body class="font-sans bg-bg text-dark antialiased min-h-screen">
         <main class="min-h-screen bg-bg pb-8">
@@ -28,7 +30,6 @@
                     <p class="text-sm text-green-100 mt-2">Meja {{ dining_table.table_number }}</p>
                 </div>
             </header>
-
             <section class="max-w-3xl mx-auto px-5 sm:px-8 -mt-6 relative z-20 space-y-4">
                 <!-- ORDER CODE + LIVE STATUS -->
                 <article class="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-card border border-gray-100">
@@ -42,7 +43,6 @@
                             {{ order.get_status_display }}
                         </span>
                     </div>
-
                     <!-- STATUS TIMELINE -->
                     <div class="relative pt-2">
                         {% if order.status == 'cancelled' %}
@@ -71,7 +71,6 @@
                         {% endif %}
                     </div>
                 </article>
-
                 <!-- ORDER DETAILS -->
                 <article class="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-card border border-gray-100">
                     <h2 class="text-xl sm:text-2xl font-extrabold text-primary mb-4">Detail Pesanan</h2>
@@ -98,7 +97,6 @@
                         </div>
                     </div>
                 </article>
-
                 <!-- PAYMENT -->
                 {% if payment %}
                     <article class="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-card border border-gray-100">
@@ -118,9 +116,7 @@
                             </div>
                             <div class="rounded-2xl bg-bg p-3 sm:p-4">
                                 <p class="text-xs text-gray-500 mb-1">Status</p>
-                                <p id="payment-status-badge" class="font-extrabold text-primary">
-                                    {{ payment.get_status_display }}
-                                </p>
+                                <p id="payment-status-badge" class="font-extrabold text-primary">{{ payment.get_status_display }}</p>
                             </div>
                             <div class="rounded-2xl bg-bg p-3 sm:p-4 col-span-2">
                                 <p class="text-xs text-gray-500 mb-1">Reference</p>
@@ -145,7 +141,6 @@
                         {% endif %}
                     </article>
                 {% endif %}
-
                 <!-- ACTIONS -->
                 <div class="grid grid-cols-2 gap-3">
                     <a href="{% url 'customer_receipt' dining_table.qr_token order.id %}"
@@ -159,13 +154,9 @@
                         Kembali ke Menu
                     </a>
                 </div>
-
-                <p class="text-center text-xs text-gray-400 pb-2">
-                    Halaman ini diperbarui otomatis saat status pesanan berubah.
-                </p>
+                <p class="text-center text-xs text-gray-400 pb-2">Halaman ini diperbarui otomatis saat status pesanan berubah.</p>
             </section>
         </main>
-
         <script>
             const orderCodeEl = document.querySelector('#order-status-badge');
             const paymentStatusEl = document.querySelector('#payment-status-badge');

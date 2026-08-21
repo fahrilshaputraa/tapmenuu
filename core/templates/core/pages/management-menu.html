@@ -46,11 +46,11 @@
                         Semua
                     </button>
                     {% for cat in categories %}
-                    <button onclick="filterMenu('{{ cat.slug }}')"
-                            id="tab-{{ cat.slug }}"
-                            class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
-                        {{ cat.name }}
-                    </button>
+                        <button onclick="filterMenu('{{ cat.slug }}')"
+                                id="tab-{{ cat.slug }}"
+                                class="px-4 py-2 bg-white text-gray-500 hover:text-primary hover:bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+                            {{ cat.name }}
+                        </button>
                     {% endfor %}
                 </div>
                 <!-- Search -->
@@ -88,17 +88,22 @@
                              data-delete-url="{% url 'menu_item_delete' item.pk %}">
                         <div class="h-40 bg-gray-100 relative overflow-hidden">
                             {% if item.image %}
-                                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                <img src="{{ item.image.url }}"
+                                     alt="{{ item.name }}"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             {% else %}
                                 <div class="w-full h-full flex items-center justify-center bg-secondary/60 text-primary">
                                     <i class="fa-solid fa-bowl-food text-3xl"></i>
                                 </div>
                             {% endif %}
                             <div class="absolute top-2 right-2">
-                                <form method="post" action="{% url 'menu_item_delete' item.pk %}" class="inline"
+                                <form method="post"
+                                      action="{% url 'menu_item_delete' item.pk %}"
+                                      class="inline"
                                       onsubmit="return confirm('Hapus menu ini secara permanen?')">
                                     {% csrf_token %}
-                                    <button type="submit" class="w-8 h-8 bg-white/90 backdrop-blur rounded-lg text-red-400 hover:text-red-600 flex items-center justify-center shadow-sm transition-colors">
+                                    <button type="submit"
+                                            class="w-8 h-8 bg-white/90 backdrop-blur rounded-lg text-red-400 hover:text-red-600 flex items-center justify-center shadow-sm transition-colors">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </form>
@@ -122,10 +127,16 @@
                             <div class="flex items-center justify-between pt-3 border-t border-gray-50">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[11px] font-bold px-2 py-1 rounded-full {% if item.is_available and item.is_active %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}">
-                                        {% if item.is_available and item.is_active %}Tersedia{% else %}Nonaktif{% endif %}
+                                        {% if item.is_available and item.is_active %}
+                                            Tersedia
+                                        {% else %}
+                                            Nonaktif
+                                        {% endif %}
                                     </span>
                                 </div>
-                                <button type="button" onclick="openEditModal(this.closest('article'))" class="text-primary hover:bg-secondary/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                <button type="button"
+                                        onclick="openEditModal(this.closest('article'))"
+                                        class="text-primary hover:bg-secondary/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
                                     Edit <i class="fa-solid fa-pen ml-1"></i>
                                 </button>
                             </div>
@@ -140,7 +151,8 @@
                         <p class="text-gray-500 text-sm">Tambahkan menu baru untuk mulai menerima pesanan.</p>
                     </div>
                 {% endfor %}
-                <div id="empty-state" class="hidden sm:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col items-center justify-center py-16">
+                <div id="empty-state"
+                     class="hidden sm:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col items-center justify-center py-16">
                     <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
                         <i class="fa-solid fa-search text-3xl"></i>
                     </div>
@@ -157,30 +169,44 @@
     <div id="menu-modal"
          class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
-
             <!-- Modal Header -->
             <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white z-10">
                 <h3 class="font-bold text-lg text-dark" id="modal-title">Tambah Menu Baru</h3>
-                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+                <button type="button"
+                        onclick="closeModal()"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-
             <!-- Tabs Navigation -->
             <div class="flex border-b border-gray-100 bg-gray-50 px-5 pt-2 gap-4 overflow-x-auto">
-                <button type="button" onclick="switchTab('basic')" id="tab-btn-basic"
-                    class="pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-colors whitespace-nowrap">Info Dasar</button>
-                <button type="button" onclick="switchTab('pricing')" id="tab-btn-pricing"
-                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Harga & Pajak</button>
-                <button type="button" onclick="switchTab('variants')" id="tab-btn-variants"
-                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Varian</button>
-                <button type="button" onclick="switchTab('others')" id="tab-btn-others"
-                    class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">Stok & Lainnya</button>
+                <button type="button"
+                        onclick="switchTab('basic')"
+                        id="tab-btn-basic"
+                        class="pb-3 text-sm font-bold border-b-2 border-primary text-primary transition-colors whitespace-nowrap">
+                    Info Dasar
+                </button>
+                <button type="button"
+                        onclick="switchTab('pricing')"
+                        id="tab-btn-pricing"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Harga & Pajak
+                </button>
+                <button type="button"
+                        onclick="switchTab('variants')"
+                        id="tab-btn-variants"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Varian
+                </button>
+                <button type="button"
+                        onclick="switchTab('others')"
+                        id="tab-btn-others"
+                        class="pb-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-dark transition-colors whitespace-nowrap">
+                    Stok & Lainnya
+                </button>
             </div>
-
             <!-- Modal Body (Scrollable) -->
             <div class="flex-1 overflow-y-auto p-6 custom-scroll relative">
-
                 <!-- TAB 1: INFO DASAR -->
                 <div id="tab-content-basic" class="space-y-5 fade-in">
                     <div class="flex flex-col sm:flex-row gap-6">
@@ -188,89 +214,106 @@
                         <div class="w-full sm:w-1/3">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Foto Menu</label>
                             <div class="relative aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center group cursor-pointer overflow-hidden hover:border-primary transition-colors">
-                                <img id="preview-image" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                                <img id="preview-image"
+                                     src=""
+                                     class="absolute inset-0 w-full h-full object-cover hidden">
                                 <div class="text-center text-gray-400 group-hover:text-primary">
                                     <i class="fa-solid fa-cloud-arrow-up text-2xl mb-1"></i>
                                     <p class="text-[10px] font-bold uppercase">Upload</p>
                                 </div>
-                                <input type="file" name="image" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer"
-                                    onchange="handleImageUpload(this)">
+                                <input type="file"
+                                       name="image"
+                                       accept="image/*"
+                                       class="absolute inset-0 opacity-0 cursor-pointer"
+                                       onchange="handleImageUpload(this)">
                             </div>
                             <p class="text-[10px] text-gray-400 mt-2 text-center">Min. 500x500px (JPG/PNG)</p>
                         </div>
-
                         <!-- Basic Inputs -->
                         <div class="w-full sm:w-2/3 space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Menu <span class="text-red-500">*</span></label>
-                                <input type="text" name="name" id="input-name"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
-                                    placeholder="Masukkan nama menu" required>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                    Nama Menu <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text"
+                                       name="name"
+                                       id="input-name"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="Masukkan nama menu"
+                                       required>
                             </div>
-
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Kategori <span class="text-red-500">*</span></label>
-                                <select name="category" id="input-category"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                    Kategori <span class="text-red-500">*</span>
+                                </label>
+                                <select name="category"
+                                        id="input-category"
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium">
                                     <option value="">-- Pilih Kategori --</option>
-                                    {% for cat in categories %}
-                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
-                                    {% endfor %}
+                                    {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
                                 </select>
                             </div>
-
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Deskripsi</label>
-                                <textarea name="description" id="input-desc" rows="3"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium resize-none"
-                                    placeholder="Jelaskan bahan utama atau rasa..."></textarea>
+                                <textarea name="description"
+                                          id="input-desc"
+                                          rows="3"
+                                          class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium resize-none"
+                                          placeholder="Jelaskan bahan utama atau rasa..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- TAB 2: HARGA & PAJAK -->
                 <div id="tab-content-pricing" class="hidden space-y-5 fade-in">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga Dasar (Rp) <span class="text-red-500">*</span></label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                                Harga Dasar (Rp) <span class="text-red-500">*</span>
+                            </label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                                <input type="number" name="price" id="input-price" oninput="calculateFinalPrice()"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg font-bold text-dark"
-                                    placeholder="0" required>
+                                <input type="number"
+                                       name="price"
+                                       id="input-price"
+                                       oninput="calculateFinalPrice()"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg font-bold text-dark"
+                                       placeholder="0"
+                                       required>
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Diskon (%)</label>
                             <div class="relative">
-                                <input type="number" id="input-discount" oninput="calculateFinalPrice()"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
-                                    placeholder="0">
+                                <input type="number"
+                                       id="input-discount"
+                                       oninput="calculateFinalPrice()"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="0">
                                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
                             </div>
                             <p class="text-[10px] text-gray-400 mt-1">Kosongkan jika tidak ada diskon.</p>
                         </div>
-
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Pajak / PPN (%)</label>
                             <div class="relative">
-                                <input type="number" id="input-tax"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
-                                    placeholder="10">
+                                <input type="number"
+                                       id="input-tax"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm font-medium"
+                                       placeholder="10">
                                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
                             </div>
                             <p class="text-[10px] text-gray-400 mt-1">Standar PPN restoran 10%.</p>
                         </div>
                     </div>
-
                     <!-- Preview Box -->
                     <div class="bg-secondary/30 rounded-xl p-4 border border-secondary mt-4">
                         <p class="text-xs font-bold text-primary mb-2 uppercase">Preview Harga Pelanggan</p>
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm text-gray-500" id="preview-original-container">Harga Normal: <span class="line-through" id="preview-original">Rp 0</span></p>
+                                <p class="text-sm text-gray-500" id="preview-original-container">
+                                    Harga Normal: <span class="line-through" id="preview-original">Rp 0</span>
+                                </p>
                                 <p class="text-xs text-accent font-bold" id="preview-discount-label">Hemat 0%</p>
                             </div>
                             <div class="text-right">
@@ -280,30 +323,28 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- TAB 3: VARIAN -->
                 <div id="tab-content-variants" class="hidden space-y-6 fade-in">
                     <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start">
                         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
                         <div>
                             <h4 class="text-xs font-bold text-blue-800">Info Varian</h4>
-                            <p class="text-[10px] text-blue-600">Gunakan varian untuk opsi tambahan seperti "Level Pedas" (Pilih Satu) atau "Toping Tambahan" (Pilih Banyak).</p>
+                            <p class="text-[10px] text-blue-600">
+                                Gunakan varian untuk opsi tambahan seperti "Level Pedas" (Pilih Satu) atau "Toping Tambahan" (Pilih Banyak).
+                            </p>
                         </div>
                     </div>
-
                     <div id="variants-container" class="space-y-4">
                         <!-- Variant Groups will be injected here -->
                     </div>
-
-                    <button type="button" onclick="addVariantGroup()"
-                        class="w-full py-3 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
+                    <button type="button"
+                            onclick="addVariantGroup()"
+                            class="w-full py-3 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
                         <i class="fa-solid fa-plus"></i> Tambah Grup Varian
                     </button>
                 </div>
-
                 <!-- TAB 4: STOK & LAINNYA -->
                 <div id="tab-content-others" class="hidden space-y-6 fade-in">
-
                     <!-- Stock Management -->
                     <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
                         <div class="flex justify-between items-center mb-4">
@@ -312,21 +353,23 @@
                                 <p class="text-[10px] text-gray-500">Aktifkan untuk melacak jumlah stok.</p>
                             </div>
                             <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                                <input type="checkbox" id="toggle-stock" onchange="toggleStockInput()"
-                                    class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300" />
+                                <input type="checkbox"
+                                       id="toggle-stock"
+                                       onchange="toggleStockInput()"
+                                       class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300" />
                                 <label for="toggle-stock"
-                                    class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                                       class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                                </label>
                             </div>
                         </div>
-
                         <div id="stock-input-container" class="hidden transition-all">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Jumlah Stok Saat Ini</label>
-                            <input type="number" id="input-stock"
-                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary text-sm font-medium"
-                                placeholder="Contoh: 50">
+                            <input type="number"
+                                   id="input-stock"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-primary text-sm font-medium"
+                                   placeholder="Contoh: 50">
                         </div>
                     </div>
-
                     <!-- Labels -->
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Label Menu (Opsional)</label>
@@ -345,55 +388,67 @@
                             </label>
                         </div>
                     </div>
-
                     <!-- Active Status -->
                     <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                            <input type="checkbox" name="is_active" id="toggle-active"
-                                class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
-                                checked />
+                            <input type="checkbox"
+                                   name="is_active"
+                                   id="toggle-active"
+                                   class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
+                                   checked />
                             <label for="toggle-active"
-                                class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                                   class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                            </label>
                         </div>
                         <div>
                             <p class="text-sm font-bold text-dark">Tampilkan di Menu</p>
                             <p class="text-[10px] text-gray-500">Menu ini bisa dipesan oleh pelanggan.</p>
                         </div>
                     </div>
-
                     <!-- Available Status -->
                     <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                            <input type="checkbox" name="is_available" id="toggle-available"
-                                class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
-                                checked />
+                            <input type="checkbox"
+                                   name="is_available"
+                                   id="toggle-available"
+                                   class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 border-gray-300"
+                                   checked />
                             <label for="toggle-available"
-                                class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                                   class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300">
+                            </label>
                         </div>
                         <div>
                             <p class="text-sm font-bold text-dark">Tersedia</p>
                             <p class="text-[10px] text-gray-500">Stok menu ini tersedia untuk dipesan.</p>
                         </div>
                     </div>
-
                 </div>
-
             </div>
-
             <!-- Footer Actions -->
             <div class="p-5 bg-gray-50 border-t border-gray-100 flex gap-3 z-10">
-                <button type="button" onclick="closeModal()"
-                    class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">Batal</button>
-                <button type="button" onclick="saveMenu()"
-                    class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">Simpan Menu</button>
+                <button type="button"
+                        onclick="closeModal()"
+                        class="flex-1 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+                    Batal
+                </button>
+                <button type="button"
+                        onclick="saveMenu()"
+                        class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primaryLight transition-colors">
+                    Simpan Menu
+                </button>
             </div>
         </div>
     </div>
-
     <!-- Hidden form for AJAX submission -->
-    <form id="menu-form" method="post" enctype="multipart/form-data" class="hidden">
+    <form id="menu-form"
+          method="post"
+          enctype="multipart/form-data"
+          class="hidden">
         {% csrf_token %}
-        <input type="hidden" name="restaurant" id="form-restaurant" value="{{ restaurant.id }}">
+        <input type="hidden"
+               name="restaurant"
+               id="form-restaurant"
+               value="{{ restaurant.id }}">
         <input type="hidden" name="slug" id="form-slug" value="">
         <input type="hidden" name="sort_order" id="form-sort-order" value="0">
         <input type="hidden" name="discount" id="form-discount" value="0">

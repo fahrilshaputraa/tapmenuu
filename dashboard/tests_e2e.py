@@ -75,7 +75,9 @@ class DashboardEndToEndTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Laporan')
 
-    def test_dashboard_pages_show_model_data_without_source_labels_or_design_dummy_data(self):
+    def test_dashboard_pages_show_model_data_without_source_labels_or_design_dummy_data(
+        self,
+    ):
         self.client.force_login(self.user)
 
         dashboard = self.client.get(reverse('dashboard')).content.decode()
@@ -124,7 +126,7 @@ class DashboardEndToEndTests(TestCase):
         )
         self.assertRedirects(response, reverse('dashboard'))
         self.assertTrue(
-            User.objects.filter(username='newowner', is_staff=True).exists(),
+            User.objects.filter(email='newowner@example.com', is_staff=True).exists(),
         )
         self.assertTrue(Restaurant.objects.filter(slug='toko-baru').exists())
 
@@ -230,8 +232,12 @@ class DashboardEndToEndTests(TestCase):
         menus = self.client.get(reverse('management_menu'))
         self.assertEqual(menus.status_code, 200)
         self.assertContains(menus, reverse('menu_item_create'))
-        self.assertContains(menus, reverse('menu_item_update', kwargs={'pk': self.item.pk}))
-        self.assertContains(menus, reverse('menu_item_delete', kwargs={'pk': self.item.pk}))
+        self.assertContains(
+            menus, reverse('menu_item_update', kwargs={'pk': self.item.pk})
+        )
+        self.assertContains(
+            menus, reverse('menu_item_delete', kwargs={'pk': self.item.pk})
+        )
         self.assertContains(menus, self.item.name)
         self.assertContains(menus, 'Tambah Menu')
         self.assertContains(menus, 'Edit')
@@ -248,8 +254,12 @@ class DashboardEndToEndTests(TestCase):
         self.assertContains(tables, 'table-modal')
         self.assertContains(tables, 'openTableModal')
         self.assertContains(tables, 'openEditTableModal')
-        self.assertContains(tables, reverse('table_delete', kwargs={'pk': self.table.pk}))
-        self.assertContains(tables, reverse('customer_menu', kwargs={'qr_token': self.table.qr_token}))
+        self.assertContains(
+            tables, reverse('table_delete', kwargs={'pk': self.table.pk})
+        )
+        self.assertContains(
+            tables, reverse('customer_menu', kwargs={'qr_token': self.table.qr_token})
+        )
         self.assertContains(tables, self.table.qr_token)
         self.assertContains(tables, 'Print QR')
         self.assertContains(tables, 'Salin Link')

@@ -47,9 +47,15 @@ class MenuItem(models.Model):
     slug = models.SlugField(max_length=180)
     description = models.TextField(blank=True)
     price = models.PositiveIntegerField()
-    discount = models.PositiveSmallIntegerField(default=0, help_text='Diskon dalam persen (0-100)')
-    tax = models.PositiveSmallIntegerField(default=10, help_text='Pajak/PPN dalam persen')
-    stock = models.PositiveIntegerField(default=0, help_text='Jumlah stok (0 = tanpa batas)')
+    discount = models.PositiveSmallIntegerField(
+        default=0, help_text='Diskon dalam persen (0-100)'
+    )
+    tax = models.PositiveSmallIntegerField(
+        default=10, help_text='Pajak/PPN dalam persen'
+    )
+    stock = models.PositiveIntegerField(
+        default=0, help_text='Jumlah stok (0 = tanpa batas)'
+    )
     image = models.ImageField(upload_to='menus/items/', blank=True, null=True)
     is_available = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
@@ -74,12 +80,15 @@ class MenuItem(models.Model):
 
 class MenuItemVariantGroup(models.Model):
     """Group of variants for a menu item (e.g., 'Level Pedas', 'Toping Tambahan')."""
+
     menu_item = models.ForeignKey(
         MenuItem,
         on_delete=models.CASCADE,
         related_name='variant_groups',
     )
-    name = models.CharField(max_length=100, help_text='Nama grup varian, contoh: Level Pedas')
+    name = models.CharField(
+        max_length=100, help_text='Nama grup varian, contoh: Level Pedas'
+    )
     type = models.CharField(
         max_length=10,
         choices=[
@@ -101,6 +110,7 @@ class MenuItemVariantGroup(models.Model):
 
 class MenuItemVariantOption(models.Model):
     """Single option within a variant group (e.g., 'Pedas' +Rp 2000)."""
+
     group = models.ForeignKey(
         MenuItemVariantGroup,
         on_delete=models.CASCADE,

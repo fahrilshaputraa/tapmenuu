@@ -30,11 +30,15 @@ ORDER_STATUS_LABELS = {
 def customer_menu(request, qr_token):
     dining_table = _get_active_table(qr_token)
     restaurant = dining_table.restaurant
-    active_items = MenuItem.objects.filter(
-        restaurant=restaurant,
-        is_active=True,
-        is_available=True,
-    ).prefetch_related('variant_groups__options').order_by('sort_order', 'name')
+    active_items = (
+        MenuItem.objects.filter(
+            restaurant=restaurant,
+            is_active=True,
+            is_available=True,
+        )
+        .prefetch_related('variant_groups__options')
+        .order_by('sort_order', 'name')
+    )
     categories = (
         MenuCategory.objects.filter(restaurant=restaurant, is_active=True)
         .prefetch_related(Prefetch('items', queryset=active_items))
@@ -474,7 +478,9 @@ def _coerce_variant_option_ids(raw_option_ids, menu_item):
 def _cart_line_key(menu_item_id, variant_option_ids, note):
     if not variant_option_ids and not note:
         return str(menu_item_id)
-    variants_key = '-'.join(str(option_id) for option_id in sorted(variant_option_ids)) or 'plain'
+    variants_key = (
+        '-'.join(str(option_id) for option_id in sorted(variant_option_ids)) or 'plain'
+    )
     note_key = abs(hash(note)) if note else 'no-note'
     return f'{menu_item_id}:{variants_key}:{note_key}'
 
@@ -497,7 +503,7 @@ def _build_variant_details(menu_item, selected_option_ids):
         for option in group_options:
             option_names.append(option.name)
             price_adjustment += option.price_adjustment
-        labels.append(f"{group.name}: {', '.join(option_names)}")
+        labels.append(f'{group.name}: {", ".join(option_names)}')
 
     return {
         'labels': labels,

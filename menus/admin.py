@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from menus.models import MenuCategory, MenuItem, MenuItemVariantGroup, MenuItemVariantOption
+from menus.models import (
+    MenuCategory,
+    MenuItem,
+    MenuItemVariantGroup,
+    MenuItemVariantOption,
+)
 
 
 @admin.register(MenuCategory)

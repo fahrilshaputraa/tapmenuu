@@ -373,7 +373,9 @@ class CustomerMenuViewTests(TestCase):
             response,
             reverse('customer_cart', kwargs={'qr_token': self.table.qr_token}),
         )
-        cart_item = self.client.session[CUSTOMER_CART_SESSION_KEY]['items'][str(self.item.id)]
+        cart_item = self.client.session[CUSTOMER_CART_SESSION_KEY]['items'][
+            str(self.item.id)
+        ]
         self.assertEqual(cart_item['quantity'], 3)
 
     def test_customer_cart_quantity_update_decrements_line_item_quantity(self):
@@ -387,10 +389,14 @@ class CustomerMenuViewTests(TestCase):
             {'action': 'decrement'},
         )
 
-        cart_item = self.client.session[CUSTOMER_CART_SESSION_KEY]['items'][str(self.item.id)]
+        cart_item = self.client.session[CUSTOMER_CART_SESSION_KEY]['items'][
+            str(self.item.id)
+        ]
         self.assertEqual(cart_item['quantity'], 1)
 
-    def test_customer_cart_quantity_update_removes_line_when_decrementing_from_one(self):
+    def test_customer_cart_quantity_update_removes_line_when_decrementing_from_one(
+        self,
+    ):
         self._put_item_in_session_cart(quantity=1)
 
         response = self.client.post(
@@ -407,7 +413,9 @@ class CustomerMenuViewTests(TestCase):
         )
         self.assertIsNone(self.client.session.get(CUSTOMER_CART_SESSION_KEY))
 
-    def test_customer_cart_remove_deletes_line_item_from_session_and_redirects_to_cart(self):
+    def test_customer_cart_remove_deletes_line_item_from_session_and_redirects_to_cart(
+        self,
+    ):
         self._put_item_in_session_cart(quantity=2, note='tanpa gula')
 
         response = self.client.post(
@@ -436,7 +444,10 @@ class CustomerMenuViewTests(TestCase):
         response = self.client.post(
             reverse(
                 'customer_cart_remove',
-                kwargs={'qr_token': other_table.qr_token, 'line_key': str(self.item.id)},
+                kwargs={
+                    'qr_token': other_table.qr_token,
+                    'line_key': str(self.item.id),
+                },
             ),
         )
 
@@ -444,7 +455,9 @@ class CustomerMenuViewTests(TestCase):
             response,
             reverse('customer_cart', kwargs={'qr_token': other_table.qr_token}),
         )
-        self.assertIn(str(self.item.id), self.client.session[CUSTOMER_CART_SESSION_KEY]['items'])
+        self.assertIn(
+            str(self.item.id), self.client.session[CUSTOMER_CART_SESSION_KEY]['items']
+        )
 
     def test_customer_cart_page_renders_empty_state(self):
         response = self.client.get(

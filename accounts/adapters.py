@@ -31,7 +31,7 @@ class TapMenuSocialAccountAdapter(DefaultSocialAccountAdapter):
         """Auto-generate a unique username from the Google email."""
         email = user.email or ''
         base = email.split('@')[0].replace('.', '_').replace('-', '_') or 'user'
-        username = f"{base}_{uuid.uuid4().hex[:6]}"
+        username = f'{base}_{uuid.uuid4().hex[:6]}'
         while self.username_exists(request, username):
-            username = f"{base}_{uuid.uuid4().hex[:6]}"
+            username = f'{base}_{uuid.uuid4().hex[:6]}'
         user.username = username

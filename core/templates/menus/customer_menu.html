@@ -3,8 +3,7 @@
 <html lang="id">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Menu {{ restaurant.name }} - Meja {{ dining_table.table_number }}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="{% static 'core/js/pages/book-menu-1.js' %}?v=20260609-desktop-responsive"></script>
@@ -12,7 +11,8 @@
               rel="stylesheet">
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <link rel="stylesheet"
+              href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
         <style>
             :root {
                 --menu-primary: {{ appearance_theme.primary_color|default:'#1B4332' }};
@@ -73,9 +73,7 @@
                         <div>
                             <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Menu Digital</p>
                             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold mt-1">{{ restaurant.name }}</h1>
-                            {% if appearance_theme.tagline %}
-                                <p class="text-sm text-green-100 mt-1">{{ appearance_theme.tagline }}</p>
-                            {% endif %}
+                            {% if appearance_theme.tagline %}<p class="text-sm text-green-100 mt-1">{{ appearance_theme.tagline }}</p>{% endif %}
                             <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }}</p>
                         </div>
                         <a href="{% url 'customer_cart' dining_table.qr_token %}"
@@ -99,7 +97,6 @@
                     </div>
                 </div>
             </header>
-
             <!-- CATEGORY FILTER TABS -->
             {% if categories and appearance_theme.show_category_tabs %}
                 <nav class="max-w-6xl mx-auto px-5 sm:px-8 -mt-5 sm:-mt-6 relative z-20 flex gap-2 overflow-x-auto no-scrollbar pb-3"
@@ -122,11 +119,12 @@
                     {% endfor %}
                 </nav>
             {% endif %}
-
             <!-- MENU ITEMS -->
             <section class="max-w-6xl mx-auto px-5 sm:px-8 pt-4 sm:pt-6">
                 {% for category in categories %}
-                    <div id="cat-{{ category.id }}" data-menu-panel="cat-{{ category.id }}" class="menu-panel scroll-mt-6 mb-8 sm:mb-12">
+                    <div id="cat-{{ category.id }}"
+                         data-menu-panel="cat-{{ category.id }}"
+                         class="menu-panel scroll-mt-6 mb-8 sm:mb-12">
                         <div class="flex items-center justify-between mb-4 sm:mb-6">
                             <div>
                                 <h2 class="text-xl sm:text-2xl font-extrabold text-dark">{{ category.name }}</h2>
@@ -148,18 +146,21 @@
                                         {% endif %}
                                         <div class="flex-1 min-w-0">
                                             <div class="flex flex-wrap gap-1.5 mb-2">
-                                                {% if item.is_favorite %}<span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>{% endif %}
-                                                {% if item.is_new %}<span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>{% endif %}
+                                                {% if item.is_favorite %}
+                                                    <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>
+                                                {% endif %}
+                                                {% if item.is_new %}
+                                                    <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>
+                                                {% endif %}
                                             </div>
                                             <h3 class="font-extrabold text-dark leading-tight text-base sm:text-lg">{{ item.name }}</h3>
-                                            {% if item.description %}<p class="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>{% endif %}
-                                            <p class="font-extrabold text-primary mt-2 sm:mt-3 text-lg sm:text-xl">{{ item.price|rupiah }}</p>
-                                            {% if item.variant_groups.all %}
-                                                <p class="mt-1 text-xs font-bold text-gray-400">Ada pilihan varian</p>
+                                            {% if item.description %}
+                                                <p class="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>
                                             {% endif %}
+                                            <p class="font-extrabold text-primary mt-2 sm:mt-3 text-lg sm:text-xl">{{ item.price|rupiah }}</p>
+                                            {% if item.variant_groups.all %}<p class="mt-1 text-xs font-bold text-gray-400">Ada pilihan varian</p>{% endif %}
                                         </div>
                                     </div>
-
                                     <button type="button"
                                             data-open-cart-sheet="order-sheet-{{ item.id }}"
                                             class="mt-4 w-full h-11 rounded-xl bg-accent text-white flex items-center justify-center shadow-sm font-extrabold hover:bg-[#d06a50] transition-colors gap-2"
@@ -167,8 +168,6 @@
                                         <i class="fa-solid fa-plus"></i>
                                         <span>Tambah ke Keranjang</span>
                                     </button>
-
-
                                 </article>
                             {% empty %}
                                 <div class="col-span-full rounded-2xl border border-dashed border-gray-200 p-6 text-center text-gray-500 bg-white">
@@ -187,78 +186,116 @@
                     </div>
                 {% endfor %}
             </section>
-
-        <!-- ORDER BOTTOM SHEETS: kept outside menu cards so sheets slide from viewport bottom -->
-        {% for category in categories %}
-            {% for item in category.items.all %}
-        <div id="order-sheet-{{ item.id }}" class="order-sheet fixed inset-0 z-50 hidden" aria-hidden="true">
-            <button type="button" data-close-cart-sheet class="absolute inset-0 bg-black/45"></button>
-            <div data-sheet-panel class="absolute inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-[2rem] bg-white shadow-floating transform translate-y-full transition-transform duration-300 overflow-hidden">
-                <div class="flex justify-center pt-3 pb-2 cursor-grab select-none touch-none" data-sheet-handle data-sheet-drag-zone>
-                    <span class="w-12 h-1.5 rounded-full bg-gray-300"></span>
-                                            </div>
-                <form method="post" action="{% url 'customer_cart_add' dining_table.qr_token item.id %}" class="max-h-[82vh] overflow-y-auto custom-scroll px-5 pb-6 space-y-5">
-                    {% csrf_token %}
-                    <div class="flex items-start gap-4 cursor-grab select-none touch-none" data-sheet-drag-zone>
-                        {% if item.image %}
-                            <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-20 h-20 rounded-2xl object-cover shrink-0">
-                        {% else %}
-                            <div class="w-20 h-20 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0"><i class="fa-solid fa-bowl-food text-2xl"></i></div>
-                        {% endif %}
-                        <div class="min-w-0">
-                            <div class="flex flex-wrap gap-1.5 mb-2">
-                                {% if item.is_favorite %}<span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>{% endif %}
-                                {% if item.is_new %}<span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>{% endif %}
+            <!-- ORDER BOTTOM SHEETS: kept outside menu cards so sheets slide from viewport bottom -->
+            {% for category in categories %}
+                {% for item in category.items.all %}
+                    <div id="order-sheet-{{ item.id }}"
+                         class="order-sheet fixed inset-0 z-50 hidden"
+                         aria-hidden="true">
+                        <button type="button"
+                                data-close-cart-sheet
+                                class="absolute inset-0 bg-black/45"></button>
+                        <div data-sheet-panel
+                             class="absolute inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-[2rem] bg-white shadow-floating transform translate-y-full transition-transform duration-300 overflow-hidden">
+                            <div class="flex justify-center pt-3 pb-2 cursor-grab select-none touch-none"
+                                 data-sheet-handle
+                                 data-sheet-drag-zone>
+                                <span class="w-12 h-1.5 rounded-full bg-gray-300"></span>
                             </div>
-                            <h3 class="font-extrabold text-dark text-lg leading-tight">{{ item.name }}</h3>
-                            <p class="font-extrabold text-primary mt-1">{{ item.price|rupiah }}</p>
+                            <form method="post"
+                                  action="{% url 'customer_cart_add' dining_table.qr_token item.id %}"
+                                  class="max-h-[82vh] overflow-y-auto custom-scroll px-5 pb-6 space-y-5">
+                                {% csrf_token %}
+                                <div class="flex items-start gap-4 cursor-grab select-none touch-none"
+                                     data-sheet-drag-zone>
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}"
+                                             alt="{{ item.name }}"
+                                             class="w-20 h-20 rounded-2xl object-cover shrink-0">
+                                    {% else %}
+                                        <div class="w-20 h-20 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-bowl-food text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap gap-1.5 mb-2">
+                                            {% if item.is_favorite %}
+                                                <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-extrabold uppercase">Favorit</span>
+                                            {% endif %}
+                                            {% if item.is_new %}
+                                                <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>
+                                            {% endif %}
+                                        </div>
+                                        <h3 class="font-extrabold text-dark text-lg leading-tight">{{ item.name }}</h3>
+                                        <p class="font-extrabold text-primary mt-1">{{ item.price|rupiah }}</p>
+                                    </div>
+                                </div>
+                                {% for group in item.variant_groups.all %}
+                                    {% if group.is_active %}
+                                        <div class="rounded-2xl border border-gray-100 bg-bg p-4">
+                                            <div class="flex items-center justify-between gap-3 mb-3">
+                                                <p class="font-extrabold text-dark">{{ group.name }}</p>
+                                                <span class="text-[10px] font-extrabold uppercase text-gray-400">
+                                                    {% if group.type == 'radio' %}
+                                                        Pilih satu
+                                                    {% else %}
+                                                        Opsional
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="space-y-2">
+                                                {% for option in group.options.all %}
+                                                    {% if option.is_active %}
+                                                        <label class="flex items-center justify-between gap-3 rounded-xl bg-white border border-gray-100 px-3 py-3">
+                                                            <span class="flex items-center gap-3 min-w-0">
+                                                                <input type="{% if group.type == 'radio' %}radio{% else %}checkbox{% endif %}"
+                                                                       name="variant_options"
+                                                                       value="{{ option.id }}"
+                                                                       class="text-primary focus:ring-primary"
+                                                                       {% if group.type == 'radio' and forloop.first %}checked{% endif %}>
+                                                                <span class="font-bold text-sm text-dark truncate">{{ option.name }}</span>
+                                                            </span>
+                                                            {% if option.price_adjustment %}
+                                                                {# djlint:off #}
+                                                                <span class="text-xs font-extrabold text-primary whitespace-nowrap">{% if option.price_adjustment > 0 %}+ {% endif %}{{ option.price_adjustment|rupiah }}</span>
+                                                                {# djlint:on #}
+                                                            {% endif %}
+                                                        </label>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="grid grid-cols-[7rem_1fr] gap-3 items-end">
+                                    <label class="block" for="sheet-qty-{{ item.id }}">
+                                        <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Jumlah Pesanan</span>
+                                        <input id="sheet-qty-{{ item.id }}"
+                                               type="number"
+                                               name="quantity"
+                                               value="1"
+                                               min="1"
+                                               class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-extrabold text-center focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                    </label>
+                                    <label class="block min-w-0" for="sheet-note-{{ item.id }}">
+                                        <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Catatan Pesanan</span>
+                                        <input id="sheet-note-{{ item.id }}"
+                                               type="text"
+                                               name="note"
+                                               placeholder="Contoh: tanpa bawang"
+                                               class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                    </label>
+                                </div>
+                                <button type="submit"
+                                        class="w-full h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg font-extrabold hover:bg-primaryLight transition-colors gap-2">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                    <span>Masukkan Keranjang</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
-
-                    {% for group in item.variant_groups.all %}
-                        {% if group.is_active %}
-                            <div class="rounded-2xl border border-gray-100 bg-bg p-4">
-                                <div class="flex items-center justify-between gap-3 mb-3">
-                                    <p class="font-extrabold text-dark">{{ group.name }}</p>
-                                    <span class="text-[10px] font-extrabold uppercase text-gray-400">{% if group.type == 'radio' %}Pilih satu{% else %}Opsional{% endif %}</span>
-                                </div>
-                                <div class="space-y-2">
-                                    {% for option in group.options.all %}
-                                        {% if option.is_active %}
-                                            <label class="flex items-center justify-between gap-3 rounded-xl bg-white border border-gray-100 px-3 py-3">
-                                                <span class="flex items-center gap-3 min-w-0">
-                        <input type="{% if group.type == 'radio' %}radio{% else %}checkbox{% endif %}" name="variant_options" value="{{ option.id }}" class="text-primary focus:ring-primary" {% if group.type == 'radio' and forloop.first %}checked{% endif %}>
-                        <span class="font-bold text-sm text-dark truncate">{{ option.name }}</span>
-                                                </span>
-                                                {% if option.price_adjustment %}<span class="text-xs font-extrabold text-primary whitespace-nowrap">{% if option.price_adjustment > 0 %}+ {% endif %}{{ option.price_adjustment|rupiah }}</span>{% endif %}
-                                            </label>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-
-                    <div class="grid grid-cols-[7rem_1fr] gap-3 items-end">
-                        <label class="block" for="sheet-qty-{{ item.id }}">
-                            <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Jumlah Pesanan</span>
-                            <input id="sheet-qty-{{ item.id }}" type="number" name="quantity" value="1" min="1" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-extrabold text-center focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
-                        </label>
-                        <label class="block min-w-0" for="sheet-note-{{ item.id }}">
-                            <span class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide mb-1.5">Catatan Pesanan</span>
-                            <input id="sheet-note-{{ item.id }}" type="text" name="note" placeholder="Contoh: tanpa bawang" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
-                        </label>
-                    </div>
-
-                    <button type="submit" class="w-full h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg font-extrabold hover:bg-primaryLight transition-colors gap-2">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span>Masukkan Keranjang</span>
-                    </button>
-                </form>
-            </div>
-        </div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
         </main>
         <script>
             document.addEventListener('DOMContentLoaded', function () {

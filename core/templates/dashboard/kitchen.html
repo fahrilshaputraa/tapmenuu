@@ -13,9 +13,7 @@
         <div>
             <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">Dapur</p>
             <h1 class="text-2xl font-extrabold text-dark">Kitchen Board</h1>
-            <p class="text-sm text-gray-500">
-                {{ kitchen_total }} pesanan aktif · diperbarui otomatis tiap 15 detik
-            </p>
+            <p class="text-sm text-gray-500">{{ kitchen_total }} pesanan aktif · diperbarui otomatis tiap 15 detik</p>
         </div>
         <span class="px-4 py-2 rounded-full bg-secondary text-primary font-bold text-sm">
             <i class="fa-solid fa-fire-burner mr-1"></i> Dapur
@@ -47,9 +45,7 @@
                                         <span class="font-bold text-dark">{{ item.quantity }}x {{ item.item_name }}</span>
                                         <span class="font-extrabold text-primary text-sm">{{ item.line_total|rupiah }}</span>
                                     </div>
-                                    {% if item.notes %}
-                                        <p class="text-xs text-gray-500 mt-1">{{ item.notes }}</p>
-                                    {% endif %}
+                                    {% if item.notes %}<p class="text-xs text-gray-500 mt-1">{{ item.notes }}</p>{% endif %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -57,8 +53,7 @@
                             <span class="font-extrabold text-dark">{{ order.total_amount|rupiah }}</span>
                             <div class="flex gap-2">
                                 {% if order.status == 'new' or order.status == 'paid' %}
-                                    <form method="post"
-                                          action="{% url 'order_update_status' order.pk %}">
+                                    <form method="post" action="{% url 'order_update_status' order.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="status" value="processing">
                                         <button type="submit"
@@ -68,8 +63,7 @@
                                     </form>
                                 {% endif %}
                                 {% if order.status == 'processing' %}
-                                    <form method="post"
-                                          action="{% url 'order_update_status' order.pk %}">
+                                    <form method="post" action="{% url 'order_update_status' order.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="status" value="ready">
                                         <button type="submit"
@@ -79,8 +73,7 @@
                                     </form>
                                 {% endif %}
                                 {% if order.status == 'ready' %}
-                                    <form method="post"
-                                          action="{% url 'order_update_status' order.pk %}">
+                                    <form method="post" action="{% url 'order_update_status' order.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="status" value="completed">
                                         <button type="submit"

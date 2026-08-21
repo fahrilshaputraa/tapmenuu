@@ -42,7 +42,9 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-bold text-amber-800 mb-0.5">Profil toko belum lengkap</p>
-                        <p class="text-xs text-amber-700">Masih ada yang kurang: <strong>{{ missing_fields|join:", " }}</strong>. Lengkapi agar tampilan menu lebih menarik.</p>
+                        <p class="text-xs text-amber-700">
+                            Masih ada yang kurang: <strong>{{ missing_fields|join:", " }}</strong>. Lengkapi agar tampilan menu lebih menarik.
+                        </p>
                     </div>
                     <a href="{% url 'store' %}"
                        class="shrink-0 px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-colors">
@@ -284,24 +286,24 @@
 </div>
 </section>
 </div>
-        {% include 'core/partials/dashboard_footer.html' %}
+{% include 'core/partials/dashboard_footer.html' %}
 </div>
 {% endblock %}
 {% block dashboard_overlays %}
-{% if show_welcome_toast %}
-<div id="welcome-toast"
-     class="fixed top-6 right-6 z-50 max-w-sm bg-white rounded-2xl shadow-2xl border border-green-100 p-4 flex items-start gap-4 fade-in">
-    <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-        <i class="fa-solid fa-rocket"></i>
-    </div>
-    <div class="flex-1">
-        <p class="font-bold text-dark text-sm mb-0.5">Toko berhasil dibuat! 🎉</p>
-        <p class="text-xs text-gray-500">Selamat datang di TapMenu. Mulai setup menu dan QR meja kamu.</p>
-    </div>
-    <button onclick="document.getElementById('welcome-toast').remove()"
-            class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
-</div>
-{% endif %}
+    {% if show_welcome_toast %}
+        <div id="welcome-toast"
+             class="fixed top-6 right-6 z-50 max-w-sm bg-white rounded-2xl shadow-2xl border border-green-100 p-4 flex items-start gap-4 fade-in">
+            <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
+            <div class="flex-1">
+                <p class="font-bold text-dark text-sm mb-0.5">Toko berhasil dibuat! 🎉</p>
+                <p class="text-xs text-gray-500">Selamat datang di TapMenu. Mulai setup menu dan QR meja kamu.</p>
+            </div>
+            <button onclick="document.getElementById('welcome-toast').remove()"
+                    class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    {% endif %}
 {% endblock %}

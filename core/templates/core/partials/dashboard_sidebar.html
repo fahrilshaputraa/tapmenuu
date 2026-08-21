@@ -14,99 +14,90 @@
             <span class="text-xs text-gray-400">{{ restaurant.name|default:'Dashboard' }}</span>
         </div>
     </div>
-
     <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll"
          aria-label="Dashboard navigation">
         {% with current=request.resolver_match.url_name %}
-        {% with user_role=request.user.profile.role|default:'owner' %}
-
-            <!-- Ringkasan -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Ringkasan</div>
-            <a href="{% url 'dashboard' %}"
-               {% if current == 'dashboard' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'dashboard' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-house w-5"></i> Dashboard
-            </a>
-
-            {% if user_role == 'owner' or user_role == 'admin' %}
-            <!-- Menu -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Menu</div>
-            <a href="{% url 'management_menu' %}"
-               {% if current == 'management_menu' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'management_menu' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
-            </a>
-            <a href="{% url 'category_management' %}"
-               {% if current == 'category_management' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'category_management' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-layer-group w-5"></i> Kategori Menu
-            </a>
-            {% endif %}
-
-            <!-- Operasional -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Operasional</div>
-            {% if user_role == 'owner' or user_role == 'admin' %}
-            <a href="{% url 'tables' %}"
-               {% if current == 'tables' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'tables' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
-            </a>
-            {% endif %}
-            <a href="{% url 'orders' %}"
-               {% if current == 'orders' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'orders' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-receipt w-5"></i> Pesanan
-            </a>
-            {% if user_role == 'dapur' or user_role == 'owner' or user_role == 'admin' %}
-            <a href="{% url 'kitchen' %}"
-               {% if current == 'kitchen' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'kitchen' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-fire-burner w-5"></i> Kitchen
-            </a>
-            {% endif %}
-
-            {% if user_role == 'owner' or user_role == 'admin' %}
-            <!-- Laporan -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Laporan</div>
-            <a href="{% url 'reports' %}"
-               {% if current == 'reports' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'reports' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-chart-pie w-5"></i> Laporan Keuangan
-            </a>
-
-            <!-- Pengaturan -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Pengaturan</div>
-            <a href="{% url 'store' %}"
-               {% if current == 'store' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'store' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-store w-5"></i> Profil Toko
-            </a>
-            <a href="{% url 'menu_appearance' %}"
-               {% if current == 'menu_appearance' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'menu_appearance' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-palette w-5"></i> Appearance Menu
-            </a>
-            <a href="{% url 'employee' %}"
-               {% if current == 'employee' %}aria-current="page"{% endif %}
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'employee' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                <i class="fa-solid fa-users-gear w-5"></i> Karyawan
-            </a>
-            {% endif %}
-
-            <!-- Link Eksternal -->
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Publik</div>
-            <a href="{% url 'book_menu' %}"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-gray-500 font-medium hover:bg-gray-50 hover:text-dark"
-               target="_blank"
-               rel="noopener">
-                <i class="fa-solid fa-eye w-5"></i> Lihat Menu Publik
-                <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-[10px] text-gray-300"></i>
-            </a>
-
-        {% endwith %}
+            {% with user_role=request.user.profile.role|default:'owner' %}
+                <!-- Ringkasan -->
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Ringkasan</div>
+                <a href="{% url 'dashboard' %}"
+                   {% if current == 'dashboard' %}aria-current="dashboard"{% endif %}
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'dashboard' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                </a>
+                {% if user_role == 'owner' or user_role == 'admin' %}
+                    <!-- Menu -->
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Menu</div>
+                    <a href="{% url 'management_menu' %}"
+                       {% if current == 'management_menu' %}aria-current="management_menu"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'management_menu' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
+                    </a>
+                    <a href="{% url 'category_management' %}"
+                       {% if current == 'category_management' %}aria-current="category_management"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'category_management' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-layer-group w-5"></i> Kategori Menu
+                    </a>
+                {% endif %}
+                <!-- Operasional -->
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Operasional</div>
+                {% if user_role == 'owner' or user_role == 'admin' %}
+                    <a href="{% url 'tables' %}"
+                       {% if current == 'tables' %}aria-current="tables"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'tables' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+                    </a>
+                {% endif %}
+                <a href="{% url 'orders' %}"
+                   {% if current == 'orders' %}aria-current="orders"{% endif %}
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'orders' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                    <i class="fa-solid fa-receipt w-5"></i> Pesanan
+                </a>
+                {% if user_role == 'dapur' or user_role == 'owner' or user_role == 'admin' %}
+                    <a href="{% url 'kitchen' %}"
+                       {% if current == 'kitchen' %}aria-current="kitchen"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'kitchen' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-fire-burner w-5"></i> Kitchen
+                    </a>
+                {% endif %}
+                {% if user_role == 'owner' or user_role == 'admin' %}
+                    <!-- Laporan -->
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Laporan</div>
+                    <a href="{% url 'reports' %}"
+                       {% if current == 'reports' %}aria-current="reports"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'reports' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-chart-pie w-5"></i> Laporan Keuangan
+                    </a>
+                    <!-- Pengaturan -->
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Pengaturan</div>
+                    <a href="{% url 'store' %}"
+                       {% if current == 'store' %}aria-current="store"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'store' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-store w-5"></i> Profil Toko
+                    </a>
+                    <a href="{% url 'menu_appearance' %}"
+                       {% if current == 'menu_appearance' %}aria-current="menu_appearance"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'menu_appearance' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-palette w-5"></i> Appearance Menu
+                    </a>
+                    <a href="{% url 'employee' %}"
+                       {% if current == 'employee' %}aria-current="employee"{% endif %}
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'employee' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <i class="fa-solid fa-users-gear w-5"></i> Karyawan
+                    </a>
+                {% endif %}
+                <!-- Link Eksternal -->
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Publik</div>
+                <a href="{% url 'book_menu' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-gray-500 font-medium hover:bg-gray-50 hover:text-dark"
+                   target="_blank"
+                   rel="noopener">
+                    <i class="fa-solid fa-eye w-5"></i> Lihat Menu Publik
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-[10px] text-gray-300"></i>
+                </a>
+            {% endwith %}
         {% endwith %}
     </nav>
-
     <!-- Profile with Dropdown -->
     <style>
         .dropdown-fade {
@@ -128,9 +119,9 @@
                 <p class="text-sm font-bold text-dark truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
                 <p class="text-xs text-gray-500 truncate">{{ request.user.profile.get_role_display|default:'Owner' }}</p>
             </div>
-            <i id="profile-chevron" class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform"></i>
+            <i id="profile-chevron"
+               class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform"></i>
         </button>
-
         <!-- Dropdown Menu -->
         <div id="profile-dropdown"
              class="hidden absolute bottom-full left-4 right-4 mb-2 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden dropdown-fade">
@@ -154,7 +145,6 @@
         </div>
     </div>
 </aside>
-
 <script>
     function toggleProfileDropdown() {
         const dropdown = document.getElementById('profile-dropdown');
