@@ -373,8 +373,11 @@ def management_menu(request):
 @role_required('owner', 'admin')
 def category_create(request):
     form = MenuCategoryForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('category_management')
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('category_management')
 
 
@@ -382,8 +385,11 @@ def category_create(request):
 def category_update(request, pk):
     category = get_object_or_404(MenuCategory, pk=pk)
     form = MenuCategoryForm(request.POST or None, instance=category)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('category_management')
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('category_management')
 
 
@@ -403,6 +409,7 @@ def menu_item_create(request):
             item = form.save()
             _save_variants(item, request.POST.get('variants'))
             return redirect('management_menu')
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('management_menu')
 
 
@@ -415,6 +422,7 @@ def menu_item_update(request, pk):
             item = form.save()
             _save_variants(item, request.POST.get('variants'))
             return redirect('management_menu')
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('management_menu')
 
 

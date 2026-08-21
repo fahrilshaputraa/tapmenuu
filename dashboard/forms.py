@@ -157,7 +157,23 @@ class MenuCategoryForm(forms.ModelForm):
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
         name = self.cleaned_data.get('name', '')
-        return slugify(slug or name) or 'kategori'
+        base_slug = slugify(slug or name) or 'kategori'
+        restaurant = self.cleaned_data.get('restaurant')
+        
+        if not restaurant:
+            return base_slug
+            
+        unique_slug = base_slug
+        counter = 1
+        qs = MenuCategory.objects.filter(restaurant=restaurant)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+            
+        while qs.filter(slug=unique_slug).exists():
+            unique_slug = f"{base_slug}-{counter}"
+            counter += 1
+            
+        return unique_slug
 
 
 class MenuItemForm(forms.ModelForm):
@@ -233,7 +249,23 @@ class MenuItemForm(forms.ModelForm):
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
         name = self.cleaned_data.get('name', '')
-        return slugify(slug or name) or 'menu'
+        base_slug = slugify(slug or name) or 'menu'
+        restaurant = self.cleaned_data.get('restaurant')
+        
+        if not restaurant:
+            return base_slug
+            
+        unique_slug = base_slug
+        counter = 1
+        qs = MenuItem.objects.filter(restaurant=restaurant)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+            
+        while qs.filter(slug=unique_slug).exists():
+            unique_slug = f"{base_slug}-{counter}"
+            counter += 1
+            
+        return unique_slug
 
 
 class OrderStatusForm(forms.ModelForm):

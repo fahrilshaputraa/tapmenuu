@@ -499,14 +499,8 @@
             document.getElementById('preview-image').src = '';
             document.getElementById('preview-image').classList.add('hidden');
 
-            // Fetch and populate variants
+            // Clear variants container
             document.getElementById('variants-container').innerHTML = '';
-            fetch(variantsUrl)
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    (data.variants || []).forEach(function(vg) { addVariantGroup(vg); });
-                })
-                .catch(function() {});
 
             switchTab('basic');
             calculateFinalPrice();
