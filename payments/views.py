@@ -74,8 +74,34 @@ def webhook(request):
 
     # Midtrans sends order_id + signature_key instead of reference.
     if 'signature_key' in payload or payload.get('order_id'):
+        order_id = payload.get('order_id', '')
+        # Multi-tenant: try per-restaurant gateway first (lookup payment by order_id)
+        gateway = None
+        if order_id:
+            try:
+                pre_payment = Payment.objects.select_related(
+                    'order', 'order__restaurant'
+                ).get(reference=order_id)
+                from payments.services import get_payment_gateway_for_order
+
+                gateway = get_payment_gateway_for_order(pre_payment.order)
+                # If per-restaurant gateway is dummy, fall back to global Midtrans for signature check
+                if (
+                    gateway.provider == 'dummy'
+                    and settings.MIDTRANS_SERVER_KEY
+                    and settings.MIDTRANS_CLIENT_KEY
+                ):
+                    gateway = MidtransPaymentGateway()
+            except Payment.DoesNotExist:
+                gateway = None
+        if gateway is None:
+            gateway = MidtransPaymentGateway()
+        # Ensure we use a Midtrans gateway for verification (dummy cannot verify signature)
+        if gateway.provider != 'midtrans':
+            gateway = MidtransPaymentGateway()
+
         try:
-            verified = MidtransPaymentGateway().verify_callback(payload)
+            verified = gateway.verify_callback(payload)
         except MidtransError as exc:
             return JsonResponse({'status': 'error', 'reason': str(exc)}, status=400)
 
@@ -94,9 +120,8 @@ def webhook(request):
     reference = payload.get('reference')
     status = payload.get('status')
 
-    # When Midtrans is configured, the generic (dummy) webhook is disabled
-    # entirely — even with a valid PAYMENT_WEBHOOK_SECRET. This prevents
-    # unsigned generic payloads from mutating payments in production.
+    # When Midtrans is configured (globally OR per-restaurant for this payment),
+    # the generic (dummy) webhook is disabled. Check global first, then per-payment.
     if settings.MIDTRANS_SERVER_KEY and settings.MIDTRANS_CLIENT_KEY:
         return JsonResponse(
             {
@@ -105,6 +130,25 @@ def webhook(request):
             },
             status=403,
         )
+    # Per-restaurant check: if this payment's restaurant uses Midtrans, block generic
+    if reference:
+        try:
+            ref_payment = Payment.objects.select_related(
+                'order', 'order__restaurant'
+            ).get(reference=reference)
+            from payments.services import get_payment_gateway_for_order
+
+            ref_gateway = get_payment_gateway_for_order(ref_payment.order)
+            if ref_gateway.provider == 'midtrans':
+                return JsonResponse(
+                    {
+                        'status': 'ignored',
+                        'reason': 'generic webhook disabled for midtrans restaurant',
+                    },
+                    status=403,
+                )
+        except Payment.DoesNotExist:
+            pass
 
     # Generic (non-Midtrans) notifications are only allowed in development
     # when a shared secret is configured and provided.

@@ -6,6 +6,7 @@ from accounts.models import Role
 from menus.models import MenuCategory, MenuItem
 from orders.models import Order
 from orders.services import can_transition_status, transition_order_status
+from payments.models import RestaurantPaymentConfig
 from restaurants.models import DiningTable, MenuAppearanceTheme, Restaurant
 
 
@@ -355,10 +356,84 @@ class MenuItemForm(forms.ModelForm):
         return unique_slug
 
 
+class RestaurantPaymentConfigForm(forms.ModelForm):
+    # Plain text inputs - will be encrypted on save. Empty = keep existing.
+    midtrans_server_key = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm',
+                'placeholder': 'SB-Mid-server-xxxx',
+                'autocomplete': 'off',
+            },
+            render_value=False,
+        ),
+        label='Midtrans Server Key',
+        help_text='Dari dashboard.midtrans.com — jangan bagikan.',
+    )
+    midtrans_client_key = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm',
+                'placeholder': 'SB-Mid-client-xxxx',
+                'autocomplete': 'off',
+            },
+            render_value=False,
+        ),
+        label='Midtrans Client Key',
+    )
+
+    class Meta:
+        model = RestaurantPaymentConfig
+        fields = ['gateway', 'midtrans_is_production', 'is_active']
+        widgets = {
+            'gateway': forms.Select(
+                attrs={
+                    'class': 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium',
+                }
+            ),
+            'midtrans_is_production': forms.CheckboxInput(attrs={'class': 'w-4 h-4'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'w-4 h-4'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        gateway = cleaned.get('gateway')
+        server_key = (
+            self.data.get('midtrans_server_key', '').strip()
+            if hasattr(self, 'data')
+            else ''
+        )
+        client_key = (
+            self.data.get('midtrans_client_key', '').strip()
+            if hasattr(self, 'data')
+            else ''
+        )
+        # Also check existing encrypted values when editing
+        has_existing_server = bool(self.instance and self.instance.midtrans_server_key)
+        has_existing_client = bool(self.instance and self.instance.midtrans_client_key)
+        has_server = bool(server_key) or has_existing_server
+        has_client = bool(client_key) or has_existing_client
+        if gateway == RestaurantPaymentConfig.Gateway.MIDTRANS:
+            if not has_server or not has_client:
+                raise forms.ValidationError(
+                    'Untuk Midtrans, Server Key dan Client Key wajib diisi.'
+                )
+        return cleaned
+
+
 class OrderStatusForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ['status']
+        widgets = {
+            'status': forms.Select(
+                attrs={
+                    'class': 'w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-dark focus:border-primary focus:ring-4 focus:ring-secondary/40 outline-none transition-all',
+                }
+            ),
+        }
 
     def clean_status(self):
         new_status = self.cleaned_data['status']

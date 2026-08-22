@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from accounts.models import Role, UserProfile
 from core.views import PALETTE_PRESETS
@@ -23,6 +24,7 @@ from dashboard.forms import (
     MenuItemForm,
     OrderStatusForm,
     RestaurantForm,
+    RestaurantPaymentConfigForm,
 )
 from menus.models import (
     MenuCategory,
@@ -240,6 +242,56 @@ def _order_status_counts(queryset):
         'completed': counts.get(Order.Status.COMPLETED, 0),
         'cancelled': counts.get(Order.Status.CANCELLED, 0),
     }
+
+
+# Kanban board columns — muted greys (background), accent only on label/dot.
+KANBAN_COLUMNS = [
+    {
+        'value': Order.Status.NEW,
+        'label': 'Baru',
+        'icon': 'fa-bell',
+        'dot': 'bg-amber-500',
+        'label_color': 'text-amber-700',
+        'header': 'bg-white border-gray-200',
+        'pill': 'bg-amber-50 text-amber-700 border border-amber-200',
+    },
+    {
+        'value': Order.Status.PAID,
+        'label': 'Dibayar',
+        'icon': 'fa-credit-card',
+        'dot': 'bg-blue-500',
+        'label_color': 'text-blue-700',
+        'header': 'bg-white border-gray-200',
+        'pill': 'bg-blue-50 text-blue-700 border border-blue-200',
+    },
+    {
+        'value': Order.Status.PROCESSING,
+        'label': 'Diproses',
+        'icon': 'fa-fire-burner',
+        'dot': 'bg-indigo-500',
+        'label_color': 'text-indigo-700',
+        'header': 'bg-white border-gray-200',
+        'pill': 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+    },
+    {
+        'value': Order.Status.READY,
+        'label': 'Siap Saji',
+        'icon': 'fa-bell-concierge',
+        'dot': 'bg-emerald-500',
+        'label_color': 'text-emerald-700',
+        'header': 'bg-white border-gray-200',
+        'pill': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    },
+    {
+        'value': Order.Status.COMPLETED,
+        'label': 'Selesai',
+        'icon': 'fa-circle-check',
+        'dot': 'bg-gray-400',
+        'label_color': 'text-primary',
+        'header': 'bg-white border-gray-200',
+        'pill': 'bg-gray-50 text-gray-600 border border-gray-200',
+    },
+]
 
 
 def _average_order_value(queryset):
@@ -686,6 +738,7 @@ def menu_item_delete(request, pk):
 @staff_required
 def orders(request):
     status = request.GET.get('status')
+    view = request.GET.get('view', 'list')
     base_queryset = _scoped_order_queryset(request.user)
     queryset = base_queryset
     if status:
@@ -696,6 +749,10 @@ def orders(request):
         _dashboard_context(
             request=request,
             orders=queryset,
+            # Kanban always shows every active status regardless of tab filter.
+            all_orders=base_queryset,
+            kanban_columns=KANBAN_COLUMNS,
+            current_view='kanban' if view == 'kanban' else 'list',
             order_statuses=Order.Status.choices,
             status_counts=_order_status_counts(base_queryset),
             current_status=status or 'all',
@@ -729,8 +786,24 @@ def order_update_status(request, pk):
     if restaurant is not None and order.restaurant_id != restaurant.id:
         raise PermissionDenied('Anda tidak memiliki akses ke pesanan ini.')
     form = OrderStatusForm(request.POST or None, instance=order)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            # Light feedback so list/kanban reloads show what happened.
+            new_label = dict(Order.Status.choices).get(order.status, order.status)
+            messages.success(request, f'Pesanan {order.code} → {new_label}.')
+        else:
+            first_error = next(iter(form.errors.values()), ['Status tidak valid.'])[0]
+            messages.error(request, f'Gagal update status: {first_error}')
+        # Allow returning to the originating view (e.g. kanban board) instead
+        # of always jumping to the order detail page.
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url and url_has_allowed_host_and_scheme(
+            url=next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
     return redirect(reverse('order_detail', kwargs={'pk': order.pk}))
 
 
@@ -934,5 +1007,48 @@ def kitchen(request):
             request=request,
             kitchen_orders=active_orders,
             kitchen_total=active_orders.count(),
+        ),
+    )
+
+
+@role_required('owner', 'admin')
+def payment_settings(request):
+    """Per-restaurant payment gateway settings (Midtrans per owner)."""
+    from payments.models import RestaurantPaymentConfig
+
+    restaurant = _profile_restaurant(request.user)
+    if restaurant is None:
+        restaurant = Restaurant.objects.order_by('id').first()
+    if not restaurant:
+        messages.error(request, 'Buat profil toko dulu sebelum atur pembayaran.')
+        return redirect('store')
+
+    config, _ = RestaurantPaymentConfig.objects.get_or_create(restaurant=restaurant)
+
+    if request.method == 'POST':
+        form = RestaurantPaymentConfigForm(request.POST, instance=config)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            # Encrypted keys: only overwrite when user typed new value
+            new_server = request.POST.get('midtrans_server_key', '').strip()
+            new_client = request.POST.get('midtrans_client_key', '').strip()
+            if new_server:
+                obj.midtrans_server_key = new_server
+            if new_client:
+                obj.midtrans_client_key = new_client
+            # If gateway switched away from midtrans, keep keys but deactivate check
+            obj.save()
+            messages.success(request, 'Pengaturan pembayaran berhasil disimpan.')
+            return redirect('payment_settings')
+    else:
+        form = RestaurantPaymentConfigForm(instance=config)
+
+    return render(
+        request,
+        'core/pages/payment-settings.html',
+        _dashboard_context(
+            request=request,
+            payment_config=config,
+            payment_form=form,
         ),
     )

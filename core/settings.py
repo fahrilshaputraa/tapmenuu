@@ -208,6 +208,9 @@ SOCIALACCOUNT_PROVIDERS = {
 # The `dummy` gateway is the default for development (no network, no keys).
 # When MIDTRANS_SERVER_KEY and MIDTRANS_CLIENT_KEY are set, the `midtrans`
 # gateway is used automatically for QRIS / Virtual Account / E-Wallet.
+# For multi-tenant setups, each Restaurant has its own RestaurantPaymentConfig
+# (payments.RestaurantPaymentConfig) - global keys are kept as fallback for
+# single-tenant / legacy deployments.
 MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', '')
 MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
 MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION', 'false').lower() in (
@@ -215,6 +218,11 @@ MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION', 'false').lower
     '1',
     'yes',
 )
+
+# Optional: explicit Fernet key for encrypting per-restaurant Midtrans keys.
+# If empty, derived from DJANGO_SECRET_KEY. Generate with:
+#   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+PAYMENT_ENCRYPTION_KEY = os.environ.get('PAYMENT_ENCRYPTION_KEY', '')
 
 # Shared secret that must be sent in the `Authorization` header of generic
 # webhook notifications (dev/dummy gateway only). Midtrans notifications are

@@ -12,17 +12,65 @@ class PaymentInitiationError(ValueError):
     """Raised when a payment cannot be initiated."""
 
 
-def get_payment_gateway():
+def get_payment_gateway(*, restaurant=None, order=None):
     """Return the active payment gateway.
 
-    Midtrans is used when its server/client keys are configured; otherwise the
-    dummy gateway is used for development (no network, no keys).
+    Resolution order (multi-tenant aware):
+    1. Per-restaurant RestaurantPaymentConfig (is_active + keys) when restaurant/order given.
+    2. Global settings MIDTRANS_SERVER_KEY / MIDTRANS_CLIENT_KEY (legacy / single-tenant fallback).
+    3. Dummy gateway.
+
+    Keep ``get_payment_gateway()`` with no args for backwards-compat (global fallback).
     """
+    # Per-restaurant config — highest priority
+    target_restaurant = restaurant
+    if order is not None and target_restaurant is None:
+        target_restaurant = getattr(order, 'restaurant', None)
+
+    if target_restaurant is not None:
+        try:
+            # Lazy import to avoid circular
+            from payments.models import RestaurantPaymentConfig
+
+            # Use cached relation if already fetched, else query
+            config = getattr(target_restaurant, 'payment_config', None)
+            if config is None and hasattr(target_restaurant, 'id'):
+                try:
+                    config = RestaurantPaymentConfig.objects.get(
+                        restaurant=target_restaurant
+                    )
+                except RestaurantPaymentConfig.DoesNotExist:
+                    config = None
+            if config and config.is_active:
+                if (
+                    config.gateway == config.Gateway.MIDTRANS
+                    and config.is_midtrans_configured
+                ):
+                    from payments.gateways.midtrans import MidtransPaymentGateway
+
+                    return MidtransPaymentGateway(
+                        server_key=config.midtrans_server_key,
+                        client_key=config.midtrans_client_key,
+                        is_production=config.midtrans_is_production,
+                    )
+                if config.gateway == config.Gateway.DUMMY:
+                    return DummyPaymentGateway()
+                # Active config but not fully set up -> fall through to global check
+                # so missing keys don't silently stay dummy if global keys exist.
+        except Exception:
+            pass
+
+    # Global fallback (legacy .env)
     if settings.MIDTRANS_SERVER_KEY and settings.MIDTRANS_CLIENT_KEY:
         from payments.gateways.midtrans import MidtransPaymentGateway
 
         return MidtransPaymentGateway()
     return DummyPaymentGateway()
+
+
+def get_payment_gateway_for_order(order):
+    """Convenience helper: gateway scoped to the order's restaurant."""
+    return get_payment_gateway(order=order)
 
 
 def initiate_payment(*, order, method, gateway=None):
@@ -46,7 +94,7 @@ def initiate_payment(*, order, method, gateway=None):
             )
         return payment
 
-    gateway = gateway or get_payment_gateway()
+    gateway = gateway or get_payment_gateway(order=order)
 
     with transaction.atomic():
         payment = Payment.objects.create(
