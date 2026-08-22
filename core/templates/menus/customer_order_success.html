@@ -14,8 +14,33 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet"
               href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
+        <style>
+            :root {
+                --menu-primary: {{ appearance_theme.primary_color|default:'#1B4332' }};
+                --menu-secondary: {{ appearance_theme.secondary_color|default:'#D8F3DC' }};
+                --menu-accent: {{ appearance_theme.accent_color|default:'#E07A5F' }};
+                --menu-bg: {{ appearance_theme.background_color|default:'#F7F5F2' }};
+                --menu-text: {{ appearance_theme.text_color|default:'#1F2933' }};
+                --menu-card: {{ appearance_theme.card_color|default:'#FFFFFF' }};
+                --menu-font: '{{ appearance_theme.font_family|default:'Plus Jakarta Sans' }}', sans-serif;
+            }
+            body[data-menu-theme] { background: var(--menu-bg); color: var(--menu-text); font-family: var(--menu-font); }
+            body[data-menu-theme] main { background: var(--menu-bg); }
+            body[data-menu-theme] header { background: var(--menu-primary); }
+            body[data-menu-theme] .bg-primary { background-color: var(--menu-primary) !important; }
+            body[data-menu-theme] .text-primary { color: var(--menu-primary) !important; }
+            body[data-menu-theme] .bg-secondary { background-color: var(--menu-secondary) !important; }
+            body[data-menu-theme] .bg-accent { background-color: var(--menu-accent) !important; }
+            body[data-menu-theme] .text-dark { color: var(--menu-text) !important; }
+            body[data-menu-theme] article.bg-white { background-color: var(--menu-card) !important; }
+            body[data-menu-theme] button.bg-accent { background-color: var(--menu-accent) !important; }
+        </style>
     </head>
-    <body class="font-sans bg-bg text-dark antialiased min-h-screen">
+    <body class="font-sans bg-bg text-dark antialiased min-h-screen"
+          data-menu-theme
+          data-layout-style="{{ appearance_theme.layout_style|default:'grid' }}"
+          data-header-style="{{ appearance_theme.header_style|default:'rounded' }}"
+          data-button-style="{{ appearance_theme.button_style|default:'rounded' }}">
         <main class="min-h-screen bg-bg pb-8">
             <!-- HEADER -->
             <header class="bg-primary text-white px-5 sm:px-8 pt-8 sm:pt-12 pb-10 sm:pb-12 rounded-b-[2rem] sm:rounded-b-[3rem] relative overflow-hidden text-center">

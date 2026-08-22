@@ -52,6 +52,16 @@
     </head>
     <body>
         <div class="receipt-header">
+            {% if restaurant.logo %}
+                <img src="{{ restaurant.logo.url }}"
+                     alt="Logo"
+                     style="width:40px;
+                            height:40px;
+                            object-fit:cover;
+                            border-radius:6px;
+                            margin-bottom:4px">
+                <br>
+            {% endif %}
             <h1>{{ restaurant.name }}</h1>
             {% if restaurant.address %}<p>{{ restaurant.address }}</p>{% endif %}
             {% if theme.contact_phone %}<p>Telp: {{ theme.contact_phone }}</p>{% endif %}

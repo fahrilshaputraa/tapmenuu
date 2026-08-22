@@ -16,13 +16,23 @@
             <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Pengaturan</p>
             <h1 class="text-2xl font-extrabold text-dark">Appearance Menu</h1>
         </div>
-        <a href="{% url 'book_menu' %}"
-           target="_blank"
-           rel="noopener"
-           class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-extrabold hover:bg-primaryLight transition-colors">
-            <i class="fa-solid fa-eye"></i>
-            Lihat Menu Publik
-        </a>
+        {% if first_table %}
+            <a href="{% url 'customer_menu' first_table.qr_token %}"
+               target="_blank"
+               rel="noopener"
+               class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-extrabold hover:bg-primaryLight transition-colors">
+                <i class="fa-solid fa-eye"></i>
+                Lihat Menu Publik
+            </a>
+        {% else %}
+            <a href="{% url 'book_menu' %}"
+               target="_blank"
+               rel="noopener"
+               class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-extrabold hover:bg-gray-50 transition-colors">
+                <i class="fa-solid fa-qrcode"></i>
+                Belum ada Meja — Buat Meja
+            </a>
+        {% endif %}
     </header>
     <div class="flex-1 overflow-y-auto bg-[#F7F5F2] p-4 sm:p-6 lg:p-8">
         {% if not appearance_form %}
@@ -41,17 +51,76 @@
                       data-theme-form
                       enctype="multipart/form-data">
                     {% csrf_token %}
+
+                    <!-- PALETTE TEMPLATE — 18 varian terkurasi -->
+                    <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
+                        <div class="flex items-start justify-between gap-4 mb-5">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-dark">Template Palet</h2>
+                                <p class="text-sm text-gray-500 mt-1">18 kombinasi terkurasi — pilih mood, lalu fine-tune 6 warna di bawah. Semua tetap full custom.</p>
+                            </div>
+                            <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-extrabold">{{ palettes|length }} template</span>
+                        </div>
+                        <!-- Legend kategori -->
+                        <div class="flex flex-wrap gap-1.5 mb-4">
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold">🌿 Natural</span>
+                            <span class="px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200 text-[10px] font-extrabold">🔥 Hangat</span>
+                            <span class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-extrabold">🌊 Sejuk</span>
+                            <span class="px-2.5 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200 text-[10px] font-extrabold">⚡ Vibrant</span>
+                            <span class="px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-extrabold">💜 Soft</span>
+                            <span class="px-2.5 py-1 rounded-full bg-stone-100 text-stone-700 border border-stone-200 text-[10px] font-extrabold">🪨 Netral</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" data-palette-grid>
+                            {% for palette in palettes %}
+                                <button type="button"
+                                        class="palette-card text-left rounded-2xl border-2 p-3 transition-all hover:scale-[1.02] hover:shadow-lg group relative overflow-hidden"
+                                        data-palette-id="{{ palette.id }}"
+                                        data-primary="{{ palette.primary }}"
+                                        data-secondary="{{ palette.secondary }}"
+                                        data-accent="{{ palette.accent }}"
+                                        data-bg="{{ palette.bg }}"
+                                        data-card="{{ palette.card }}"
+                                        data-text="{{ palette.text }}"
+                                        {% if appearance_theme.primary_color == palette.primary %}data-selected="true"{% endif %}>
+                                    <span class="absolute top-2 right-2 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-white/90 border border-gray-100 shadow-sm">{{ palette.category }}</span>
+                                    <div class="flex gap-1 mb-2.5 mt-1">
+                                        <span class="w-6 h-6 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5" style="background: {{ palette.primary }}" title="Primary"></span>
+                                        <span class="w-6 h-6 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5 -ml-1" style="background: {{ palette.secondary }}" title="Secondary"></span>
+                                        <span class="w-6 h-6 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5 -ml-1" style="background: {{ palette.accent }}" title="Accent"></span>
+                                        <span class="w-6 h-6 rounded-full border border-gray-200 shadow-sm -ml-1 hidden sm:inline-block" style="background: {{ palette.bg }}" title="BG"></span>
+                                    </div>
+                                    <div class="rounded-xl overflow-hidden mb-2 border border-gray-100 shadow-sm" style="background: {{ palette.bg }}">
+                                        <div class="h-6 flex items-center px-2" style="background: {{ palette.primary }}">
+                                            <div class="w-6 h-1.5 rounded-full bg-white/70"></div>
+                                        </div>
+                                        <div class="p-2 flex gap-1.5" style="background: {{ palette.card }}">
+                                            <div class="w-5 h-5 rounded-md shrink-0 border border-black/5" style="background: {{ palette.secondary }}"></div>
+                                            <div class="flex-1 space-y-1">
+                                                <div class="h-1.5 rounded-full" style="background: {{ palette.text }}; opacity:0.18"></div>
+                                                <div class="h-1.5 w-2/3 rounded-full" style="background: {{ palette.accent }}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs font-extrabold text-dark truncate">{{ palette.name }}</p>
+                                    <p class="text-[10px] leading-tight text-gray-500 line-clamp-2 min-h-[1.8em]">{{ palette.description }}</p>
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-3">Klik template untuk isi 6 warna sekaligus (primary • secondary • accent • background • card • text) — tetap bisa di-custom manual di bawah. Dibuat bervariasi biar nggak flat.</p>
+                    </section>
+
+                    <!-- WARNA TEMA -->
                     <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
                         <div class="flex items-start justify-between gap-4 mb-6">
                             <div>
                                 <h2 class="text-lg font-extrabold text-dark">Warna Tema</h2>
-                                <p class="text-sm text-gray-500 mt-1">Atur warna utama menu customer sesuai brand restoran.</p>
+                                <p class="text-sm text-gray-500 mt-1">Full custom — atur 6 warna utama sesuai brand. Live preview di kanan.</p>
                             </div>
                             <span class="px-3 py-1 rounded-full bg-secondary text-primary text-xs font-extrabold">Live Preview</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <label class="theme-field">
-                                <span>Warna Utama</span>
+                            <label class="theme-field group">
+                                <span class="flex items-center justify-between">Warna Utama <span class="text-[10px] font-bold text-primary opacity-60" data-hex-for="primary_color">{{ appearance_theme.primary_color }}</span></span>
                                 {{ appearance_form.primary_color }}
                             </label>
                             <label class="theme-field">
@@ -76,18 +145,24 @@
                             </label>
                         </div>
                     </section>
+
+                    <!-- BRANDING -->
                     <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
                         <h2 class="text-lg font-extrabold text-dark mb-1">Branding & Kontak</h2>
-                        <p class="text-sm text-gray-500 mb-6">Banner, tagline, sambutan, dan info kontak untuk halaman pelanggan & struk.</p>
+                        <p class="text-sm text-gray-500 mb-6">Banner, tagline, sambutan, dan info kontak — semua live di preview & menu customer.</p>
                         <div class="space-y-4">
                             <label class="theme-field block">
                                 <span>Banner Image</span>
                                 {{ appearance_form.banner_image }}
-                                <span class="block text-xs text-gray-400 mt-1">Gambar banner tampilan customer (opsional).</span>
+                                {% if appearance_theme.banner_image %}
+                                    <img src="{{ appearance_theme.banner_image.url }}" class="mt-2 w-full h-28 object-cover rounded-xl border border-gray-100" alt="Banner saat ini">
+                                {% endif %}
+                                <span class="block text-xs text-gray-400 mt-1">Gambar banner di atas menu customer (opsional). Preview akan update setelah simpan.</span>
                             </label>
                             <label class="theme-field block">
                                 <span>Tagline</span>
                                 {{ appearance_form.tagline }}
+                                <span class="block text-xs text-gray-400 mt-1" data-preview-text="tagline">Contoh: {{ appearance_theme.tagline|default:'Jagonya Ayam Geprek' }}</span>
                             </label>
                             <label class="theme-field block">
                                 <span>Pesan Sambutan</span>
@@ -109,28 +184,96 @@
                             </div>
                         </div>
                     </section>
+
+                    <!-- LAYOUT FULL CUSTOM -->
                     <section class="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6">
-                        <h2 class="text-lg font-extrabold text-dark mb-1">Text & Layout</h2>
-                        <p class="text-sm text-gray-500 mb-6">Pilih font, bentuk header, layout card, dan bentuk tombol.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="theme-select-field">
-                                <span>Font Menu</span>
-                                {{ appearance_form.font_family }}
-                            </label>
-                            <label class="theme-select-field">
-                                <span>Layout Menu</span>
-                                {{ appearance_form.layout_style }}
-                            </label>
-                            <label class="theme-select-field">
-                                <span>Style Header</span>
-                                {{ appearance_form.header_style }}
-                            </label>
-                            <label class="theme-select-field">
-                                <span>Style Tombol</span>
-                                {{ appearance_form.button_style }}
-                            </label>
+                        <h2 class="text-lg font-extrabold text-dark mb-1">Layout & Gaya • Full Custom</h2>
+                        <p class="text-sm text-gray-500 mb-6">Pilih visual, bukan dropdown — klik card di bawah, preview HP langsung berubah.</p>
+
+                        <!-- FONT -->
+                        <div class="mb-6">
+                            <p class="text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-3">Font Menu</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2" data-visual-group="font_family">
+                                {% for value,label in appearance_form.fields.font_family.choices %}
+                                    <button type="button" data-visual-value="{{ value }}" data-visual-field="font_family" class="visual-card p-3 rounded-2xl border-2 text-center transition-all hover:border-primary/40">
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase">{{ value|truncatechars:12 }}</p>
+                                        <p class="text-sm font-extrabold text-dark mt-1" style="font-family:'{{ value }}', sans-serif">Aa</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ label }}</p>
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            <div class="hidden">{{ appearance_form.font_family }}</div>
                         </div>
-                        <label class="mt-5 flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3 cursor-pointer">
+
+                        <!-- LAYOUT -->
+                        <div class="mb-6">
+                            <p class="text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-3">Layout Menu</p>
+                            <div class="grid grid-cols-3 gap-3" data-visual-group="layout_style">
+                                <button type="button" data-visual-value="grid" data-visual-field="layout_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="grid grid-cols-2 gap-1 mb-2 mx-auto w-10">
+                                        <div class="h-5 rounded-md bg-gray-200"></div><div class="h-5 rounded-md bg-gray-200"></div>
+                                        <div class="h-5 rounded-md bg-gray-200"></div><div class="h-5 rounded-md bg-gray-200"></div>
+                                    </div>
+                                    <p class="text-xs font-bold text-dark">Grid</p><p class="text-[10px] text-gray-400">Nyaman</p>
+                                </button>
+                                <button type="button" data-visual-value="compact" data-visual-field="layout_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="space-y-1 mb-2 mx-auto w-10">
+                                        <div class="h-3 rounded-md bg-gray-200"></div><div class="h-3 rounded-md bg-gray-200"></div><div class="h-3 rounded-md bg-gray-200"></div>
+                                    </div>
+                                    <p class="text-xs font-bold text-dark">Compact</p><p class="text-[10px] text-gray-400">Padat</p>
+                                </button>
+                                <button type="button" data-visual-value="featured" data-visual-field="layout_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="mb-2 mx-auto w-10">
+                                        <div class="h-7 rounded-md bg-primary/20 border border-primary/20 mb-1"></div>
+                                        <div class="grid grid-cols-2 gap-1"><div class="h-4 rounded-md bg-gray-200"></div><div class="h-4 rounded-md bg-gray-200"></div></div>
+                                    </div>
+                                    <p class="text-xs font-bold text-dark">Featured</p><p class="text-[10px] text-gray-400">Sorot</p>
+                                </button>
+                            </div>
+                            <div class="hidden">{{ appearance_form.layout_style }}</div>
+                        </div>
+
+                        <!-- HEADER -->
+                        <div class="mb-6">
+                            <p class="text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-3">Style Header</p>
+                            <div class="grid grid-cols-3 gap-3" data-visual-group="header_style">
+                                <button type="button" data-visual-value="rounded" data-visual-field="header_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-8 rounded-b-[14px] bg-primary mb-2 mx-auto w-10"></div>
+                                    <p class="text-xs font-bold">Rounded</p>
+                                </button>
+                                <button type="button" data-visual-value="minimal" data-visual-field="header_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-8 bg-primary mb-2 mx-auto w-10"></div>
+                                    <p class="text-xs font-bold">Minimal</p>
+                                </button>
+                                <button type="button" data-visual-value="hero" data-visual-field="header_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-10 rounded-b-[14px] bg-gradient-to-br from-primary to-accent mb-2 mx-auto w-10"></div>
+                                    <p class="text-xs font-bold">Hero</p>
+                                </button>
+                            </div>
+                            <div class="hidden">{{ appearance_form.header_style }}</div>
+                        </div>
+
+                        <!-- BUTTON -->
+                        <div class="mb-2">
+                            <p class="text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-3">Style Tombol</p>
+                            <div class="grid grid-cols-3 gap-3" data-visual-group="button_style">
+                                <button type="button" data-visual-value="rounded" data-visual-field="button_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-6 rounded-xl bg-accent mx-auto w-10 mb-2"></div>
+                                    <p class="text-xs font-bold">Rounded</p>
+                                </button>
+                                <button type="button" data-visual-value="pill" data-visual-field="button_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-6 rounded-full bg-accent mx-auto w-10 mb-2"></div>
+                                    <p class="text-xs font-bold">Pill</p>
+                                </button>
+                                <button type="button" data-visual-value="square" data-visual-field="button_style" class="visual-card p-3 rounded-2xl border-2 transition-all text-center">
+                                    <div class="h-6 rounded-[8px] bg-accent mx-auto w-10 mb-2"></div>
+                                    <p class="text-xs font-bold">Square</p>
+                                </button>
+                            </div>
+                            <div class="hidden">{{ appearance_form.button_style }}</div>
+                        </div>
+
+                        <label class="mt-6 flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3 cursor-pointer">
                             {{ appearance_form.show_category_tabs }}
                             <span>
                                 <span class="block text-sm font-extrabold text-dark">Tampilkan tab kategori</span>
@@ -138,6 +281,7 @@
                             </span>
                         </label>
                     </section>
+
                     <div class="flex flex-col sm:flex-row gap-3 justify-end">
                         <button type="button"
                                 data-reset-theme-trigger
@@ -154,17 +298,60 @@
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Preview HP</p>
                             <h2 class="text-lg font-extrabold text-dark">Menu Customer</h2>
+                            <p class="text-[11px] text-gray-400">Live Preview — update otomatis saat kamu mengetik / klik palet</p>
                         </div>
                         <i class="fa-solid fa-mobile-screen-button text-2xl text-primary"></i>
                     </div>
                     <div class="phone-shell">
                         <div class="phone-screen" data-preview-phone>
                             <div class="preview-header" data-preview-header>
-                                <p class="preview-kicker">Menu Digital</p>
-                                <h3>{{ restaurant.name }}</h3>
-                                <p>Meja A1</p>
-                                <div class="preview-stat">3 kategori</div>
+                                <div class="flex items-start gap-3">
+                                    {% if restaurant.logo %}
+                                        <img src="{{ restaurant.logo.url }}" alt="Logo {{ restaurant.name }}" class="w-10 h-10 rounded-xl object-cover border-2 border-white/20 shrink-0 bg-white" data-preview-logo>
+                                        <div class="hidden w-10 h-10 rounded-xl bg-white/15 items-center justify-center shrink-0" data-preview-logo-fallback><i class="fa-solid fa-utensils text-white text-sm"></i></div>
+                                    {% else %}
+                                        <img src="" alt="Logo" class="hidden w-10 h-10 rounded-xl object-cover border-2 border-white/20 shrink-0 bg-white" data-preview-logo>
+                                        <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0" data-preview-logo-fallback><i class="fa-solid fa-utensils text-white text-sm"></i></div>
+                                    {% endif %}
+                                    <div class="min-w-0 flex-1">
+                                        <p class="preview-kicker">Menu Digital</p>
+                                        <h3 data-preview-restaurant>{{ restaurant.name }}</h3>
+                                        {% if appearance_theme.tagline %}
+                                            <p class="text-sm opacity-90 mt-1 font-medium" data-preview-tagline data-fallback-description="{{ restaurant.description|escape }}">{{ appearance_theme.tagline }}</p>
+                                        {% elif restaurant.description %}
+                                            <p class="text-sm opacity-90 mt-1 font-medium" data-preview-tagline data-fallback-description="{{ restaurant.description|escape }}">{{ restaurant.description|truncatewords:12 }}</p>
+                                        {% else %}
+                                            <p class="text-sm opacity-90 mt-1 font-medium hidden" data-preview-tagline data-fallback-description="{{ restaurant.description|escape }}"></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="mt-3 bg-white/10 rounded-xl p-3 backdrop-blur-sm" data-preview-meja-card>
+                                    <div class="flex items-center gap-2 text-white font-bold text-xs">
+                                        <span class="w-6 h-6 rounded-lg bg-white text-primary flex items-center justify-center"><i class="fa-solid fa-chair text-[10px]"></i></span>
+                                        <span>Meja A1</span>
+                                        <span class="w-1 h-1 rounded-full bg-white/60"></span>
+                                        <span class="preview-stat !mt-0 !bg-transparent !p-0 !text-white">3 kategori</span>
+                                    </div>
+                                    {% if appearance_theme.greeting_message %}
+                                        <p class="text-[11px] mt-1.5 opacity-90 leading-relaxed" data-preview-greeting>{{ appearance_theme.greeting_message }}</p>
+                                    {% else %}
+                                        <p class="text-[11px] mt-1.5 opacity-90 leading-relaxed hidden" data-preview-greeting></p>
+                                    {% endif %}
+                                    <div class="flex flex-wrap gap-2 mt-2 text-[10px] opacity-80 leading-none {% if not appearance_theme.contact_phone and not appearance_theme.contact_instagram %}hidden{% endif %}" data-preview-contacts>
+                                        {% if appearance_theme.contact_phone %}<span class="inline-flex items-center gap-1.5 leading-none" data-preview-phone-text><i class="fa-solid fa-phone text-[9px] leading-none shrink-0"></i><span class="leading-none">{{ appearance_theme.contact_phone }}</span></span>{% else %}<span class="hidden inline-flex items-center gap-1.5 leading-none" data-preview-phone-text></span>{% endif %}
+                                        {% if appearance_theme.contact_instagram %}<span class="inline-flex items-center gap-1.5 leading-none" data-preview-ig-text><i class="fa-brands fa-instagram text-[9px] leading-none shrink-0"></i><span class="leading-none">@{{ appearance_theme.contact_instagram }}</span></span>{% else %}<span class="hidden inline-flex items-center gap-1.5 leading-none" data-preview-ig-text></span>{% endif %}
+                                    </div>
+                                </div>
                             </div>
+                            {% if appearance_theme.banner_image %}
+                                <div class="mx-3 -mt-3 mb-2 rounded-xl overflow-hidden shadow-sm border border-white/50" data-preview-banner>
+                                    <img src="{{ appearance_theme.banner_image.url }}" alt="Banner" class="w-full h-20 object-cover" data-preview-banner-img>
+                                </div>
+                            {% else %}
+                                <div class="mx-3 -mt-3 mb-2 rounded-xl overflow-hidden shadow-sm border border-white/50 hidden" data-preview-banner>
+                                    <img src="" alt="Banner" class="w-full h-20 object-cover hidden" data-preview-banner-img>
+                                </div>
+                            {% endif %}
                             <div class="preview-tabs" data-preview-tabs>
                                 <span>Semua</span>
                                 <span>Makanan</span>
@@ -175,25 +362,55 @@
                                     <div class="preview-img">
                                         <i class="fa-solid fa-bowl-food"></i>
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex flex-wrap gap-1 mb-1">
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#FFF0EB] text-accent border border-accent/20">Favorit</span>
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600">-15%</span>
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600">Sisa 3</span>
+                                        </div>
                                         <p class="preview-title">Nasi Goreng Spesial</p>
-                                        <p class="preview-desc">Pedas gurih dengan telur</p>
-                                        <p class="preview-price">Rp 25.000</p>
+                                        <p class="preview-desc">Pedas gurih dengan telur — contoh deskripsi menu</p>
+                                        <div class="flex items-baseline gap-1.5 mt-1">
+                                            <span class="text-[10px] line-through text-gray-400">Rp 30.000</span>
+                                            <span class="preview-price !mt-0">Rp 25.500</span>
+                                        </div>
+                                        <p class="text-[9px] font-bold text-gray-400 mt-1">Qty: pilih jumlah + varian di sheet</p>
                                     </div>
                                 </article>
                                 <article class="preview-card">
                                     <div class="preview-img">
                                         <i class="fa-solid fa-mug-hot"></i>
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex gap-1 mb-1">
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-secondary text-primary border border-primary/20">Baru</span>
+                                        </div>
                                         <p class="preview-title">Es Kopi Susu</p>
                                         <p class="preview-desc">Creamy dan segar</p>
                                         <p class="preview-price">Rp 18.000</p>
+                                        <p class="text-[9px] font-bold text-gray-400 mt-1">Ada pilihan varian</p>
                                     </div>
                                 </article>
                             </div>
                             <button type="button" class="preview-button">Tambah ke Keranjang</button>
+                            <div class="mx-4 mt-3 text-center space-y-1">
+                                <p class="text-[10px] text-gray-400 {% if not appearance_theme.receipt_footer_text %}hidden{% endif %}" data-preview-receipt>{{ appearance_theme.receipt_footer_text|default:'Terima kasih atas kunjungan Anda' }}</p>
+                                {% if restaurant.address %}
+                                    <p class="text-[9px] text-gray-400 flex items-center justify-center gap-1" data-preview-address><i class="fa-solid fa-location-dot text-[8px]"></i> {{ restaurant.address|truncatechars:60 }}</p>
+                                {% else %}
+                                    <p class="text-[9px] text-gray-400 hidden" data-preview-address></p>
+                                {% endif %}
+                                <p class="text-[9px] text-gray-300 hidden" data-preview-contacts-footer>
+                                    <span data-preview-footer-phone>{% if appearance_theme.contact_phone %}{{ appearance_theme.contact_phone }}{% endif %}</span>
+                                    <span data-preview-footer-ig>{% if appearance_theme.contact_instagram %} • @{{ appearance_theme.contact_instagram }}{% endif %}</span>
+                                </p>
+                                <p class="text-[8px] text-gray-300">Powered by TapMenu • <span data-preview-restaurant-footer>{{ restaurant.name }}</span></p>
+                            </div>
                         </div>
+                    </div>
+                    <div class="mt-3 p-3 rounded-2xl bg-white border border-gray-100">
+                        <p class="text-xs font-bold text-dark mb-1">Full custom?</p>
+                        <p class="text-[11px] text-gray-500">Semua 6 warna, 5 font, 3 layout, 3 header, 3 tombol, banner, teks — live & tersimpan per-resto.</p>
                     </div>
                 </aside>
             </div>
@@ -227,6 +444,7 @@
                 </div>
             </div>
         {% endif %}
+        {% include 'core/partials/dashboard_footer.html' %}
     </div>
 {% endblock %}
 {% block dashboard_page_scripts %}

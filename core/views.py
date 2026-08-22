@@ -16,107 +16,225 @@ from accounts.models import Role, UserProfile
 from menus.models import MenuCategory, MenuItem
 from restaurants.models import DiningTable, MenuAppearanceTheme, Restaurant
 
-# 10 color palette presets for onboarding
+# 18 color palette presets — kombinasi warna terkurasi
+# Categories: natural / hangat / sejuk / vibrant / soft / netral
+# Each palette maps to MenuAppearanceTheme: primary/secondary/accent/bg/card/text
 PALETTE_PRESETS = [
     {
         'id': 'tapmenu',
         'name': 'TapMenu',
-        'description': 'Hijau alami & elegan',
+        'description': 'Hijau alami • Lush Forest',
+        'category': 'Natural',
         'primary': '#1B4332',
         'secondary': '#D8F3DC',
         'accent': '#E07A5F',
         'bg': '#F7F5F2',
         'card': '#FFFFFF',
+        'text': '#1F2933',
     },
     {
-        'id': 'sunset',
-        'name': 'Sunset',
-        'description': 'Hangat & menyambut',
-        'primary': '#C75146',
-        'secondary': '#FFE8D6',
-        'accent': '#F4A261',
-        'bg': '#FFF8F0',
-        'card': '#FFFFFF',
+        'id': 'kopi',
+        'name': 'Kopi Susu',
+        'description': 'Cappuccino • Chocolate Truffle',
+        'category': 'Hangat',
+        'primary': '#4A271A',
+        'secondary': '#FDE68A',
+        'accent': '#EA580C',
+        'bg': '#FFFBEB',
+        'card': '#FFF7ED',
+        'text': '#1C1917',
     },
     {
         'id': 'ocean',
         'name': 'Ocean',
-        'description': 'Bersih & profesional',
-        'primary': '#1A5276',
-        'secondary': '#D6EAF8',
-        'accent': '#2E86C1',
-        'bg': '#F0F7FF',
+        'description': 'Blue Eclipse • Harbor Haze',
+        'category': 'Sejuk',
+        'primary': '#0F2A44',
+        'secondary': '#BFDBFE',
+        'accent': '#0EA5E9',
+        'bg': '#EFF6FF',
         'card': '#FFFFFF',
+        'text': '#0F172A',
     },
     {
-        'id': 'coklat',
-        'name': 'Coklat Klasik',
-        'description': 'Tradisional & hangat',
-        'primary': '#6E3A1E',
-        'secondary': '#F5E6D3',
-        'accent': '#D4845A',
-        'bg': '#FAF5F0',
+        'id': 'matcha',
+        'name': 'Matcha',
+        'description': 'Pistachio Dream • Green Juice',
+        'category': 'Natural',
+        'primary': '#14532D',
+        'secondary': '#BBF7D0',
+        'accent': '#16A34A',
+        'bg': '#F0FDF4',
         'card': '#FFFFFF',
+        'text': '#052E16',
     },
     {
-        'id': 'merah',
-        'name': 'Merah Berani',
-        'description': 'Energik & penuh semangat',
-        'primary': '#922B21',
-        'secondary': '#FDEDEC',
-        'accent': '#E74C3C',
-        'bg': '#FFF5F5',
+        'id': 'sunset',
+        'name': 'Sunset Terracotta',
+        'description': 'Tuscan Sunset • Golden Hour',
+        'category': 'Hangat',
+        'primary': '#9A3412',
+        'secondary': '#FFEDD5',
+        'accent': '#F97316',
+        'bg': '#FFF7ED',
         'card': '#FFFFFF',
+        'text': '#431407',
     },
     {
-        'id': 'ungu',
-        'name': 'Ungu Modern',
-        'description': 'Kreatif & berkelas',
-        'primary': '#6C3483',
-        'secondary': '#F4ECF7',
-        'accent': '#8E44AD',
-        'bg': '#FAF5FF',
+        'id': 'lavender',
+        'name': 'Lavender',
+        'description': 'Wisteria Bloom • Iris Garden',
+        'category': 'Soft',
+        'primary': '#4C1D95',
+        'secondary': '#DDD6FE',
+        'accent': '#8B5CF6',
+        'bg': '#F5F3FF',
         'card': '#FFFFFF',
+        'text': '#1E1B4B',
     },
     {
-        'id': 'hijau',
-        'name': 'Hijau Segar',
-        'description': 'Segar & alami',
-        'primary': '#1E8449',
-        'secondary': '#D5F5E3',
-        'accent': '#27AE60',
-        'bg': '#F0FFF4',
+        'id': 'chili',
+        'name': 'Chili',
+        'description': 'Chili Spice • Alchemical',
+        'category': 'Vibrant',
+        'primary': '#7F1D1D',
+        'secondary': '#FECACA',
+        'accent': '#DC2626',
+        'bg': '#FEF2F2',
         'card': '#FFFFFF',
+        'text': '#450A0A',
     },
     {
-        'id': 'biru',
-        'name': 'Biru Elegan',
-        'description': 'Terpercaya & mewah',
-        'primary': '#154360',
-        'secondary': '#D6EAF8',
-        'accent': '#1A75BB',
-        'bg': '#F0F8FF',
+        'id': 'midnight',
+        'name': 'Midnight',
+        'description': 'Blue Eclipse • Neon Noir',
+        'category': 'Soft',
+        'primary': '#1E1B4B',
+        'secondary': '#C7D2FE',
+        'accent': '#6366F1',
+        'bg': '#EEF2FF',
         'card': '#FFFFFF',
+        'text': '#1E1B4B',
     },
     {
-        'id': 'pink',
-        'name': 'Pink Manis',
-        'description': 'Cute & ramah',
-        'primary': '#943A5D',
-        'secondary': '#FDEBF2',
-        'accent': '#E91E8C',
-        'bg': '#FFF5FA',
+        'id': 'mint',
+        'name': 'Mint Teal',
+        'description': 'Eucalyptus • Morning Dew',
+        'category': 'Sejuk',
+        'primary': '#134E4A',
+        'secondary': '#99F6E4',
+        'accent': '#14B8A6',
+        'bg': '#F0FDFA',
         'card': '#FFFFFF',
+        'text': '#042F2E',
     },
     {
-        'id': 'abu',
-        'name': 'Abu Minimalis',
-        'description': 'Modern & minimalis',
-        'primary': '#2C3E50',
-        'secondary': '#ECF0F1',
-        'accent': '#7F8C8D',
-        'bg': '#F8F9FA',
+        'id': 'honey',
+        'name': 'Honey',
+        'description': 'Honeycomb • Spiced Chai',
+        'category': 'Hangat',
+        'primary': '#78350F',
+        'secondary': '#FDE68A',
+        'accent': '#F59E0B',
+        'bg': '#FFFBEB',
+        'card': '#FFF7ED',
+        'text': '#431407',
+    },
+    {
+        'id': 'berry',
+        'name': 'Berry',
+        'description': 'Cherry Blossom • Evening Rose',
+        'category': 'Vibrant',
+        'primary': '#831843',
+        'secondary': '#FBCFE8',
+        'accent': '#EC4899',
+        'bg': '#FDF2F8',
         'card': '#FFFFFF',
+        'text': '#4A044E',
+    },
+    {
+        'id': 'stone',
+        'name': 'Stone',
+        'description': 'Quiet Luxury • Stone Path',
+        'category': 'Netral',
+        'primary': '#292524',
+        'secondary': '#E7E5E4',
+        'accent': '#D97706',
+        'bg': '#FAFAF9',
+        'card': '#FFFFFF',
+        'text': '#1C1917',
+    },
+    {
+        'id': 'coral',
+        'name': 'Coral',
+        'description': 'Watermelon Splash • Guava',
+        'category': 'Vibrant',
+        'primary': '#9F1239',
+        'secondary': '#FFE4E6',
+        'accent': '#E11D48',
+        'bg': '#FFF1F2',
+        'card': '#FFFFFF',
+        'text': '#4C0519',
+    },
+    {
+        'id': 'olive',
+        'name': 'Olive',
+        'description': 'Mossy Hollow • Olive Grove',
+        'category': 'Natural',
+        'primary': '#365314',
+        'secondary': '#D9F99D',
+        'accent': '#65A30D',
+        'bg': '#F7FEE7',
+        'card': '#FFFFFF',
+        'text': '#1A2E05',
+    },
+    {
+        'id': 'slate',
+        'name': 'Slate Harbor',
+        'description': 'Stormy Morning • Siltstone',
+        'category': 'Netral',
+        'primary': '#1E293B',
+        'secondary': '#E2E8F0',
+        'accent': '#64748B',
+        'bg': '#F8FAFC',
+        'card': '#FFFFFF',
+        'text': '#0F172A',
+    },
+    {
+        'id': 'peach',
+        'name': 'Peach Dusk',
+        'description': 'Fresh Peach • Desert Dusk',
+        'category': 'Hangat',
+        'primary': '#7C2D12',
+        'secondary': '#FFEDD5',
+        'accent': '#FB923C',
+        'bg': '#FFF7ED',
+        'card': '#FFFBEB',
+        'text': '#431407',
+    },
+    {
+        'id': 'cyber',
+        'name': 'Cyber',
+        'description': 'Neon Jungle • Electropop',
+        'category': 'Vibrant',
+        'primary': '#312E81',
+        'secondary': '#A5B4FC',
+        'accent': '#06B6D4',
+        'bg': '#EEF2FF',
+        'card': '#FFFFFF',
+        'text': '#1E1B4B',
+    },
+    {
+        'id': 'emerald',
+        'name': 'Emerald Night',
+        'description': 'Emerald Odyssey • Coastal',
+        'category': 'Sejuk',
+        'primary': '#064E3B',
+        'secondary': '#6EE7B7',
+        'accent': '#10B981',
+        'bg': '#ECFDF5',
+        'card': '#FFFFFF',
+        'text': '#022C22',
     },
 ]
 
@@ -132,7 +250,17 @@ landing = page('landing.html')
 
 
 def book_menu(request):
-    restaurant = Restaurant.objects.filter(is_active=True).order_by('id').first()
+    # Scoped to logged-in user's restaurant when possible (fix F&B sebelah leak)
+    restaurant = None
+    if request.user.is_authenticated and request.user.is_staff:
+        try:
+            profile = request.user.profile
+            if profile.restaurant_id:
+                restaurant = profile.restaurant
+        except UserProfile.DoesNotExist:
+            pass
+    if restaurant is None:
+        restaurant = Restaurant.objects.filter(is_active=True).order_by('id').first()
     dining_table = None
     categories = MenuCategory.objects.none()
     cart_summary = {'items': [], 'total_quantity': 0, 'total_amount': 0}
@@ -321,7 +449,7 @@ def onboarding_step1(request):
 
 @login_required(login_url='login')
 def onboarding_step2(request):
-    """Step 2 — Pallet Warna: choose from 10 presets (skippable)."""
+    """Step 2 — Pallet Warna: choose from 18 presets (skippable)."""
     # Guard: must have completed step 1
     if not request.user.is_authenticated or not request.user.is_staff:
         return redirect('login')
@@ -346,6 +474,7 @@ def onboarding_step2(request):
         theme.accent_color = palette['accent']
         theme.background_color = palette['bg']
         theme.card_color = palette['card']
+        theme.text_color = palette.get('text', '#1F2933')
         theme.save(
             update_fields=[
                 'primary_color',
@@ -353,6 +482,7 @@ def onboarding_step2(request):
                 'accent_color',
                 'background_color',
                 'card_color',
+                'text_color',
             ]
         )
 

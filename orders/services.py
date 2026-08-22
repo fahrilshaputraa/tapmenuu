@@ -111,9 +111,8 @@ def create_order_from_cart(*, table, cart_items, customer_name='', customer_note
             note = cart_item.get('note', '')
             # Never trust unit_price from cart/client —
             # recalculate from DB as source of truth.
-            # Variant price adjustments are re-validated via
-            # MenuItemVariantOption.
-            unit_price = menu_item.price
+            # Apply discount percentage first, then variant adjustments.
+            unit_price = menu_item.final_price
             variant_option_ids = cart_item.get('variant_option_ids') or cart_item.get(
                 'variant_options', []
             )
@@ -144,6 +143,12 @@ def create_order_from_cart(*, table, cart_items, customer_name='', customer_note
             if not menu_item.is_active or not menu_item.is_available:
                 raise OrderCreationError(
                     f'Menu {menu_item.name} sedang tidak tersedia.',
+                )
+
+            # Validate stock (0 = unlimited)
+            if menu_item.stock > 0 and quantity > menu_item.stock:
+                raise OrderCreationError(
+                    f'Stok {menu_item.name} tidak cukup (tersisa {menu_item.stock}).',
                 )
 
             order_item = OrderItem.objects.create(

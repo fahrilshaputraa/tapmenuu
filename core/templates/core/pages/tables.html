@@ -35,18 +35,18 @@
             <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
                     <p class="text-sm text-gray-500 mb-1">Total Meja</p>
-                    <h2 class="text-3xl font-extrabold text-primary">{{ tables|length }}</h2>
-                    <p class="text-xs text-gray-400 mt-1">Meja terdaftar di sistem</p>
+                    <h2 class="text-3xl font-extrabold text-primary">{{ tables_total|default:tables|length }}</h2>
+                    <p class="text-xs text-gray-400 mt-1">Meja terdaftar — {{ restaurant.name|default:'toko ini' }}</p>
                 </article>
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
                     <p class="text-sm text-gray-500 mb-1">QR Aktif</p>
-                    <h2 class="text-3xl font-extrabold text-primary">{{ tables|length }}</h2>
-                    <p class="text-xs text-gray-400 mt-1">Tautan langsung ke menu publik</p>
+                    <h2 class="text-3xl font-extrabold text-primary">{{ tables_active|default:tables|length }}</h2>
+                    <p class="text-xs text-gray-400 mt-1">Meja aktif dengan QR valid</p>
                 </article>
                 <article class="bg-white rounded-[1.75rem] p-5 border border-gray-100 shadow-card">
-                    <p class="text-sm text-gray-500 mb-1">Scan Hari Ini</p>
-                    <h2 class="text-3xl font-extrabold text-primary">87</h2>
-                    <p class="text-xs text-gray-400 mt-1">Dari pelanggan dine-in</p>
+                    <p class="text-sm text-gray-500 mb-1">Pesanan Hari Ini</p>
+                    <h2 class="text-3xl font-extrabold text-primary">{{ scans_today|default:0 }}</h2>
+                    <p class="text-xs text-gray-400 mt-1">Order masuk hari ini (proxy scan)</p>
                 </article>
             </section>
             <section class="bg-white rounded-[2rem] border border-gray-100 shadow-card overflow-hidden">

@@ -3,98 +3,183 @@
        data-dashboard-sidebar
        aria-hidden="true"
        class="fixed md:static inset-y-0 left-0 h-full w-72 bg-white border-r border-gray-200 flex flex-col z-50 md:z-20 shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out shadow-2xl md:shadow-none">
-    <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+    <div class="px-6 py-5 flex items-center gap-3.5 border-b border-gray-100">
         <a href="{% url 'dashboard' %}"
-           class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
+           class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm shrink-0">
             <i class="fa-solid fa-utensils text-sm"></i>
         </a>
-        <div>
+        <div class="min-w-0">
             <a href="{% url 'dashboard' %}"
-               class="text-lg font-extrabold text-primary tracking-tight block">TapMenu</a>
-            <span class="text-xs text-gray-400">{{ restaurant.name|default:'Dashboard' }}</span>
+               class="text-[17px] font-extrabold text-primary tracking-tight block leading-none">TapMenu</a>
+            <span class="text-[11px] font-semibold text-gray-400 truncate block mt-0.5">{{ restaurant.name|default:'Dashboard' }}</span>
         </div>
     </div>
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scroll"
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-1.5 custom-scroll"
          aria-label="Dashboard navigation">
         {% with current=request.resolver_match.url_name %}
             {% with user_role=request.user.profile.role|default:'owner' %}
                 <!-- Ringkasan -->
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Ringkasan</div>
+                <div class="px-3 mt-1 mb-3">
+                    <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.14em]">Ringkasan</p>
+                </div>
                 <a href="{% url 'dashboard' %}"
                    {% if current == 'dashboard' %}aria-current="dashboard"{% endif %}
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'dashboard' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                   class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'dashboard' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'dashboard' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                        <i class="fa-solid fa-house text-xs"></i>
+                    </span>
+                    <span>Dashboard</span>
                 </a>
+
                 {% if user_role == 'owner' or user_role == 'admin' %}
                     <!-- Menu -->
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Menu</div>
-                    <a href="{% url 'management_menu' %}"
-                       {% if current == 'management_menu' %}aria-current="management_menu"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'management_menu' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-book-open w-5"></i> Daftar Menu
-                    </a>
-                    <a href="{% url 'category_management' %}"
-                       {% if current == 'category_management' %}aria-current="category_management"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'category_management' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-layer-group w-5"></i> Kategori Menu
-                    </a>
+                    <div class="px-3 mt-7 mb-3">
+                        <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.14em]">Menu</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <a href="{% url 'management_menu' %}"
+                           {% if current == 'management_menu' %}aria-current="management_menu"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'management_menu' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'management_menu' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-book-open text-xs"></i>
+                            </span>
+                            <span>Daftar Menu</span>
+                        </a>
+                        <a href="{% url 'category_management' %}"
+                           {% if current == 'category_management' %}aria-current="category_management"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'category_management' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'category_management' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-layer-group text-xs"></i>
+                            </span>
+                            <span>Kategori Menu</span>
+                        </a>
+                    </div>
                 {% endif %}
+
                 <!-- Operasional -->
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Operasional</div>
-                {% if user_role == 'owner' or user_role == 'admin' %}
-                    <a href="{% url 'tables' %}"
-                       {% if current == 'tables' %}aria-current="tables"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'tables' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-qrcode w-5"></i> Meja & QR
+                <div class="px-3 mt-7 mb-3">
+                    <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.14em]">Operasional</p>
+                </div>
+                <div class="space-y-1.5">
+                    {% if user_role == 'owner' or user_role == 'admin' %}
+                        <a href="{% url 'tables' %}"
+                           {% if current == 'tables' %}aria-current="tables"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'tables' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'tables' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-qrcode text-xs"></i>
+                            </span>
+                            <span>Meja & QR</span>
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'orders' %}"
+                       {% if current == 'orders' %}aria-current="orders"{% endif %}
+                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'orders' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'orders' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                            <i class="fa-solid fa-receipt text-xs"></i>
+                        </span>
+                        <span>Pesanan</span>
                     </a>
-                {% endif %}
-                <a href="{% url 'orders' %}"
-                   {% if current == 'orders' %}aria-current="orders"{% endif %}
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'orders' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                    <i class="fa-solid fa-receipt w-5"></i> Pesanan
-                </a>
-                {% if user_role == 'dapur' or user_role == 'owner' or user_role == 'admin' %}
-                    <a href="{% url 'kitchen' %}"
-                       {% if current == 'kitchen' %}aria-current="kitchen"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'kitchen' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-fire-burner w-5"></i> Kitchen
-                    </a>
-                {% endif %}
+                    {% if user_role == 'dapur' or user_role == 'owner' or user_role == 'admin' %}
+                        <a href="{% url 'kitchen' %}"
+                           {% if current == 'kitchen' %}aria-current="kitchen"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'kitchen' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'kitchen' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-fire-burner text-xs"></i>
+                            </span>
+                            <span>Kitchen</span>
+                        </a>
+                    {% endif %}
+                </div>
+
                 {% if user_role == 'owner' or user_role == 'admin' %}
                     <!-- Laporan -->
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Laporan</div>
-                    <a href="{% url 'reports' %}"
-                       {% if current == 'reports' %}aria-current="reports"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'reports' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-chart-pie w-5"></i> Laporan Keuangan
-                    </a>
+                    <div class="px-3 mt-7 mb-3">
+                        <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.14em]">Laporan</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <a href="{% url 'reports' %}"
+                           {% if current == 'reports' %}aria-current="reports"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'reports' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'reports' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-chart-pie text-xs"></i>
+                            </span>
+                            <span>Laporan Keuangan</span>
+                        </a>
+                    </div>
+
                     <!-- Pengaturan -->
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Pengaturan</div>
-                    <a href="{% url 'store' %}"
-                       {% if current == 'store' %}aria-current="store"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'store' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-store w-5"></i> Profil Toko
-                    </a>
-                    <a href="{% url 'menu_appearance' %}"
-                       {% if current == 'menu_appearance' %}aria-current="menu_appearance"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'menu_appearance' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-palette w-5"></i> Appearance Menu
-                    </a>
-                    <a href="{% url 'employee' %}"
-                       {% if current == 'employee' %}aria-current="employee"{% endif %}
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors {% if current == 'employee' %}bg-secondary/50 text-primary font-bold{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
-                        <i class="fa-solid fa-users-gear w-5"></i> Karyawan
-                    </a>
+                    <div class="px-3 mt-7 mb-3">
+                        <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.14em]">Pengaturan</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <a href="{% url 'store' %}"
+                           {% if current == 'store' %}aria-current="store"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'store' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'store' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-store text-xs"></i>
+                            </span>
+                            <span>Profil Toko</span>
+                        </a>
+                        <a href="{% url 'menu_appearance' %}"
+                           {% if current == 'menu_appearance' %}aria-current="menu_appearance"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'menu_appearance' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'menu_appearance' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-palette text-xs"></i>
+                            </span>
+                            <span>Appearance Menu</span>
+                        </a>
+                        <a href="{% url 'employee' %}"
+                           {% if current == 'employee' %}aria-current="employee"{% endif %}
+                           class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all {% if current == 'employee' %}bg-secondary text-primary font-bold shadow-sm{% else %}text-gray-500 font-medium hover:bg-gray-50 hover:text-dark{% endif %}">
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {% if current == 'employee' %}bg-primary text-white{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                <i class="fa-solid fa-users-gear text-xs"></i>
+                            </span>
+                            <span>Karyawan</span>
+                        </a>
+                    </div>
                 {% endif %}
-                <!-- Link Eksternal -->
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2 px-2">Publik</div>
-                <a href="{% url 'book_menu' %}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-gray-500 font-medium hover:bg-gray-50 hover:text-dark"
-                   target="_blank"
-                   rel="noopener">
-                    <i class="fa-solid fa-eye w-5"></i> Lihat Menu Publik
-                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-[10px] text-gray-300"></i>
-                </a>
+
+                <!-- Lokasi Toko — receipt-style card above profile -->
+                {% if restaurant %}
+                    <div class="mx-1 mt-8 p-4 bg-white rounded-[1.5rem] border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-sm">
+                                <i class="fa-solid fa-location-dot text-white text-sm"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-[0.12em] leading-none">Lokasi</p>
+                                <p class="text-[13px] font-extrabold text-dark truncate mt-0.5">{{ restaurant.name }}</p>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm animate-pulse shrink-0" title="Aktif"></span>
+                        </div>
+                        <div class="rounded-xl bg-[#F7F5F2] border border-dashed border-gray-200 p-3">
+                            <p class="text-[11px] text-gray-500 leading-relaxed line-clamp-3">{% if restaurant.address %}{{ restaurant.address }}{% else %}Alamat belum diatur — lengkapi di Profil Toko agar pelanggan mudah menemukanmu.{% endif %}</p>
+                            {% if restaurant.phone %}
+                                <p class="text-[11px] font-bold text-primary mt-1.5 flex items-center gap-1.5"><i class="fa-solid fa-phone text-[10px]"></i> {{ restaurant.phone }}</p>
+                            {% endif %}
+                        </div>
+                        {% if tables %}
+                            {% with tables|first as first_table %}
+                                <a href="{% url 'customer_menu' first_table.qr_token %}"
+                                   target="_blank"
+                                   rel="noopener"
+                                   class="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-primary text-white text-xs font-extrabold shadow-sm hover:bg-primaryLight transition-colors">
+                                    <i class="fa-solid fa-eye text-[11px]"></i>
+                                    Lihat Menu
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
+                                </a>
+                            {% endwith %}
+                        {% else %}
+                            <a href="{% url 'tables' %}"
+                               class="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-extrabold hover:bg-amber-100 transition-colors">
+                                <i class="fa-solid fa-qrcode text-[11px]"></i>
+                                Buat QR Meja
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <!-- Fallback global menu link for tests / unauthenticated sidebar render (hidden) -->
+                <a href="{% url 'book_menu' %}" class="hidden" aria-hidden="true" data-testid="book-menu-fallback"></a>
             {% endwith %}
         {% endwith %}
     </nav>
@@ -108,10 +193,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
-    <div class="p-4 border-t border-gray-100 relative">
+    <div class="p-4 border-t border-gray-100 bg-white relative">
         <button id="profile-button"
                 onclick="toggleProfileDropdown()"
-                class="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                class="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors text-left border border-transparent hover:border-gray-200">
             <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0 uppercase">
                 {{ request.user.username|slice:":1" }}
             </div>

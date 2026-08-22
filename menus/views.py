@@ -1,5 +1,6 @@
 import json
 import time
+from types import SimpleNamespace
 
 from django.db.models import Prefetch
 from django.http import StreamingHttpResponse
@@ -39,11 +40,28 @@ def customer_menu(request, qr_token):
         .prefetch_related('variant_groups__options')
         .order_by('sort_order', 'name')
     )
-    categories = (
+    categories = list(
         MenuCategory.objects.filter(restaurant=restaurant, is_active=True)
         .prefetch_related(Prefetch('items', queryset=active_items))
         .order_by('sort_order', 'name')
     )
+    # Include items with no category under a synthetic "Lainnya" group
+    categorized_ids = set()
+    for cat in categories:
+        categorized_ids.update(cat.items.values_list('id', flat=True))
+    orphan_items = active_items.filter(category__isnull=True).exclude(
+        id__in=categorized_ids,
+    )
+    orphan_list = list(orphan_items)
+    if orphan_list:
+        _items_proxy = SimpleNamespace(all=orphan_list)
+        categories.append(
+            SimpleNamespace(
+                id='uncategorized',
+                name='Lainnya',
+                items=_items_proxy,
+            )
+        )
     cart_summary = _build_cart_summary(request.session, dining_table)
     appearance_theme, _ = MenuAppearanceTheme.objects.get_or_create(
         restaurant=restaurant,
@@ -65,15 +83,20 @@ def customer_menu(request, qr_token):
 
 def customer_cart(request, qr_token):
     dining_table = _get_active_table(qr_token)
+    restaurant = dining_table.restaurant
     cart_summary = _build_cart_summary(request.session, dining_table)
+    appearance_theme, _ = MenuAppearanceTheme.objects.get_or_create(
+        restaurant=restaurant
+    )
 
     return render(
         request,
         'menus/customer_cart.html',
         {
             'dining_table': dining_table,
-            'restaurant': dining_table.restaurant,
+            'restaurant': restaurant,
             'cart_summary': cart_summary,
+            'appearance_theme': appearance_theme,
             'payment_methods': _customer_payment_methods(),
         },
     )
@@ -110,6 +133,9 @@ def customer_cart_add(request, qr_token, item_id):
         },
     )
     cart_item['quantity'] += quantity
+    # Cap to available stock (0 = unlimited)
+    if menu_item.stock > 0:
+        cart_item['quantity'] = min(cart_item['quantity'], menu_item.stock)
     cart_item['note'] = note
     cart_item['variant_option_ids'] = selected_option_ids
 
@@ -132,7 +158,18 @@ def customer_cart_quantity(request, qr_token, line_key):
             quantity = _coerce_positive_quantity(cart_item.get('quantity', 1))
             action = request.POST.get('action')
             if action == 'increment':
-                cart_item['quantity'] = quantity + 1
+                new_qty = quantity + 1
+                # Cap to available stock (0 = unlimited)
+                try:
+                    mi = MenuItem.objects.get(
+                        id=cart_item.get('item_id'),
+                        restaurant=dining_table.restaurant,
+                    )
+                    if mi.stock > 0:
+                        new_qty = min(new_qty, mi.stock)
+                except (MenuItem.DoesNotExist, TypeError, ValueError):
+                    pass
+                cart_item['quantity'] = new_qty
             elif action == 'decrement':
                 if quantity <= 1:
                     items.pop(line_key, None)
@@ -197,25 +234,30 @@ def customer_checkout(request, qr_token):
 
 def customer_order_success(request, qr_token, order_id):
     dining_table = _get_active_table(qr_token)
+    restaurant = dining_table.restaurant
     order = get_object_or_404(
         Order.objects.select_related('restaurant', 'dining_table').prefetch_related(
             'payments',
         ),
         id=order_id,
         dining_table=dining_table,
-        restaurant=dining_table.restaurant,
+        restaurant=restaurant,
     )
     payment = order.payments.first()
+    appearance_theme, _ = MenuAppearanceTheme.objects.get_or_create(
+        restaurant=restaurant
+    )
 
     return render(
         request,
         'menus/customer_order_success.html',
         {
             'dining_table': dining_table,
-            'restaurant': dining_table.restaurant,
+            'restaurant': restaurant,
             'order': order,
             'payment': payment,
             'payment_details': _parse_payment_notes(payment.notes if payment else ''),
+            'appearance_theme': appearance_theme,
         },
     )
 
@@ -223,8 +265,12 @@ def customer_order_success(request, qr_token, order_id):
 def customer_order_status(request, qr_token, order_id):
     """Customer-facing order status page with a live timeline."""
     dining_table = _get_active_table(qr_token)
+    restaurant = dining_table.restaurant
     order = _get_customer_order(dining_table, order_id)
     payment = order.payments.first()
+    appearance_theme, _ = MenuAppearanceTheme.objects.get_or_create(
+        restaurant=restaurant
+    )
 
     current_index = _status_flow_index(order.status)
     steps = []
@@ -248,7 +294,7 @@ def customer_order_status(request, qr_token, order_id):
         'menus/customer_order_status.html',
         {
             'dining_table': dining_table,
-            'restaurant': dining_table.restaurant,
+            'restaurant': restaurant,
             'order': order,
             'payment': payment,
             'payment_details': _parse_payment_notes(payment.notes if payment else ''),
@@ -256,6 +302,7 @@ def customer_order_status(request, qr_token, order_id):
             'current_index': current_index,
             'status_labels': ORDER_STATUS_LABELS,
             'status_flow': ORDER_STATUS_FLOW,
+            'appearance_theme': appearance_theme,
         },
     )
 
@@ -412,11 +459,16 @@ def _build_cart_summary(session, dining_table):
             continue
 
         quantity = _coerce_positive_quantity(cart_item.get('quantity', 1))
+        # Cap quantity to available stock (0 = unlimited)
+        if menu_item.stock > 0:
+            quantity = min(quantity, menu_item.stock)
         variant_details = _build_variant_details(
             menu_item,
             cart_item.get('variant_option_ids', []),
         )
-        unit_price = menu_item.price + variant_details['price_adjustment']
+        # Use discounted base price when discount > 0
+        base_price = menu_item.final_price
+        unit_price = base_price + variant_details['price_adjustment']
         line_total = unit_price * quantity
         total_quantity += quantity
         total_amount += line_total

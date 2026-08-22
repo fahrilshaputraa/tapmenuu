@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Role, UserProfile
+from core.views import PALETTE_PRESETS
 from dashboard.forms import (
     DiningTableForm,
     EmployeeCreateForm,
@@ -99,10 +100,12 @@ def staff_required(view_func):
         # Legacy compat: tests create Restaurant without linking UserProfile.
         # If exactly one restaurant exists and profile has none, auto-attach it
         # to keep old tests green without leaking across multi-tenant DBs.
+        # IMPORTANT: only auto-attach orphan restaurants (no profiles yet) to avoid
+        # stealing a new tenant's account onto an existing tenant's restaurant.
         if profile.restaurant_id is None and not request.user.is_superuser:
             if Restaurant.objects.count() == 1:
                 first = Restaurant.objects.order_by('id').first()
-                if first:
+                if first and not UserProfile.objects.filter(restaurant=first).exists():
                     profile.restaurant = first
                     profile.save(update_fields=['restaurant'])
         if (
@@ -112,6 +115,7 @@ def staff_required(view_func):
             and Restaurant.objects.exists()
         ):
             from django.urls import reverse as _reverse
+
             return redirect(_reverse('onboarding_step1'))
         return view_func(request, *args, **kwargs)
 
@@ -195,12 +199,29 @@ def _dashboard_context(request=None, **extra):
         'items',
         'payments',
     )
+    tables = DiningTable.objects.select_related('restaurant')
+    categories = MenuCategory.objects.select_related('restaurant')
+    menu_items = MenuItem.objects.select_related('restaurant', 'category')
+    restaurants_qs = Restaurant.objects.all()
+    # Scope all querysets to the user's restaurant when set (multi-tenant isolation).
+    # Superusers (restaurant is None) see all data; regular staff only see their own.
+    if restaurant is not None and request and request.user.is_authenticated:
+        profile_rest = _profile_restaurant(request.user)
+        if profile_rest is not None:
+            orders = orders.filter(restaurant=profile_rest)
+            tables = tables.filter(restaurant=profile_rest)
+            categories = categories.filter(restaurant=profile_rest)
+            menu_items = menu_items.filter(restaurant=profile_rest)
+            # For single-restaurant staff, restrict the restaurants list to their own
+            # to avoid leaking other tenants in dropdowns / counts.
+            if not request.user.is_superuser:
+                restaurants_qs = restaurants_qs.filter(id=profile_rest.id)
     context = {
         'restaurant': restaurant,
-        'restaurants': Restaurant.objects.all(),
-        'tables': DiningTable.objects.select_related('restaurant'),
-        'categories': MenuCategory.objects.select_related('restaurant'),
-        'menu_items': MenuItem.objects.select_related('restaurant', 'category'),
+        'restaurants': restaurants_qs,
+        'tables': tables,
+        'categories': categories,
+        'menu_items': menu_items,
         'orders': orders,
     }
     context.update(extra)
@@ -263,6 +284,10 @@ def dashboard_home(request):
         profile_incomplete = bool(missing_fields)
 
     orders = Order.objects.select_related('dining_table').prefetch_related('items')
+    # Scope to user's restaurant for multi-tenant isolation (superuser sees all)
+    _rest = _profile_restaurant(request.user)
+    if _rest is not None:
+        orders = orders.filter(restaurant=_rest)
     active_orders = orders.exclude(
         status__in=[Order.Status.COMPLETED, Order.Status.CANCELLED],
     )
@@ -275,10 +300,16 @@ def dashboard_home(request):
         .aggregate(total=Sum('total_amount'))['total']
         or 0
     )
-    table_total = DiningTable.objects.count()
+    _tables_qs = DiningTable.objects.all()
+    if _rest is not None:
+        _tables_qs = _tables_qs.filter(restaurant=_rest)
+    table_total = _tables_qs.count()
     table_with_orders = (
         active_orders.values('dining_table').distinct().count() if table_total else 0
     )
+    _menu_count_qs = MenuItem.objects.filter(is_active=True)
+    if _rest is not None:
+        _menu_count_qs = _menu_count_qs.filter(restaurant=_rest)
     context = _dashboard_context(
         request=request,
         total_orders=orders.count(),
@@ -287,7 +318,7 @@ def dashboard_home(request):
         revenue=revenue,
         pending_payments=pending_payments,
         average_order_value=_average_order_value(orders),
-        menu_count=MenuItem.objects.filter(is_active=True).count(),
+        menu_count=_menu_count_qs.count(),
         table_total=table_total,
         table_with_orders=table_with_orders,
         recent_orders=orders[:5],
@@ -304,18 +335,58 @@ def store(request):
     restaurant = _profile_restaurant(request.user)
     if restaurant is None:
         restaurant = Restaurant.objects.order_by('id').first()
+    if not restaurant:
+        return render(
+            request,
+            'core/pages/store.html',
+            _dashboard_context(
+                request=request, restaurant_form=None, appearance_theme=None
+            ),
+        )
+    theme, _ = MenuAppearanceTheme.objects.get_or_create(restaurant=restaurant)
     if request.method == 'POST':
         form = RestaurantForm(request.POST, request.FILES, instance=restaurant)
         if form.is_valid():
-            form.save()
+            saved_restaurant = form.save()
+            # Sync branding fields (store edits theme too)
+            # Slogan/Tagline input maps to theme.tagline
+            tagline = request.POST.get('tagline')
+            if tagline is not None:
+                theme.tagline = tagline.strip()
+            contact_instagram = request.POST.get('contact_instagram')
+            if contact_instagram is not None:
+                theme.contact_instagram = contact_instagram.strip()
+            # Sync phone: store WA → theme.contact_phone only if theme has none
+            if saved_restaurant.phone and not theme.contact_phone:
+                theme.contact_phone = saved_restaurant.phone
+            # Banner upload from store (if provided) maps to theme.banner_image
+            if 'banner_image' in request.FILES:
+                theme.banner_image = request.FILES['banner_image']
+            # Greeting uses restaurant description as fallback; keep in sync if provided
+            greeting = request.POST.get('greeting_message')
+            if greeting is not None:
+                theme.greeting_message = greeting.strip()
+            theme.save()
+            messages.success(request, 'Profil toko berhasil diperbarui.')
             return redirect('store')
     else:
         form = RestaurantForm(instance=restaurant)
 
+    # Provide first table QR for "Lihat Menu" CTA scoped to this restaurant
+    first_table = (
+        DiningTable.objects.filter(restaurant=restaurant, is_active=True)
+        .order_by('id')
+        .first()
+    )
     return render(
         request,
         'core/pages/store.html',
-        _dashboard_context(request=request, restaurant_form=form),
+        _dashboard_context(
+            request=request,
+            restaurant_form=form,
+            appearance_theme=theme,
+            first_table=first_table,
+        ),
     )
 
 
@@ -339,51 +410,109 @@ def menu_appearance(request):
         return redirect('menu_appearance')
 
     if request.method == 'POST':
-        form = MenuAppearanceThemeForm(request.POST, instance=theme)
+        form = MenuAppearanceThemeForm(request.POST, request.FILES, instance=theme)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Tema menu berhasil diperbarui.')
             return redirect('menu_appearance')
     else:
         form = MenuAppearanceThemeForm(instance=theme)
 
+    first_table = (
+        DiningTable.objects.filter(restaurant=restaurant, is_active=True)
+        .order_by('id')
+        .first()
+    )
     return render(
         request,
         'core/pages/menu-appearance.html',
         _dashboard_context(
-            request=request, appearance_theme=theme, appearance_form=form
+            request=request,
+            appearance_theme=theme,
+            appearance_form=form,
+            first_table=first_table,
+            palettes=PALETTE_PRESETS,
         ),
     )
 
 
 @role_required('owner', 'admin')
 def tables(request):
+    restaurant = _profile_restaurant(request.user)
+    form = DiningTableForm()
+    if restaurant and not request.user.is_superuser and 'restaurant' in form.fields:
+        form.fields['restaurant'].queryset = Restaurant.objects.filter(id=restaurant.id)
+        form.fields['restaurant'].initial = restaurant
+    # Real stats per-restaurant (not dummy): total, active, scans today via orders
+    tables_qs = DiningTable.objects.all()
+    if restaurant and not request.user.is_superuser:
+        tables_qs = tables_qs.filter(restaurant=restaurant)
+    elif restaurant:
+        tables_qs = tables_qs.filter(restaurant=restaurant)
+    total_meja = tables_qs.count()
+    active_meja = tables_qs.filter(is_active=True).count()
+    # Scans proxy: orders created today for this restaurant
+    today = timezone.localdate()
+    orders_today_qs = Order.objects.filter(created_at__date=today)
+    if restaurant and not request.user.is_superuser:
+        orders_today_qs = orders_today_qs.filter(restaurant=restaurant)
+    elif restaurant:
+        orders_today_qs = orders_today_qs.filter(restaurant=restaurant)
+    scans_today = orders_today_qs.count()
     return render(
         request,
         'core/pages/tables.html',
-        _dashboard_context(request=request, table_form=DiningTableForm()),
+        _dashboard_context(
+            request=request,
+            table_form=form,
+            tables_total=total_meja,
+            tables_active=active_meja,
+            scans_today=scans_today,
+        ),
     )
 
 
 @role_required('owner', 'admin')
 def table_create(request):
+    restaurant = _profile_restaurant(request.user)
     form = DiningTableForm(request.POST or None)
+    # Limit restaurant choices to user's restaurant for regular staff
+    if restaurant and not request.user.is_superuser and 'restaurant' in form.fields:
+        form.fields['restaurant'].queryset = Restaurant.objects.filter(id=restaurant.id)
+        form.fields['restaurant'].initial = restaurant
     if request.method == 'POST' and form.is_valid():
-        form.save()
+        table = form.save(commit=False)
+        if restaurant and not request.user.is_superuser:
+            table.restaurant = restaurant
+        table.save()
     return redirect('tables')
 
 
 @role_required('owner', 'admin')
 def table_update(request, pk):
-    table = get_object_or_404(DiningTable, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    table = get_object_or_404(DiningTable, **lookup)
     form = DiningTableForm(request.POST or None, instance=table)
+    if restaurant and not request.user.is_superuser and 'restaurant' in form.fields:
+        form.fields['restaurant'].queryset = Restaurant.objects.filter(id=restaurant.id)
     if request.method == 'POST' and form.is_valid():
-        form.save()
+        obj = form.save(commit=False)
+        if restaurant and not request.user.is_superuser:
+            obj.restaurant = restaurant
+        obj.save()
     return redirect('tables')
 
 
 @role_required('owner', 'admin')
 def table_delete(request, pk):
-    table = get_object_or_404(DiningTable, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    table = get_object_or_404(DiningTable, **lookup)
     if request.method == 'POST':
         table.delete()
     return redirect('tables')
@@ -391,23 +520,48 @@ def table_delete(request, pk):
 
 @role_required('owner', 'admin')
 def management_menu(request):
+    restaurant = _profile_restaurant(request.user)
+    cat_form = MenuCategoryForm()
+    item_form = MenuItemForm()
+    if restaurant and not request.user.is_superuser:
+        if 'restaurant' in cat_form.fields:
+            cat_form.fields['restaurant'].queryset = Restaurant.objects.filter(
+                id=restaurant.id
+            )
+            cat_form.fields['restaurant'].initial = restaurant
+        if 'restaurant' in item_form.fields:
+            item_form.fields['restaurant'].queryset = Restaurant.objects.filter(
+                id=restaurant.id
+            )
+            item_form.fields['restaurant'].initial = restaurant
+        if 'category' in item_form.fields:
+            item_form.fields['category'].queryset = MenuCategory.objects.filter(
+                restaurant=restaurant
+            )
     return render(
         request,
         'core/pages/management-menu.html',
         _dashboard_context(
             request=request,
-            category_form=MenuCategoryForm(),
-            menu_item_form=MenuItemForm(),
+            category_form=cat_form,
+            menu_item_form=item_form,
         ),
     )
 
 
 @role_required('owner', 'admin')
 def category_create(request):
+    restaurant = _profile_restaurant(request.user)
     form = MenuCategoryForm(request.POST or None)
+    if restaurant and not request.user.is_superuser and 'restaurant' in form.fields:
+        form.fields['restaurant'].queryset = Restaurant.objects.filter(id=restaurant.id)
+        form.fields['restaurant'].initial = restaurant
     if request.method == 'POST':
         if form.is_valid():
-            form.save()
+            cat = form.save(commit=False)
+            if restaurant and not request.user.is_superuser:
+                cat.restaurant = restaurant
+            cat.save()
             return redirect('category_management')
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('category_management')
@@ -415,11 +569,20 @@ def category_create(request):
 
 @role_required('owner', 'admin')
 def category_update(request, pk):
-    category = get_object_or_404(MenuCategory, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    category = get_object_or_404(MenuCategory, **lookup)
     form = MenuCategoryForm(request.POST or None, instance=category)
+    if restaurant and not request.user.is_superuser and 'restaurant' in form.fields:
+        form.fields['restaurant'].queryset = Restaurant.objects.filter(id=restaurant.id)
     if request.method == 'POST':
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            if restaurant and not request.user.is_superuser:
+                obj.restaurant = restaurant
+            obj.save()
             return redirect('category_management')
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('category_management')
@@ -427,7 +590,11 @@ def category_update(request, pk):
 
 @role_required('owner', 'admin')
 def category_delete(request, pk):
-    category = get_object_or_404(MenuCategory, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    category = get_object_or_404(MenuCategory, **lookup)
     if request.method == 'POST':
         category.delete()
     return redirect('category_management')
@@ -435,10 +602,26 @@ def category_delete(request, pk):
 
 @role_required('owner', 'admin')
 def menu_item_create(request):
+    restaurant = _profile_restaurant(request.user)
     if request.method == 'POST':
         form = MenuItemForm(request.POST, request.FILES)
+        if restaurant and not request.user.is_superuser:
+            if 'restaurant' in form.fields:
+                form.fields['restaurant'].queryset = Restaurant.objects.filter(
+                    id=restaurant.id
+                )
+            if 'category' in form.fields:
+                form.fields['category'].queryset = MenuCategory.objects.filter(
+                    restaurant=restaurant
+                )
         if form.is_valid():
-            item = form.save()
+            item = form.save(commit=False)
+            if restaurant and not request.user.is_superuser:
+                item.restaurant = restaurant
+                # Enforce category belongs to same restaurant
+                if item.category and item.category.restaurant_id != restaurant.id:
+                    item.category = None
+            item.save()
             _save_variants(item, request.POST.get('variants'))
             return redirect('management_menu')
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
@@ -447,12 +630,30 @@ def menu_item_create(request):
 
 @role_required('owner', 'admin')
 def menu_item_update(request, pk):
-    item = get_object_or_404(MenuItem, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    item = get_object_or_404(MenuItem, **lookup)
     if request.method == 'POST':
         form = MenuItemForm(request.POST, request.FILES, instance=item)
+        if restaurant and not request.user.is_superuser:
+            if 'restaurant' in form.fields:
+                form.fields['restaurant'].queryset = Restaurant.objects.filter(
+                    id=restaurant.id
+                )
+            if 'category' in form.fields:
+                form.fields['category'].queryset = MenuCategory.objects.filter(
+                    restaurant=restaurant
+                )
         if form.is_valid():
-            item = form.save()
-            _save_variants(item, request.POST.get('variants'))
+            obj = form.save(commit=False)
+            if restaurant and not request.user.is_superuser:
+                obj.restaurant = restaurant
+                if obj.category and obj.category.restaurant_id != restaurant.id:
+                    obj.category = None
+            obj.save()
+            _save_variants(obj, request.POST.get('variants'))
             return redirect('management_menu')
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     return redirect('management_menu')
@@ -461,14 +662,22 @@ def menu_item_update(request, pk):
 @role_required('owner', 'admin')
 def menu_item_variants_json(request, pk):
     """Return variant groups and options as JSON for pre-filling the edit modal."""
-    item = get_object_or_404(MenuItem, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    item = get_object_or_404(MenuItem, **lookup)
     variants = json.loads(_build_variants_json(item))
     return JsonResponse({'variants': variants})
 
 
 @role_required('owner', 'admin')
 def menu_item_delete(request, pk):
-    item = get_object_or_404(MenuItem, pk=pk)
+    restaurant = _profile_restaurant(request.user)
+    lookup = {'pk': pk}
+    if restaurant and not request.user.is_superuser:
+        lookup['restaurant'] = restaurant
+    item = get_object_or_404(MenuItem, **lookup)
     if request.method == 'POST':
         item.delete()
     return redirect('management_menu')
@@ -552,7 +761,10 @@ def admin_receipt(request, pk):
 
 @role_required('owner', 'admin')
 def reports(request):
+    restaurant = _profile_restaurant(request.user)
     orders = Order.objects.select_related('restaurant').prefetch_related('payments')
+    if restaurant is not None and not request.user.is_superuser:
+        orders = orders.filter(restaurant=restaurant)
     paid_orders = orders.filter(payment_status=Order.PaymentStatus.PAID)
     revenue = paid_orders.aggregate(total=Sum('total_amount'))['total'] or 0
     order_count = orders.count()
@@ -681,9 +893,12 @@ def employee_delete(request, pk):
 
 @role_required('owner', 'admin')
 def category_management(request):
+    restaurant = _profile_restaurant(request.user)
     all_categories = MenuCategory.objects.select_related('restaurant').order_by(
         'restaurant__name', 'sort_order', 'name'
     )
+    if restaurant is not None and not request.user.is_superuser:
+        all_categories = all_categories.filter(restaurant=restaurant)
     active_count = all_categories.filter(is_active=True).count()
     inactive_count = all_categories.filter(is_active=False).count()
     return render(

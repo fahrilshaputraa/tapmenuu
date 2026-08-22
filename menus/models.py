@@ -77,6 +77,13 @@ class MenuItem(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def final_price(self):
+        """Return price after applying discount percentage (integer Rupiah)."""
+        if self.discount > 0:
+            return int(self.price * (100 - self.discount) / 100)
+        return self.price
+
 
 class MenuItemVariantGroup(models.Model):
     """Group of variants for a menu item (e.g., 'Level Pedas', 'Toping Tambahan')."""

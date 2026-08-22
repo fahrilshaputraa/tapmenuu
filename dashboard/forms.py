@@ -47,7 +47,15 @@ class EmployeeUpdateForm(forms.Form):
 class RestaurantForm(forms.ModelForm):
     class Meta:
         model = Restaurant
-        fields = ['name', 'slug', 'description', 'address', 'phone', 'is_active']
+        fields = [
+            'name',
+            'slug',
+            'description',
+            'address',
+            'phone',
+            'logo',
+            'is_active',
+        ]
 
 
 class MenuAppearanceThemeForm(forms.ModelForm):

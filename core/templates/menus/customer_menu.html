@@ -55,7 +55,16 @@
             body[data-menu-theme][data-layout-style="compact"] article.fade-item { border-radius: 1rem !important; padding: 0.75rem !important; }
             body[data-menu-theme][data-layout-style="compact"] article.fade-item img,
             body[data-menu-theme][data-layout-style="compact"] article.fade-item .bg-secondary { width: 4.5rem !important; height: 4.5rem !important; border-radius: 1rem !important; }
+            body[data-menu-theme][data-layout-style="compact"] .menu-panel .grid { grid-template-columns: 1fr !important; }
+            body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+            @media (min-width: 1280px) { body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
+            body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid article.fade-item { flex-direction: column !important; }
+            body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid article.fade-item > div:first-child { flex-direction: column !important; }
+            body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid article.fade-item img,
+            body[data-menu-theme][data-layout-style="grid"] .menu-panel .grid article.fade-item .bg-secondary { width: 100% !important; height: 7rem !important; border-radius: 1rem !important; }
             body[data-menu-theme][data-layout-style="featured"] .menu-panel .grid article:first-child { grid-column: 1 / -1; }
+            body[data-menu-theme][data-layout-style="featured"] .menu-panel .grid article:first-child img,
+            body[data-menu-theme][data-layout-style="featured"] .menu-panel .grid article:first-child .bg-secondary { height: 9rem !important; }
         </style>
     </head>
     <body class="font-sans bg-bg text-dark antialiased min-h-screen"
@@ -69,15 +78,29 @@
                 <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-white/10"></div>
                 <div class="absolute -left-20 bottom-0 w-56 h-56 rounded-full bg-accent/20 blur-2xl"></div>
                 <div class="relative z-10 max-w-6xl mx-auto">
-                    <div class="flex items-center justify-between mb-6 sm:mb-8">
-                        <div>
+                    <div class="flex items-start justify-between gap-4 mb-6 sm:mb-8">
+                        <div class="min-w-0 flex-1">
                             <p class="text-xs uppercase tracking-[0.25em] text-green-100 font-bold">Menu Digital</p>
-                            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold mt-1">{{ restaurant.name }}</h1>
-                            {% if appearance_theme.tagline %}<p class="text-sm text-green-100 mt-1">{{ appearance_theme.tagline }}</p>{% endif %}
-                            <p class="text-sm text-green-100 mt-1">Meja {{ dining_table.table_number }}</p>
+                            <div class="flex items-center gap-3 mt-1">
+                                {% if restaurant.logo %}
+                                    <img src="{{ restaurant.logo.url }}"
+                                         alt="Logo"
+                                         class="w-10 h-10 rounded-xl object-cover border-2 border-white/20 shrink-0">
+                                {% else %}
+                                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-utensils text-sm"></i>
+                                    </div>
+                                {% endif %}
+                                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight">{{ restaurant.name }}</h1>
+                            </div>
+                            {% if appearance_theme.tagline %}
+                                <p class="text-sm text-green-100/90 mt-1.5 font-medium">{{ appearance_theme.tagline }}</p>
+                            {% elif restaurant.description %}
+                                <p class="text-sm text-green-100/90 mt-1.5 font-medium">{{ restaurant.description|truncatewords:20 }}</p>
+                            {% endif %}
                         </div>
                         <a href="{% url 'customer_cart' dining_table.qr_token %}"
-                           class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+                           class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors shrink-0"
                            aria-label="Buka halaman keranjang">
                             <i class="fa-solid fa-cart-shopping text-xl sm:text-2xl"></i>
                             {% if cart_summary.total_quantity %}
@@ -87,16 +110,41 @@
                             {% endif %}
                         </a>
                     </div>
-                    <div class="relative z-10 bg-white/10 border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-sm max-w-md">
+                    <!-- Meja & greeting — separate card, not parallel with tagline -->
+                    <div class="relative z-10 bg-white/10 border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-5 backdrop-blur-sm max-w-md">
+                        <div class="flex items-center gap-2 text-white font-bold">
+                            <span class="w-8 h-8 rounded-xl bg-white text-primary flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-chair text-xs"></i>
+                            </span>
+                            <span class="text-sm">Meja {{ dining_table.table_number }}</span>
+                            <span class="w-1 h-1 rounded-full bg-white/60"></span>
+                            <span class="text-sm font-extrabold">{{ categories|length }} kategori</span>
+                        </div>
                         {% if appearance_theme.greeting_message %}
-                            <p class="text-sm text-green-100">{{ appearance_theme.greeting_message }}</p>
-                        {% else %}
-                            <p class="text-sm text-green-100">Pilih menu favorit</p>
+                            <p class="text-sm text-green-50 mt-2.5 leading-relaxed">{{ appearance_theme.greeting_message }}</p>
                         {% endif %}
-                        <p class="text-3xl sm:text-4xl font-extrabold">{{ categories|length }} kategori</p>
+                        {% if appearance_theme.contact_phone or appearance_theme.contact_instagram %}
+                            <div class="flex flex-wrap gap-3 mt-3 pt-3 border-t border-white/10 text-xs text-green-100/90 leading-none">
+                                {% if appearance_theme.contact_phone %}
+                                    <span class="inline-flex items-center gap-1.5 leading-none"><i class="fa-solid fa-phone text-[11px] leading-none shrink-0"></i><span class="leading-none">{{ appearance_theme.contact_phone }}</span></span>
+                                {% endif %}
+                                {% if appearance_theme.contact_instagram %}
+                                    <span class="inline-flex items-center gap-1.5 leading-none"><i class="fa-brands fa-instagram text-[11px] leading-none shrink-0"></i><span class="leading-none">@{{ appearance_theme.contact_instagram }}</span></span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </header>
+            {% if appearance_theme.banner_image %}
+                <div class="max-w-6xl mx-auto px-5 sm:px-8 -mt-6 mb-4 relative z-10">
+                    <div class="rounded-[1.5rem] overflow-hidden shadow-card border border-white/50">
+                        <img src="{{ appearance_theme.banner_image.url }}"
+                             alt="Banner {{ restaurant.name }}"
+                             class="w-full h-44 sm:h-56 object-cover">
+                    </div>
+                </div>
+            {% endif %}
             <!-- CATEGORY FILTER TABS -->
             {% if categories and appearance_theme.show_category_tabs %}
                 <nav class="max-w-6xl mx-auto px-5 sm:px-8 -mt-5 sm:-mt-6 relative z-20 flex gap-2 overflow-x-auto no-scrollbar pb-3"
@@ -152,12 +200,25 @@
                                                 {% if item.is_new %}
                                                     <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase">Baru</span>
                                                 {% endif %}
+                                                {% if item.discount > 0 %}
+                                                    <span class="px-2 py-1 rounded-full bg-red-100 text-red-600 text-[10px] font-extrabold">-{{ item.discount }}%</span>
+                                                {% endif %}
+                                                {% if item.stock > 0 and item.stock <= 5 %}
+                                                    <span class="px-2 py-1 rounded-full bg-orange-100 text-orange-600 text-[10px] font-extrabold">Sisa {{ item.stock }}</span>
+                                                {% endif %}
                                             </div>
                                             <h3 class="font-extrabold text-dark leading-tight text-base sm:text-lg">{{ item.name }}</h3>
                                             {% if item.description %}
                                                 <p class="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>
                                             {% endif %}
-                                            <p class="font-extrabold text-primary mt-2 sm:mt-3 text-lg sm:text-xl">{{ item.price|rupiah }}</p>
+                                            {% if item.discount > 0 %}
+                                                <div class="mt-2 sm:mt-3 flex items-center gap-2">
+                                                    <span class="text-sm text-gray-400 line-through">{{ item.price|rupiah }}</span>
+                                                    <span class="font-extrabold text-primary text-lg sm:text-xl">{{ item.final_price|rupiah }}</span>
+                                                </div>
+                                            {% else %}
+                                                <p class="font-extrabold text-primary mt-2 sm:mt-3 text-lg sm:text-xl">{{ item.price|rupiah }}</p>
+                                            {% endif %}
                                             {% if item.variant_groups.all %}<p class="mt-1 text-xs font-bold text-gray-400">Ada pilihan varian</p>{% endif %}
                                         </div>
                                     </div>
@@ -186,6 +247,32 @@
                     </div>
                 {% endfor %}
             </section>
+            <!-- FOOTER kontak & struk -->
+            {% if appearance_theme.contact_phone or appearance_theme.contact_instagram or appearance_theme.receipt_footer_text %}
+                <footer class="max-w-6xl mx-auto px-5 sm:px-8 py-8">
+                    <div class="bg-white rounded-[1.5rem] p-5 shadow-card border border-gray-100 text-center">
+                        {% if appearance_theme.contact_phone or appearance_theme.contact_instagram %}
+                            <div class="flex flex-wrap justify-center gap-4 text-sm font-bold text-primary mb-2 leading-none">
+                                {% if appearance_theme.contact_phone %}
+                                    <span class="inline-flex items-center gap-1.5 leading-none"><i class="fa-solid fa-phone leading-none shrink-0"></i><span class="leading-none">{{ appearance_theme.contact_phone }}</span></span>
+                                {% endif %}
+                                {% if appearance_theme.contact_instagram %}
+                                    <span class="inline-flex items-center gap-1.5 leading-none"><i class="fa-brands fa-instagram leading-none shrink-0"></i><span class="leading-none">@{{ appearance_theme.contact_instagram }}</span></span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if appearance_theme.receipt_footer_text %}
+                            <p class="text-xs text-gray-500">{{ appearance_theme.receipt_footer_text }}</p>
+                        {% endif %}
+                        {% if restaurant.address %}
+                            <p class="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-[11px]"></i>{{ restaurant.address }}
+                            </p>
+                        {% endif %}
+                        <p class="text-[11px] text-gray-400 mt-2">Powered by TapMenu • {{ restaurant.name }}</p>
+                    </div>
+                </footer>
+            {% endif %}
             <!-- ORDER BOTTOM SHEETS: kept outside menu cards so sheets slide from viewport bottom -->
             {% for category in categories %}
                 {% for item in category.items.all %}
@@ -227,7 +314,16 @@
                                             {% endif %}
                                         </div>
                                         <h3 class="font-extrabold text-dark text-lg leading-tight">{{ item.name }}</h3>
-                                        <p class="font-extrabold text-primary mt-1">{{ item.price|rupiah }}</p>
+                                        {% if item.description %}<p class="text-xs text-gray-500 line-clamp-3 mt-1">{{ item.description }}</p>{% endif %}
+                                        {% if item.discount > 0 %}
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-xs text-gray-400 line-through">{{ item.price|rupiah }}</span>
+                                                <span class="font-extrabold text-primary">{{ item.final_price|rupiah }}</span>
+                                                <span class="px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-extrabold">-{{ item.discount }}%</span>
+                                            </div>
+                                        {% else %}
+                                            <p class="font-extrabold text-primary mt-1">{{ item.price|rupiah }}</p>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 {% for group in item.variant_groups.all %}
@@ -275,6 +371,7 @@
                                                name="quantity"
                                                value="1"
                                                min="1"
+                                               {% if item.stock > 0 %}max="{{ item.stock }}"{% endif %}
                                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-extrabold text-center focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
                                     </label>
                                     <label class="block min-w-0" for="sheet-note-{{ item.id }}">

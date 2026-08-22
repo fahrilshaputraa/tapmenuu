@@ -15,11 +15,36 @@
         <link rel="stylesheet"
               href="{% static 'core/css/pages/book-menu-1.css' %}?v=20260609-desktop-responsive">
         <style>
+            :root {
+                --menu-primary: {{ appearance_theme.primary_color|default:'#1B4332' }};
+                --menu-secondary: {{ appearance_theme.secondary_color|default:'#D8F3DC' }};
+                --menu-accent: {{ appearance_theme.accent_color|default:'#E07A5F' }};
+                --menu-bg: {{ appearance_theme.background_color|default:'#F7F5F2' }};
+                --menu-text: {{ appearance_theme.text_color|default:'#1F2933' }};
+                --menu-card: {{ appearance_theme.card_color|default:'#FFFFFF' }};
+                --menu-font: '{{ appearance_theme.font_family|default:'Plus Jakarta Sans' }}', sans-serif;
+            }
             .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             .no-scrollbar::-webkit-scrollbar { display: none; }
+            body[data-menu-theme] { background: var(--menu-bg); color: var(--menu-text); font-family: var(--menu-font); }
+            body[data-menu-theme] main { background: var(--menu-bg); }
+            body[data-menu-theme] header { background: var(--menu-primary); }
+            body[data-menu-theme] .bg-primary { background-color: var(--menu-primary) !important; }
+            body[data-menu-theme] .text-primary { color: var(--menu-primary) !important; }
+            body[data-menu-theme] .bg-secondary { background-color: var(--menu-secondary) !important; }
+            body[data-menu-theme] .bg-accent { background-color: var(--menu-accent) !important; }
+            body[data-menu-theme] .text-dark { color: var(--menu-text) !important; }
+            body[data-menu-theme] article.bg-white,
+            body[data-menu-theme] .menu-tab.bg-white { background-color: var(--menu-card) !important; }
+            body[data-menu-theme] button.bg-accent,
+            body[data-menu-theme] span.bg-accent { background-color: var(--menu-accent) !important; }
         </style>
     </head>
-    <body class="font-sans bg-bg text-dark antialiased min-h-screen">
+    <body class="font-sans bg-bg text-dark antialiased min-h-screen"
+          data-menu-theme
+          data-layout-style="{{ appearance_theme.layout_style|default:'grid' }}"
+          data-header-style="{{ appearance_theme.header_style|default:'rounded' }}"
+          data-button-style="{{ appearance_theme.button_style|default:'rounded' }}">
         <main class="min-h-screen bg-bg pb-8">
             <!-- HEADER -->
             <header class="bg-primary text-white px-5 sm:px-8 pt-6 sm:pt-10 pb-8 sm:pb-10 rounded-b-[2rem] sm:rounded-b-[3rem] relative overflow-hidden">
@@ -71,106 +96,116 @@
                                     </form>
                                     <div class="relative z-10 flex items-start justify-between gap-4 rounded-2xl bg-bg p-4 sm:p-5 transition-transform duration-200 touch-pan-y"
                                          data-cart-swipe-content>
-                                        <div class="min-w-0">
-                                            <p class="font-extrabold text-dark leading-tight">{{ cart_item.menu_item.name }}</p>
-                                            <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ cart_item.quantity }} x {{ cart_item.unit_price|rupiah }}</p>
-                                            {% for variant_label in cart_item.variant_labels %}
-                                                <p class="text-xs text-primary font-bold mt-1">{{ variant_label }}</p>
-                                            {% endfor %}
-                                            {% if cart_item.note %}<p class="text-xs text-gray-500 mt-1">Catatan: {{ cart_item.note }}</p>{% endif %}
-                                            <p class="text-[10px] sm:text-xs text-gray-400 font-bold mt-2">Geser kiri untuk hapus</p>
-                                        </div>
-                                        <div class="shrink-0 flex flex-col items-end gap-3" data-cart-qty-control>
-                                            <p class="font-extrabold text-primary whitespace-nowrap text-sm sm:text-base">{{ cart_item.line_total|rupiah }}</p>
-                                            <div class="flex items-center gap-1.5 rounded-full bg-white border border-gray-200 p-1 shadow-sm">
-                                                <form method="post"
-                                                      action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="action" value="decrement">
-                                                    <button type="submit"
-                                                            aria-label="Kurangi qty {{ cart_item.menu_item.name }}"
-                                                            class="w-8 h-8 rounded-full bg-gray-100 text-dark font-extrabold flex items-center justify-center hover:bg-secondary hover:text-primary transition-colors">
-                                                        <i class="fa-solid fa-minus text-xs"></i>
-                                                    </button>
-                                                </form>
-                                                <span class="min-w-6 text-center text-sm font-extrabold text-dark">{{ cart_item.quantity }}</span>
-                                                <form method="post"
-                                                      action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="action" value="increment">
-                                                    <button type="submit"
-                                                            aria-label="Tambah qty {{ cart_item.menu_item.name }}"
-                                                            class="w-8 h-8 rounded-full bg-primary text-white font-extrabold flex items-center justify-center hover:bg-primaryLight transition-colors">
-                                                        <i class="fa-solid fa-plus text-xs"></i>
-                                                    </button>
-                                                </form>
+                                        <div class="min-w-0 flex items-start gap-3">
+                                            {% if cart_item.menu_item.image %}
+                                                <img src="{{ cart_item.menu_item.image.url }}"
+                                                     alt="{{ cart_item.menu_item.name }}"
+                                                     class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover shrink-0">
+                                            {% else %}
+                                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-secondary text-primary flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-bowl-food text-lg"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="min-w-0">
+                                                <p class="font-extrabold text-dark leading-tight">{{ cart_item.menu_item.name }}</p>
+                                                <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ cart_item.quantity }} x {{ cart_item.unit_price|rupiah }}</p>
+                                                {% for variant_label in cart_item.variant_labels %}
+                                                    <p class="text-xs text-primary font-bold mt-1">{{ variant_label }}</p>
+                                                {% endfor %}
+                                                {% if cart_item.note %}<p class="text-xs text-gray-500 mt-1">Catatan: {{ cart_item.note }}</p>{% endif %}
+                                                <p class="text-[10px] sm:text-xs text-gray-400 font-bold mt-2">Geser kiri untuk hapus</p>
+                                            </div>
+                                            <div class="shrink-0 flex flex-col items-end gap-3" data-cart-qty-control>
+                                                <p class="font-extrabold text-primary whitespace-nowrap text-sm sm:text-base">{{ cart_item.line_total|rupiah }}</p>
+                                                <div class="flex items-center gap-1.5 rounded-full bg-white border border-gray-200 p-1 shadow-sm">
+                                                    <form method="post"
+                                                          action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="decrement">
+                                                        <button type="submit"
+                                                                aria-label="Kurangi qty {{ cart_item.menu_item.name }}"
+                                                                class="w-8 h-8 rounded-full bg-gray-100 text-dark font-extrabold flex items-center justify-center hover:bg-secondary hover:text-primary transition-colors">
+                                                            <i class="fa-solid fa-minus text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                    <span class="min-w-6 text-center text-sm font-extrabold text-dark">{{ cart_item.quantity }}</span>
+                                                    <form method="post"
+                                                          action="{% url 'customer_cart_quantity' dining_table.qr_token cart_item.line_key %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="increment">
+                                                        <button type="submit"
+                                                                aria-label="Tambah qty {{ cart_item.menu_item.name }}"
+                                                                class="w-8 h-8 rounded-full bg-primary text-white font-extrabold flex items-center justify-center hover:bg-primaryLight transition-colors">
+                                                            <i class="fa-solid fa-plus text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                {% endfor %}
+                            </div>
+                            <!-- TOTAL & CHECKOUT FORM -->
+                            <div class="border-t border-dashed border-gray-200 pt-4 sm:pt-5 mb-5 flex items-center justify-between">
+                                <span class="text-sm sm:text-base md:text-lg text-gray-500">Total Pembayaran</span>
+                                <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent">{{ cart_summary.total_amount|rupiah }}</span>
+                            </div>
+                            <form method="post"
+                                  action="{% url 'customer_checkout' dining_table.qr_token %}"
+                                  class="space-y-3 sm:space-y-4">
+                                {% csrf_token %}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+                                    <label class="block">
+                                        <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Nama Customer <span class="text-red-500">*</span></span>
+                                        <input type="text"
+                                               name="customer_name"
+                                               required
+                                               placeholder="Nama Anda"
+                                               class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                    </label>
+                                    <label class="block">
+                                        <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pembayaran</span>
+                                        <select name="payment_method"
+                                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                            {% for method_value, method_label in payment_methods %}
+                                                <option value="{{ method_value }}">{{ method_label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
                                 </div>
-                            {% endfor %}
-                        </div>
-                        <!-- TOTAL & CHECKOUT FORM -->
-                        <div class="border-t border-dashed border-gray-200 pt-4 sm:pt-5 mb-5 flex items-center justify-between">
-                            <span class="text-sm sm:text-base md:text-lg text-gray-500">Total Pembayaran</span>
-                            <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent">{{ cart_summary.total_amount|rupiah }}</span>
-                        </div>
-                        <form method="post"
-                              action="{% url 'customer_checkout' dining_table.qr_token %}"
-                              class="space-y-3 sm:space-y-4">
-                            {% csrf_token %}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
                                 <label class="block">
-                                    <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Nama Customer <span class="text-red-500">*</span></span>
-                                    <input type="text"
-                                           name="customer_name"
-                                           required
-                                           placeholder="Nama Anda"
-                                           class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
+                                    <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Catatan Pesanan</span>
+                                    <textarea name="customer_note"
+                                              rows="3"
+                                              placeholder="Catatan untuk restoran"
+                                              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60"></textarea>
                                 </label>
-                                <label class="block">
-                                    <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pembayaran</span>
-                                    <select name="payment_method"
-                                            class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60">
-                                        {% for method_value, method_label in payment_methods %}
-                                            <option value="{{ method_value }}">{{ method_label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                                <button type="submit"
+                                        class="w-full md:w-auto md:px-12 py-4 bg-primary text-white font-extrabold rounded-xl shadow-lg hover:bg-[#143326] transition-all flex justify-center items-center gap-2 text-base sm:text-lg mx-auto md:mx-0">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    Checkout Sekarang
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="rounded-2xl border border-dashed border-gray-200 p-8 sm:p-12 md:p-16 text-center text-gray-500 bg-bg">
+                                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-5">
+                                    <i class="fa-solid fa-cart-shopping text-3xl sm:text-4xl"></i>
+                                </div>
+                                <p class="font-extrabold text-dark text-xl sm:text-2xl">Keranjang masih kosong</p>
+                                <p class="text-sm sm:text-base mt-2 max-w-md mx-auto">
+                                    Pilih menu dulu, lalu kembali ke halaman keranjang untuk checkout.
+                                </p>
+                                <a href="{% url 'customer_menu' dining_table.qr_token %}"
+                                   class="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl bg-primary text-white font-extrabold hover:bg-primaryLight transition-colors text-base">
+                                    <i class="fa-solid fa-utensils"></i>
+                                    Pilih Menu
+                                </a>
                             </div>
-                            <label class="block">
-                                <span class="block text-xs font-bold text-gray-500 uppercase mb-2">Catatan Pesanan</span>
-                                <textarea name="customer_note"
-                                          rows="3"
-                                          placeholder="Catatan untuk restoran"
-                                          class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-secondary/60"></textarea>
-                            </label>
-                            <button type="submit"
-                                    class="w-full md:w-auto md:px-12 py-4 bg-primary text-white font-extrabold rounded-xl shadow-lg hover:bg-[#143326] transition-all flex justify-center items-center gap-2 text-base sm:text-lg mx-auto md:mx-0">
-                                <i class="fa-solid fa-paper-plane"></i>
-                                Checkout Sekarang
-                            </button>
-                        </form>
-                    {% else %}
-                        <div class="rounded-2xl border border-dashed border-gray-200 p-8 sm:p-12 md:p-16 text-center text-gray-500 bg-bg">
-                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-secondary text-primary flex items-center justify-center mx-auto mb-5">
-                                <i class="fa-solid fa-cart-shopping text-3xl sm:text-4xl"></i>
-                            </div>
-                            <p class="font-extrabold text-dark text-xl sm:text-2xl">Keranjang masih kosong</p>
-                            <p class="text-sm sm:text-base mt-2 max-w-md mx-auto">
-                                Pilih menu dulu, lalu kembali ke halaman keranjang untuk checkout.
-                            </p>
-                            <a href="{% url 'customer_menu' dining_table.qr_token %}"
-                               class="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl bg-primary text-white font-extrabold hover:bg-primaryLight transition-colors text-base">
-                                <i class="fa-solid fa-utensils"></i>
-                                Pilih Menu
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </section>
-        </main>
-        <script>
+                        {% endif %}
+                    </div>
+                </section>
+            </main>
+            <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const revealDistance = 96;
                 const openThreshold = 44;
@@ -239,6 +274,6 @@
                     });
                 });
             });
-        </script>
-    </body>
-</html>
+            </script>
+        </body>
+    </html>

@@ -50,45 +50,56 @@
                 <form method="post" id="theme-form">
                     {% csrf_token %}
                     <input type="hidden" name="palette_id" id="selected-palette" value="tapmenu">
-                    <!-- Palette Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+                    <p class="text-[10px] text-gray-400 mb-3 text-center">{{ palettes|length }} kombinasi terkurasi • {{ palettes|length }} mood bervariasi biar nggak flat</p>
+                    <!-- Palette Grid — 18 varian -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 max-h-[52vh] overflow-y-auto custom-scroll pr-1">
                         {% for palette in palettes %}
-                            <div class="palette-card cursor-pointer rounded-2xl border-2 p-3 transition-all hover:scale-105 {% if forloop.first %}border-primary ring-2 ring-primary/30{% else %}border-gray-200{% endif %}"
+                            <div class="palette-card cursor-pointer rounded-2xl border-2 p-3 transition-all hover:scale-[1.02] hover:shadow-md relative overflow-hidden {% if forloop.first %}border-primary ring-2 ring-primary/30{% else %}border-gray-200{% endif %}"
                                  data-id="{{ palette.id }}"
                                  onclick="selectPalette('{{ palette.id }}', this)"
                                  style="background-color: {{ palette.bg }}">
-                                <!-- Color swatches -->
-                                <div class="flex gap-1 mb-2">
-                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm"
-                                         style="background-color: {{ palette.primary }}"></div>
-                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm"
+                                <span class="absolute top-1.5 right-1.5 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full bg-white/90 border border-gray-100 shadow-sm">{{ palette.category }}</span>
+                                <!-- Color swatches — 4 dots + text hint -->
+                                <div class="flex gap-1 mb-2 mt-3">
+                                    <div class="w-5 h-5 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5"
+                                         style="background-color: {{ palette.primary }}" title="Primary"></div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5 -ml-1"
                                          style="background-color: {{ palette.secondary }}"></div>
-                                    <div class="w-5 h-5 rounded-full border border-white/50 shadow-sm"
+                                    <div class="w-5 h-5 rounded-full border-2 border-white shadow-sm ring-1 ring-black/5 -ml-1"
                                          style="background-color: {{ palette.accent }}"></div>
+                                    <div class="w-5 h-5 rounded-full border border-gray-200 shadow-sm -ml-1 hidden sm:inline-block"
+                                         style="background-color: {{ palette.text }}" title="Text"></div>
                                 </div>
                                 <!-- Mini preview -->
-                                <div class="rounded-xl overflow-hidden mb-2"
+                                <div class="rounded-xl overflow-hidden mb-2 border border-black/5 shadow-sm"
                                      style="background-color: {{ palette.card }}">
                                     <div class="px-2 py-1.5" style="background-color: {{ palette.primary }}">
                                         <div class="w-8 h-1 rounded-full bg-white/70"></div>
                                     </div>
-                                    <div class="px-2 py-1.5 flex items-center gap-1">
-                                        <div class="w-4 h-4 rounded-md"
+                                    <div class="px-2 py-1.5 flex items-center gap-1" style="background-color: {{ palette.card }}">
+                                        <div class="w-4 h-4 rounded-md border border-black/5"
                                              style="background-color: {{ palette.secondary }}"></div>
                                         <div class="flex-1">
                                             <div class="w-full h-1 rounded-full mb-1"
-                                                 style="background-color: {{ palette.primary }};
-                                                        opacity: 0.3"></div>
+                                                 style="background-color: {{ palette.text }};
+                                                        opacity: 0.18"></div>
                                             <div class="w-2/3 h-1 rounded-full"
-                                                 style="background-color: {{ palette.accent }};
-                                                        opacity: 0.5"></div>
+                                                 style="background-color: {{ palette.accent }}"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <p class="text-xs font-bold text-dark truncate">{{ palette.name }}</p>
-                                <p class="text-[10px] text-gray-500 truncate">{{ palette.description }}</p>
+                                <p class="text-[10px] text-gray-500 line-clamp-2 leading-tight">{{ palette.description }}</p>
                             </div>
                         {% endfor %}
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 justify-center mb-6">
+                        <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Natural</span>
+                        <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200 text-[10px] font-bold">Hangat</span>
+                        <span class="px-2 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-bold">Sejuk</span>
+                        <span class="px-2 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200 text-[10px] font-bold">Vibrant</span>
+                        <span class="px-2 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-bold">Soft</span>
+                        <span class="px-2 py-1 rounded-full bg-stone-100 text-stone-700 border text-[10px] font-bold">Netral</span>
                     </div>
                     <div class="flex gap-3">
                         <a href="{% url 'onboarding_step3' %}"
